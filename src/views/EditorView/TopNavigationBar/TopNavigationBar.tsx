@@ -58,6 +58,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                         value={projectData.name}
                         onChange={onChange}
                         onFocus={onFocus}
+                        disabled={true}
                     />
                 </div>
                 <div className="NavigationBarGroupWrapper">
@@ -70,16 +71,6 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                         label={"IMAGES"}
                         under={true}
                         onClick={() => updateActivePopupType(PopupWindowType.IMPORT_IMAGES)}
-                    />
-                    <UnderlineTextButton
-                        label={"EXPORT ANNOTATIONS"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.EXPORT_ANNOTATIONS)}
-                    />
-                    <UnderlineTextButton
-                        label={"IMPORT ANNOTATIONS"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.IMPORT_ANNOTATIONS)}
                     />
                     <ImageButton
                         image={"img/github-logo.png"}

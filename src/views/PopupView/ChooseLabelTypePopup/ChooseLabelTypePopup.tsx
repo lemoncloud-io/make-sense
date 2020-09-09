@@ -1,13 +1,13 @@
 import React from 'react'
 import './ChooseLabelTypePopup.scss'
-import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
-import {PopupWindowType} from "../../../data/enums/PopupWindowType";
-import {updateActivePopupType} from "../../../store/general/actionCreators";
-import {updateProjectData} from '../../../store/general/actionCreators';
-import {AppState} from "../../../store";
-import {connect} from "react-redux";
-import {ProjectType} from "../../../data/enums/ProjectType";
-import {ProjectData} from '../../../store/general/types';
+import { GenericYesNoPopup } from "../GenericYesNoPopup/GenericYesNoPopup";
+import { PopupWindowType } from "../../../data/enums/PopupWindowType";
+import { updateActivePopupType } from "../../../store/general/actionCreators";
+import { updateProjectData } from '../../../store/general/actionCreators';
+import { AppState } from "../../../store";
+import { connect } from "react-redux";
+import { ProjectType } from "../../../data/enums/ProjectType";
+import { ProjectData } from '../../../store/general/types';
 
 interface IProps {
     projectData: ProjectData;
@@ -36,12 +36,11 @@ const ChooseLabelTypePopup: React.FC<IProps> = (
             type: ProjectType.IMAGE_RECOGNITION
         });
         updateActivePopupType(null);
-        // updateActivePopupType(PopupWindowType.UPDATE_LABEL);
     }
 
     const renderContent = () => {
         return(<div className="ChooseLabelTypePopup">
-            <div className="RightContainer">
+            <div className="Container">
                 <div className="Message">
                     {
                         "Before you start, you can create a list of labels you plan to assign to objects in your " +

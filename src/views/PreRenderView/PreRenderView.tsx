@@ -9,7 +9,6 @@ import {ProjectData} from '../../store/general/types';
 import {addImageData, updateActiveImageIndex, updateLabelNames} from '../../store/labels/actionCreators';
 import {ImageData, LabelName} from '../../store/labels/types';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import EditorView from '../EditorView/EditorView';
 
 interface IProps {
     updateProjectData: (projectData: ProjectData) => any;
@@ -29,25 +28,19 @@ const PreRenderView: React.FC<IProps> = (
     }) => {
 
     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
+    const customOptions = { responseType: 'blob' };
     const lemonCore: AuthService = new AuthService(lemonOptions);
 
     lemonCore.request('GET', 'http://localhost:8200/', 'project/hi').then(res => {
         const { data: { name, labels, images } } = res;
-        console.log(name, labels, images);
-        updateProjectData({ name, type: null });
         updateLabelNames(labels);
+        updateProjectData({ name, type: null });
 
         // request images
-        lemonCore.setLemonOptions({
-            ...lemonOptions,
-            extraOptions: {
-                responseType: 'blob',
-            }
-        });
+        lemonCore.setLemonOptions({ ...lemonOptions, extraOptions: { ...customOptions } });
 
         Promise.all(images.map(({ url, name }) => {
-            return lemonCore.request('GET', url, '/')
-                .then(response => new File([response], name))
+            return lemonCore.request('GET', url, '/').then(response => new File([response], name))
         })).then((files: any) => {
             updateActiveImageIndex(0);
             addImageData(files.map((fileData:File) => ImageDataUtil.createImageDataFromFileData(fileData)));
@@ -55,11 +48,15 @@ const PreRenderView: React.FC<IProps> = (
         }).catch(console.error.bind(console));
     });
 
-    const firstStage = <div className="FirstStage">TEST</div>;
+    const test = <div className="FirstStage">TEST</div>;
 
-    return (<div className="PreRenderView">
-            {firstStage}
-    </div>)
+    return (
+        <>
+            <div className="PreRenderView">
+                {test}
+            </div>
+        </>
+    )
 };
 
 const mapDispatchToProps = {
@@ -71,6 +68,7 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
+    // TODO: add something
 });
 
 export default connect(
