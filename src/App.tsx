@@ -19,6 +19,7 @@ import { initLemonCore } from './store/lemon/actionCreators';
 import {store} from './index';
 import {PopupWindowType} from './data/enums/PopupWindowType';
 import {updateActivePopupType, } from "./store/general/actionCreators";
+import PreRenderView  from './views/PreRenderView/PreRenderView';
 
 const queryString = require('query-string');
 
@@ -41,12 +42,16 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
     const selectRoute = () => {
         const projectId = getProjectIdFromQuery();
         if (projectId) {
-            const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
+            // const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
             // store.dispatch(initLemonCore(lemonOptions));
             // TODO: fetch labels
             // TODO: fetch files(images)
-            // store.dispatch(updateActivePopupType(PopupWindowType.INSERT_LABEL_NAMES));
-            return <MobileMainView/>;
+            // store.dispatch(updateActivePopupType(PopupWindowType.CHOOSE_LABEL_TYPE));
+            if (!projectType) {
+                return <PreRenderView/>;
+            } else {
+                return <EditorView/>;
+            }
         }
 
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
