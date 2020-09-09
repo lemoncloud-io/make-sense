@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useRef, useState } from 'react';
 import './InsertLabelNamesPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {PopupWindowType} from "../../../data/enums/PopupWindowType";
@@ -31,14 +31,17 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateLabelNames,
         isUpdate
     }) => {
-    const originLabels = LabelUtil.convertLabelNamesListToMap(LemonSelector.getOriginLabels());
 
+    const scrollRef = useRef(null);
+
+    const originLabels = LabelUtil.convertLabelNamesListToMap(LemonSelector.getOriginLabels());
     const initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
     const [labelNames, setLabelNames] = useState(initialLabels);
 
     const addHandle = () => {
         const newLabelNames = {...labelNames, [uuidv1()]: ""};
         setLabelNames(newLabelNames);
+        setTimeout(scrollRef.current.scrollToBottom, 150);
     };
 
     const deleteHandle = (key: string) => {
@@ -53,7 +56,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 key={key}
                 value={originLabels[key]}
                 isPassword={false}
-                label={"default label"}
+                label={"Default Label"}
                 disabled={true}
             />
         </div>
@@ -66,7 +69,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     value={labelNames[key]}
                     isPassword={false}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(key, event.target.value)}
-                    label={"Insert label"}
+                    label={"Insert Label"}
                 />
                 <ImageButton
                     image={"ico/trash.png"}
@@ -113,7 +116,6 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateActivePopupType(null);
     };
 
-
     const extractLabelNamesList = (): string[] => {
         return Object.values(labelNames).filter((value => !!value)) as string[];
     };
@@ -140,7 +142,8 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     }
                 </div>
                 <div className="LabelsContainer">
-                    {Object.keys(originLabelInputs).length > 0 || Object.keys(labelNames).length > 0 ? <Scrollbars>
+                    {Object.keys(originLabelInputs).length > 0 || Object.keys(labelNames).length > 0 ?
+                        <Scrollbars ref={scrollRef}>
                         <div
                             className="InsertLabelNamesPopupContent"
                         >
