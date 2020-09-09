@@ -2,9 +2,9 @@ import {ImageData} from "../store/labels/types";
 import uuidv1 from "uuid/v1";
 
 export class ImageDataUtil {
-    public static createImageDataFromFileData(fileData: File): ImageData {
+    public static createImageDataFromFileData(fileData: File, id: string = uuidv1()): ImageData {
         return {
-            id: uuidv1(),
+            id: id,
             fileData: fileData,
             loadStatus: false,
             labelRects: [],

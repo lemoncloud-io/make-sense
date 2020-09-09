@@ -43,8 +43,8 @@ const PreRenderView: React.FC<IProps> = (
         const customOptions = { responseType: 'blob' };
         lemonCore.setLemonOptions({ ...lemonOptions, extraOptions: { ...customOptions } });
 
-        return Promise.all(imageUrls.map(({ url, name }) => {
-            return lemonCore.request('GET', url, '/').then(response => new File([response], name));
+        return Promise.all(imageUrls.map(({ id, url, name }) => {
+            return lemonCore.request('GET', url, '/').then(response => ({ id, file: new File([response], name) }));
         }))
     }
 
@@ -57,9 +57,13 @@ const PreRenderView: React.FC<IProps> = (
         updateProjectData({ name, type: null });
     }
 
-    const setImagesToStore = files => {
+    const setImagesToStore = datas => {
+        const imageDatas = datas.map(fileData => {
+            const { id, file } = fileData;
+            return ImageDataUtil.createImageDataFromFileData(file, id);
+        });
         updateActiveImageIndex(0);
-        addImageData(files.map((fileData: File) => ImageDataUtil.createImageDataFromFileData(fileData)));
+        addImageData(imageDatas);
     }
 
     const popUpChooseLabelType = () => {
@@ -74,8 +78,8 @@ const PreRenderView: React.FC<IProps> = (
 
             return convertUrlsToFiles(images);
         })
-        .then(files => {
-            setImagesToStore(files);
+        .then(datas => {
+            setImagesToStore(datas);
             popUpChooseLabelType();
         });
 

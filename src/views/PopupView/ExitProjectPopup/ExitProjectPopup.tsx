@@ -14,6 +14,7 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
+import {setOriginLabels} from '../../../store/lemon/actionCreators';
 
 interface IProps {
     updateActiveImageIndex: (activeImageIndex: number) => any;
@@ -22,6 +23,7 @@ interface IProps {
     updateImageData: (imageData: ImageData[]) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
     updateProjectData: (projectData: ProjectData) => any;
+    setOriginLabels: (labelNames: LabelName[]) => any;
 }
 
 const ExitProjectPopup: React.FC<IProps> = (props) => {
@@ -31,7 +33,8 @@ const ExitProjectPopup: React.FC<IProps> = (props) => {
         updateActiveImageIndex,
         updateImageData,
         updateFirstLabelCreatedFlag,
-        updateProjectData
+        updateProjectData,
+        setOriginLabels
     } = props;
 
     const renderContent = () => {
@@ -51,6 +54,7 @@ const ExitProjectPopup: React.FC<IProps> = (props) => {
         updateActiveImageIndex(null);
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
+        setOriginLabels([]);
         PopupActions.close();
     };
 
@@ -75,7 +79,8 @@ const mapDispatchToProps = {
     updateProjectData,
     updateActiveImageIndex,
     updateImageData,
-    updateFirstLabelCreatedFlag
+    updateFirstLabelCreatedFlag,
+    setOriginLabels,
 };
 
 const mapStateToProps = (state: AppState) => ({});
