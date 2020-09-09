@@ -13,6 +13,7 @@ import Scrollbars from 'react-custom-scrollbars';
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelName} from "../../../../store/labels/types";
 import {LabelsSelector} from "../../../../store/selectors/LabelsSelector";
+import {LemonSelector} from "../../../../store/selectors/LemonSelector";
 import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
 
@@ -68,7 +69,7 @@ class LabelInputField extends React.Component<IProps, IState> {
     }
 
     private openDropdown = () => {
-        if (LabelsSelector.getLabelNames().length === 0) {
+        if (LemonSelector.getOriginLabels().length === 0 && LabelsSelector.getLabelNames().length === 0) {
             this.props.updateActivePopupType(PopupWindowType.UPDATE_LABEL);
         } else {
             this.setState({isOpen: true});

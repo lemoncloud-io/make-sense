@@ -23,6 +23,7 @@ interface IProps {
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
     labelNames: LabelName[];
+    originLabels: LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 
@@ -32,6 +33,7 @@ const LineLabelsList: React.FC<IProps> = (
         imageData,
         updateImageDataById,
         labelNames,
+        originLabels,
         updateActiveLabelNameId,
         activeLabelId,
         highlightedLabelId,
@@ -86,8 +88,8 @@ const LineLabelsList: React.FC<IProps> = (
                     id={labelLine.id}
                     key={labelLine.id}
                     onDelete={deleteLineLabelById}
-                    value={labelLine.labelId !== null ? findLast(labelNames, {id: labelLine.labelId}) : null}
-                    options={labelNames}
+                    value={labelLine.labelId !== null ? findLast([...originLabels, ...labelNames], {id: labelLine.labelId}) : null}
+                    options={[...originLabels, ...labelNames]}
                     onSelectLabel={updateLineLabel}
                 />
             });
@@ -126,7 +128,8 @@ const mapDispatchToProps = {
 const mapStateToProps = (state: AppState) => ({
     activeLabelId: state.labels.activeLabelId,
     highlightedLabelId: state.labels.highlightedLabelId,
-    labelNames : state.labels.labels
+    labelNames: state.labels.labels,
+    originLabels: state.lemon.labels
 });
 
 export default connect(

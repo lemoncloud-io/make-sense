@@ -49,7 +49,7 @@ const PreRenderView: React.FC<IProps> = (
     }
 
     const setLabelsToStore = (labels: LabelName[]) => {
-        updateLabelNames(labels);
+        // updateLabelNames(labels);
         setOriginLabels(labels);
     }
 

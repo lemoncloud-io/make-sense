@@ -15,6 +15,7 @@ import {LabelUtil} from "../../../utils/LabelUtil";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 import {LabelActions} from "../../../logic/actions/LabelActions";
 import {ProjectType} from "../../../data/enums/ProjectType";
+import {LemonSelector} from "../../../store/selectors/LemonSelector";
 
 interface IProps {
     projectType: ProjectType;
@@ -30,6 +31,8 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateLabelNames,
         isUpdate
     }) => {
+    const originLabels = LabelUtil.convertLabelNamesListToMap(LemonSelector.getOriginLabels());
+
     const initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
     const [labelNames, setLabelNames] = useState(initialLabels);
 
@@ -43,6 +46,18 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         delete newLabelNames[key];
         setLabelNames(newLabelNames);
     };
+
+    const originLabelInputs = Object.keys(originLabels).map((key: string) => {
+        return <div className="LabelEntry" key={key}>
+            <TextInput
+                key={key}
+                value={originLabels[key]}
+                isPassword={false}
+                label={"default label"}
+                disabled={true}
+            />
+        </div>
+    });
 
     const labelInputs = Object.keys(labelNames).map((key: string) => {
         return <div className="LabelEntry" key={key}>
@@ -125,10 +140,11 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     }
                 </div>
                 <div className="LabelsContainer">
-                    {Object.keys(labelNames).length !== 0 ? <Scrollbars>
+                    {Object.keys(originLabelInputs).length > 0 || Object.keys(labelNames).length > 0 ? <Scrollbars>
                         <div
                             className="InsertLabelNamesPopupContent"
                         >
+                            {originLabelInputs}
                             {labelInputs}
                         </div>
                     </Scrollbars> :

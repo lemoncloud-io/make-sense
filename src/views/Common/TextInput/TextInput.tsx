@@ -38,11 +38,11 @@ const TextInput = (props: IProps) => {
             <input
                 value={!!value ? value : undefined}
                 type={getInputType()}
+                disabled={disabled}
                 id={key}
                 style={inputStyle}
                 onChange={onChange ? onChange : undefined}
                 onFocus={onFocus ? onFocus : undefined}
-                disabled={disabled}
             />
             {!!label && <label
                 htmlFor={key}

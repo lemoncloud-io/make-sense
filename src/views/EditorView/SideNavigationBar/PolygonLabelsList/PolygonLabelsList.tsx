@@ -23,10 +23,11 @@ interface IProps {
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
     labelNames: LabelName[];
+    originLabels: LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 
-const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId}) => {
+const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId, originLabels}) => {
     const labelInputFieldHeight = 40;
     const listStyle: React.CSSProperties = {
         width: size.width,
@@ -74,8 +75,8 @@ const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
                 id={labelPolygon.id}
                 key={labelPolygon.id}
                 onDelete={deletePolygonLabelById}
-                value={labelPolygon.labelId !== null ? findLast(labelNames, {id: labelPolygon.labelId}) : null}
-                options={labelNames}
+                value={labelPolygon.labelId !== null ? findLast([...originLabels, ...labelNames], {id: labelPolygon.labelId}) : null}
+                options={[...originLabels, ...labelNames]}
                 onSelectLabel={updatePolygonLabel}
             />
         });
@@ -114,7 +115,8 @@ const mapDispatchToProps = {
 const mapStateToProps = (state: AppState) => ({
     activeLabelId: state.labels.activeLabelId,
     highlightedLabelId: state.labels.highlightedLabelId,
-    labelNames : state.labels.labels
+    labelNames: state.labels.labels,
+    originLabels: state.lemon.labels
 });
 
 export default connect(
