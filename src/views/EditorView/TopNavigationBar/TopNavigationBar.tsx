@@ -70,7 +70,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                     <UnderlineTextButton
                         label={"FINISH"}
                         under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.UPDATE_LABEL)}
+                        onClick={() => updateActivePopupType(PopupWindowType.FINISH_PROJECT)}
                     />
                     <ImageButton
                         image={"img/github-logo.png"}

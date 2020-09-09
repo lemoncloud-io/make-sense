@@ -7,17 +7,17 @@ import {PopupWindowType} from '../../data/enums/PopupWindowType';
 import {updateActivePopupType, updateProjectData} from '../../store/general/actionCreators';
 import {ProjectData} from '../../store/general/types';
 import {addImageData, updateActiveImageIndex, updateLabelNames} from '../../store/labels/actionCreators';
-import { setOriginLabels } from '../../store/lemon/actionCreators';
+import { setOriginLabels, setProjectId } from '../../store/lemon/actionCreators';
 import {ImageData, LabelName} from '../../store/labels/types';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
 
 interface IProps {
     updateProjectData: (projectData: ProjectData) => any;
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
-    updateLabelNames: (labels: LabelName[]) => any;
     addImageData: (imageData: ImageData[]) => any;
     updateActiveImageIndex: (activeImageIndex: number) => any;
     setOriginLabels: (labels: LabelName[]) => any;
+    setProjectId: (projectId: string) => any;
     projectId: string;
 }
 
@@ -25,12 +25,15 @@ const PreRenderView: React.FC<IProps> = (
     {
         updateProjectData,
         updateActivePopupType,
-        updateLabelNames,
         addImageData,
         updateActiveImageIndex,
         setOriginLabels,
+        setProjectId,
         projectId,
     }) => {
+
+    // set data
+    setProjectId(projectId);
 
     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
     const lemonCore: AuthService = new AuthService(lemonOptions);
@@ -75,7 +78,6 @@ const PreRenderView: React.FC<IProps> = (
             const { data: { name, labels, images } } = res;
             setLabelsToStore(labels);
             setProjectNameToStore(name);
-
             return convertUrlsToFiles(images);
         })
         .then(datas => {
@@ -84,23 +86,20 @@ const PreRenderView: React.FC<IProps> = (
         });
 
     const test = <div className="FirstStage">TEST</div>;
-
     return (
-        <>
-            <div className="PreRenderView">
-                {test}
-            </div>
-        </>
+        <div className="PreRenderView">
+            {test}
+        </div>
     )
 };
 
 const mapDispatchToProps = {
     updateProjectData,
     updateActivePopupType,
-    updateLabelNames,
     addImageData,
     updateActiveImageIndex,
     setOriginLabels,
+    setProjectId,
 };
 
 const mapStateToProps = (state: AppState) => ({

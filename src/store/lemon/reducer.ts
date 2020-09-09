@@ -2,7 +2,8 @@ import { LemonActionTypes, LemonState } from './types';
 import { Action } from '../Actions';
 
 const initialState: LemonState = {
-    labels: []
+    labels: [],
+    projectId: null
 };
 
 export function lemonReducer(
@@ -14,6 +15,12 @@ export function lemonReducer(
             return {
                 ...state,
                 labels: action.payload.labels
+            }
+        }
+        case Action.SET_PROJECT_ID: {
+            return {
+                ...state,
+                projectId: action.payload.projectId
             }
         }
         default:

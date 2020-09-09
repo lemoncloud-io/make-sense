@@ -3,6 +3,7 @@ import { LabelName } from '../labels/types';
 
 export type LemonState = {
     labels: LabelName[];
+    projectId: string;
 }
 
 interface SetOriginLabels {
@@ -12,4 +13,12 @@ interface SetOriginLabels {
     }
 }
 
-export type LemonActionTypes = SetOriginLabels;
+interface SetProjectId {
+    type: typeof Action.SET_PROJECT_ID;
+    payload: {
+        projectId: string
+    }
+}
+
+export type LemonActionTypes = SetOriginLabels
+    | SetProjectId

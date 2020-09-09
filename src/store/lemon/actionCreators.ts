@@ -10,3 +10,13 @@ export function setOriginLabels(labels: LabelName[]): LemonActionTypes {
         }
     }
 }
+
+export function setProjectId(projectId: string): LemonActionTypes {
+    return {
+        type: Action.SET_PROJECT_ID,
+        payload: {
+            projectId,
+        }
+    }
+}
+

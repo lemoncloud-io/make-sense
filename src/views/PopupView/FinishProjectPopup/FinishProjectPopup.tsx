@@ -1,0 +1,109 @@
+import React from 'react'
+import './FinishProjectPopup.scss'
+import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
+import {
+    updateActiveImageIndex,
+    updateActiveLabelNameId,
+    updateFirstLabelCreatedFlag,
+    updateImageData,
+    updateLabelNames
+} from "../../../store/labels/actionCreators";
+import {AppState} from "../../../store";
+import {connect} from "react-redux";
+import {ImageData, LabelName} from "../../../store/labels/types";
+import {PopupActions} from "../../../logic/actions/PopupActions";
+import {ProjectData} from "../../../store/general/types";
+import {updateProjectData} from "../../../store/general/actionCreators";
+import {setOriginLabels} from '../../../store/lemon/actionCreators';
+
+interface IProps {
+    projectId: string;
+    imagesData: ImageData[];
+    updateActiveImageIndex: (activeImageIndex: number) => any;
+    updateActiveLabelNameId: (activeLabelId: string) => any;
+    updateLabelNames: (labelNames: LabelName[]) => any;
+    updateImageData: (imageData: ImageData[]) => any;
+    updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
+    updateProjectData: (projectData: ProjectData) => any;
+    setOriginLabels: (labelNames: LabelName[]) => any;
+}
+
+const FinishProjectPopup: React.FC<IProps> = (props) => {
+    const {
+        projectId,
+        imagesData,
+        updateActiveLabelNameId,
+        updateLabelNames,
+        updateActiveImageIndex,
+        updateImageData,
+        updateFirstLabelCreatedFlag,
+        updateProjectData,
+        setOriginLabels
+    } = props;
+
+    const renderContent = () => {
+        return(
+            <div className="FinishProjectPopup">
+                <div className="Message">
+                    Are you sure you want to finish the project?
+                </div>
+            </div>
+        )
+    };
+
+    const onAccept = () => {
+        resetStore();
+        // TODO: save data
+        saveLabels();
+        PopupActions.close();
+    };
+
+    const onReject = () => {
+        PopupActions.close();
+    };
+
+    const saveLabels = () => {
+        console.log(projectId);
+        console.log(imagesData);
+    }
+
+    const resetStore = () => {
+        updateActiveLabelNameId(null);
+        updateLabelNames([]);
+        updateProjectData({type: null, name: "my-project-name"});
+        updateActiveImageIndex(null);
+        updateImageData([]);
+        updateFirstLabelCreatedFlag(false);
+        setOriginLabels([]);
+    }
+
+    return(
+        <GenericYesNoPopup
+            title={"Finish project"}
+            renderContent={renderContent}
+            acceptLabel={"Save"}
+            onAccept={onAccept}
+            rejectLabel={"Back"}
+            onReject={onReject}
+        />)
+};
+
+const mapDispatchToProps = {
+    updateActiveLabelNameId,
+    updateLabelNames,
+    updateProjectData,
+    updateActiveImageIndex,
+    updateImageData,
+    updateFirstLabelCreatedFlag,
+    setOriginLabels,
+};
+
+const mapStateToProps = (state: AppState) => ({
+    projectId: state.lemon.projectId,
+    imagesData: state.labels.imagesData,
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(FinishProjectPopup);

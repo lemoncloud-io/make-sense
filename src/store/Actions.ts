@@ -31,4 +31,5 @@ export enum Action {
 
     // LEMON
     SET_ORIGIN_LABELS = '@@SET_ORIGIN_LABELS',
+    SET_PROJECT_ID = '@@SET_PROJECT_ID',
 }

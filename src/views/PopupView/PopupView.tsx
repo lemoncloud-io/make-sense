@@ -14,6 +14,7 @@ import {ClipLoader} from "react-spinners";
 import ImportLabelPopup from "./ImportLabelPopup/ImportLabelPopup";
 import ExportLabelPopup from "./ExportLabelsPopup/ExportLabelPopup";
 import ChooseLabelTypePopup from './ChooseLabelTypePopup/ChooseLabelTypePopup';
+import FinishProjectPopup from './FinishProjectPopup/FinishProjectPopup';
 
 interface IProps {
     activePopupType: PopupWindowType;
@@ -41,6 +42,8 @@ const PopupView: React.FC<IProps> = ({activePopupType}) => {
                 />;
             case PopupWindowType.EXIT_PROJECT:
                 return <ExitProjectPopup/>;
+            case PopupWindowType.FINISH_PROJECT:
+                return <FinishProjectPopup/>;
             case PopupWindowType.IMPORT_IMAGES:
                 return <LoadMoreImagesPopup/>;
             case PopupWindowType.LOAD_AI_MODEL:
