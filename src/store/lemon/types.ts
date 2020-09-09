@@ -1,24 +1,15 @@
 import { Action } from '../Actions';
-import { AuthService, LemonOptions } from '@lemoncloud/lemon-front-lib';
+import { LabelName } from '../labels/types';
 
 export type LemonState = {
-    lemonCore: AuthService;
+    labels: LabelName[];
 }
 
-interface InitLemonCore {
-    type: typeof Action.INIT_LEMON_CORE;
+interface SetOriginLabels {
+    type: typeof Action.SET_ORIGIN_LABELS;
     payload: {
-        options: LemonOptions
+        labels: LabelName[]
     }
 }
 
-interface UpdateLemonCoreOptions {
-    type: typeof Action.UPDATE_LEMON_CORE_OPTIONS;
-    payload: {
-        options: LemonOptions
-    }
-}
-
-
-export type LemonActionTypes = InitLemonCore
-    | UpdateLemonCoreOptions;
+export type LemonActionTypes = SetOriginLabels;

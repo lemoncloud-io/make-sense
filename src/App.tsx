@@ -13,12 +13,7 @@ import {SizeItUpView} from "./views/SizeItUpView/SizeItUpView";
 import {PlatformModel} from "./staticModels/PlatformModel";
 import classNames from "classnames";
 
-import { AuthService, LemonOptions } from '@lemoncloud/lemon-front-lib';
 import { RouteComponentProps } from 'react-router-dom';
-import { initLemonCore } from './store/lemon/actionCreators';
-import {store} from './index';
-import {PopupWindowType} from './data/enums/PopupWindowType';
-import {updateActivePopupType, } from "./store/general/actionCreators";
 import PreRenderView  from './views/PreRenderView/PreRenderView';
 
 const queryString = require('query-string');
@@ -29,10 +24,9 @@ interface IProps {
     ObjectDetectorLoaded: boolean;
     PoseDetectionLoaded: boolean;
     routeProps: RouteComponentProps;
-    lemonCore: AuthService;
 }
 
-const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded, routeProps, lemonCore}) => {
+const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded, routeProps}) => {
     const getProjectIdFromQuery = () => {
         const { location } = routeProps;
         const queryParams = queryString.parse(location.search);
@@ -43,7 +37,7 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
         const projectId = getProjectIdFromQuery();
         if (projectId) {
             if (!projectType) {
-                return <PreRenderView/>;
+                return <PreRenderView projectId={projectId}/>;
             } else {
                 return <EditorView/>;
             }
@@ -77,7 +71,6 @@ const mapStateToProps = (state: AppState, routeProps: RouteComponentProps) => ({
     windowSize: state.general.windowSize,
     ObjectDetectorLoaded: state.ai.isObjectDetectorLoaded,
     PoseDetectionLoaded: state.ai.isPoseDetectorLoaded,
-    lemonCore: state.lemon.lemonCore,
     routeProps
 });
 

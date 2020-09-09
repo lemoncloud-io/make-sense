@@ -1,8 +1,8 @@
 import { store } from '../..';
-import { AuthService } from '@lemoncloud/lemon-front-lib';
+import { LabelName } from '../labels/types';
 
 export class LemonSelector {
-    public static getLemonCore(): AuthService {
-        return store.getState().lemon.lemonCore;
+    public static getOriginLabels(): LabelName[] {
+        return store.getState().lemon.labels;
     }
 }

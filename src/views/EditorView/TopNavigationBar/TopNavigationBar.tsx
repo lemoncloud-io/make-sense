@@ -47,7 +47,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                             alt={"make-sense"}
                             src={"/make-sense-ico-transparent.png"}
                         />
-                        Make Sense
+                        LEMONADE
                     </div>
                 </div>
                 <div className="NavigationBarGroupWrapper">
@@ -63,14 +63,14 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                 </div>
                 <div className="NavigationBarGroupWrapper">
                     <UnderlineTextButton
-                        label={"LABELS"}
+                        label={"Edit Labels"}
                         under={true}
                         onClick={() => updateActivePopupType(PopupWindowType.UPDATE_LABEL)}
                     />
                     <UnderlineTextButton
-                        label={"IMAGES"}
+                        label={"Finish Task"}
                         under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.IMPORT_IMAGES)}
+                        onClick={() => updateActivePopupType(PopupWindowType.UPDATE_LABEL)}
                     />
                     <ImageButton
                         image={"img/github-logo.png"}

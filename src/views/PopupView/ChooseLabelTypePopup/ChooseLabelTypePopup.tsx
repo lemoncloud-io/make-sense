@@ -39,16 +39,13 @@ const ChooseLabelTypePopup: React.FC<IProps> = (
     }
 
     const renderContent = () => {
-        return(<div className="ChooseLabelTypePopup">
-            <div className="Container">
+        return(
+            <div className="ChooseLabelTypePopup">
                 <div className="Message">
-                    {
-                        "Before you start, you can create a list of labels you plan to assign to objects in your " +
-                        "project. You can also choose to skip that part for now and define label names as you go."
-                    }
+                    Select ~~~~
                 </div>
             </div>
-        </div>);
+        );
     };
 
     return(

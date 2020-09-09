@@ -1,9 +1,8 @@
 import { LemonActionTypes, LemonState } from './types';
 import { Action } from '../Actions';
-import { AuthService } from '@lemoncloud/lemon-front-lib';
 
 const initialState: LemonState = {
-    lemonCore: null
+    labels: []
 };
 
 export function lemonReducer(
@@ -11,16 +10,10 @@ export function lemonReducer(
     action: LemonActionTypes
 ): LemonState {
     switch (action.type) {
-        case Action.INIT_LEMON_CORE: {
+        case Action.SET_ORIGIN_LABELS: {
             return {
                 ...state,
-                lemonCore: new AuthService(action.payload.options)
-            }
-        }
-        case Action.UPDATE_LEMON_CORE_OPTIONS: {
-            return {
-                ...state,
-                lemonCore: new AuthService(action.payload.options)
+                labels: action.payload.labels
             }
         }
         default:
