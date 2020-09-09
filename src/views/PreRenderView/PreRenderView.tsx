@@ -53,7 +53,7 @@ const PreRenderView: React.FC<IProps> = (
         setOriginLabels(labels);
     }
 
-    const setProjectName = (name: string) => {
+    const setProjectNameToStore = (name: string) => {
         updateProjectData({ name, type: null });
     }
 
@@ -70,7 +70,7 @@ const PreRenderView: React.FC<IProps> = (
         .then(res => {
             const { data: { name, labels, images } } = res;
             setLabelsToStore(labels);
-            setProjectName(name);
+            setProjectNameToStore(name);
 
             return convertUrlsToFiles(images);
         })
