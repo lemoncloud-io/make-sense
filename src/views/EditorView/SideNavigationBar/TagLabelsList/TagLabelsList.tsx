@@ -16,7 +16,6 @@ interface IProps {
     imageData: ImageData;
     updateImageDataById: (id: string, newImageData: ImageData) => any;
     labelNames: LabelName[];
-    originLabels: LabelName[];
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
 }
 
@@ -26,7 +25,6 @@ const TagLabelsList: React.FC<IProps> = (
         imageData,
         updateImageDataById,
         labelNames,
-        originLabels,
         updateActivePopupType
     }) => {
     const labelInputFieldHeight = 40;
@@ -68,7 +66,7 @@ const TagLabelsList: React.FC<IProps> = (
 
     const getChildren = () => {
         return [
-            [...originLabels, ...labelNames].map((labelName: LabelName) => {
+            labelNames.map((labelName: LabelName) => {
                 return <div
                     className={getClassName(labelName.id)}
                     onClickCapture={() => onTagClick(labelName.id)}
@@ -92,7 +90,7 @@ const TagLabelsList: React.FC<IProps> = (
             style={listStyle}
             key="tag-labels-list"
         >
-            {[...originLabels, ...labelNames].length === 0 ?
+            {labelNames.length === 0 ?
                 <div
                     className="EmptyLabelList"
                     onClick={addNewOnClick}
@@ -126,7 +124,6 @@ const mapDispatchToProps = {
 
 const mapStateToProps = (state: AppState) => ({
     labelNames : state.labels.labels,
-    originLabels : state.lemon.labels
 });
 
 export default connect(

@@ -15,7 +15,11 @@ import {LabelUtil} from "../../../utils/LabelUtil";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 import {LabelActions} from "../../../logic/actions/LabelActions";
 import {ProjectType} from "../../../data/enums/ProjectType";
-import {LemonSelector} from "../../../store/selectors/LemonSelector";
+
+type LabelValue = {
+    name: string;
+    isEditable?: boolean;
+}
 
 interface IProps {
     projectType: ProjectType;
@@ -34,59 +38,53 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
 
     const scrollRef = useRef(null);
 
-    const originLabels = LabelUtil.convertLabelNamesListToMap(LemonSelector.getOriginLabels());
-    const initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
+    const initialLabels: LabelValue[] = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
     const [labelNames, setLabelNames] = useState(initialLabels);
+    const originLabels = [...LabelsSelector.getLabelNames()]; // to diff updated
 
     const addHandle = () => {
-        const newLabelNames = {...labelNames, [uuidv1()]: ""};
+        const newLabel: LabelValue = { name: '', isEditable: true };
+        const newLabelNames = {...labelNames, [uuidv1()]: newLabel };
         setLabelNames(newLabelNames);
         setTimeout(scrollRef.current.scrollToBottom, 150);
     };
 
     const deleteHandle = (key: string) => {
-        const newLabelNames = {...labelNames};
+        const newLabelNames = { ...labelNames };
         delete newLabelNames[key];
         setLabelNames(newLabelNames);
     };
-
-    const originLabelInputs = Object.keys(originLabels).map((key: string) => {
-        return <div className="LabelEntry" key={key}>
-            <TextInput
-                key={key}
-                value={originLabels[key]}
-                isPassword={false}
-                label={"Default Label"}
-                disabled={true}
-            />
-        </div>
-    });
 
     const labelInputs = Object.keys(labelNames).map((key: string) => {
         return <div className="LabelEntry" key={key}>
                 <TextInput
                     key={key}
-                    value={labelNames[key]}
+                    value={labelNames[key].name}
                     isPassword={false}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(key, event.target.value)}
-                    label={"Insert Label"}
+                    label={labelNames[key].isEditable ? "Insert Label" : "Default Label"}
+                    disabled={!labelNames[key].isEditable}
                 />
-                <ImageButton
-                    image={"ico/trash.png"}
-                    imageAlt={"remove_label"}
-                    buttonSize={{width: 30, height: 30}}
-                    onClick={() => deleteHandle(key)}
-                />
-            </div>
+                {
+                    labelNames[key].isEditable
+                        ? <ImageButton
+                            image={"ico/trash.png"}
+                            imageAlt={"remove_label"}
+                            buttonSize={{width: 30, height: 30}}
+                            onClick={() => deleteHandle(key)}
+                        />
+                        : <></>
+                }
+        </div>
     });
 
     const onChange = (key: string, value: string) => {
-        const newLabelNames = {...labelNames, [key]: value};
+        const newLabelNames = {...labelNames, [key]: { name: value, isEditable: true } };
         setLabelNames(newLabelNames);
     };
 
     const onCreateAccept = () => {
-        const labelNamesList: string[] = extractLabelNamesList();
+        const labelNamesList: LabelValue[] = extractLabelNamesList();
         if (labelNamesList.length > 0) {
             updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
         }
@@ -98,15 +96,25 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
     };
 
     const onUpdateAccept = () => {
-        const labelNamesList: string[] = extractLabelNamesList();
+        const labelNamesList: LabelValue[] = extractLabelNamesList();
         const updatedLabelNamesList: LabelName[] = LabelUtil.convertMapToLabelNamesList(labelNames);
         const missingIds: string[] = LabelUtil.labelNamesIdsDiff(LabelsSelector.getLabelNames(), updatedLabelNamesList);
         LabelActions.removeLabelNames(missingIds);
+        // TODO: request DELETE missingIds
+        console.log('missingIds', missingIds);
+
         if (labelNamesList.length > 0) {
+            checkUpdatedLabels(updatedLabelNamesList);
             updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
             updateActivePopupType(null);
         }
     };
+
+    const checkUpdatedLabels = (updatedLabels: LabelName[], ) => {
+        const updated = updatedLabels.filter(updatedLabel => !originLabels.some(originLabel => originLabel.name === updatedLabel.name));
+        console.log('updated', updated);
+        // TODO: request PUT data
+    }
 
     const onCreateReject = () => {
         updateActivePopupType(PopupWindowType.LOAD_LABEL_NAMES);
@@ -116,8 +124,8 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateActivePopupType(null);
     };
 
-    const extractLabelNamesList = (): string[] => {
-        return Object.values(labelNames).filter((value => !!value)) as string[];
+    const extractLabelNamesList = (): LabelValue[] => {
+        return Object.values(labelNames).filter(((value: LabelValue) => !!value.name));
     };
 
     const renderContent = () => {
@@ -142,12 +150,11 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     }
                 </div>
                 <div className="LabelsContainer">
-                    {Object.keys(originLabelInputs).length > 0 || Object.keys(labelNames).length > 0 ?
+                    {Object.keys(labelNames).length > 0 ?
                         <Scrollbars ref={scrollRef}>
                         <div
                             className="InsertLabelNamesPopupContent"
                         >
-                            {originLabelInputs}
                             {labelInputs}
                         </div>
                     </Scrollbars> :

@@ -24,11 +24,10 @@ interface IProps {
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
     labelNames: LabelName[];
-    originLabels: LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 
-const RectLabelsList: React.FC<IProps> = ({size, originLabels, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId}) => {
+const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId}) => {
     const labelInputFieldHeight = 40;
     const listStyle: React.CSSProperties = {
         width: size.width,
@@ -81,8 +80,8 @@ const RectLabelsList: React.FC<IProps> = ({size, originLabels, imageData, update
                 id={labelRect.id}
                 key={labelRect.id}
                 onDelete={deleteRectLabelById}
-                value={labelRect.labelId !== null ? findLast([...originLabels, ...labelNames], {id: labelRect.labelId}) : null}
-                options={[...originLabels, ...labelNames]}
+                value={labelRect.labelId !== null ? findLast(labelNames, {id: labelRect.labelId}) : null}
+                options={labelNames}
                 onSelectLabel={updateRectLabel}
             />
         });
@@ -122,7 +121,6 @@ const mapStateToProps = (state: AppState) => ({
     activeLabelId: state.labels.activeLabelId,
     highlightedLabelId: state.labels.highlightedLabelId,
     labelNames : state.labels.labels,
-    originLabels: state.lemon.labels
 });
 
 export default connect(

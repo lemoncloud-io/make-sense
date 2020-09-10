@@ -44,6 +44,7 @@ export type LabelLine = {
 export type LabelName = {
     name: string;
     id: string;
+    isEditable?: boolean;
 }
 
 export type ImageData = {

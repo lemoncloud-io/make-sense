@@ -7,7 +7,7 @@ import {PopupWindowType} from '../../data/enums/PopupWindowType';
 import {updateActivePopupType, updateProjectData} from '../../store/general/actionCreators';
 import {ProjectData} from '../../store/general/types';
 import {addImageData, updateActiveImageIndex, updateLabelNames} from '../../store/labels/actionCreators';
-import { setOriginLabels, setProjectId } from '../../store/lemon/actionCreators';
+import {setProjectId} from '../../store/lemon/actionCreators';
 import {ImageData, LabelName} from '../../store/labels/types';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
 
@@ -16,7 +16,7 @@ interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     addImageData: (imageData: ImageData[]) => any;
     updateActiveImageIndex: (activeImageIndex: number) => any;
-    setOriginLabels: (labels: LabelName[]) => any;
+    updateLabelNames: (labels: LabelName[]) => any;
     setProjectId: (projectId: string) => any;
     projectId: string;
 }
@@ -26,8 +26,8 @@ const PreRenderView: React.FC<IProps> = (
         updateProjectData,
         updateActivePopupType,
         addImageData,
+        updateLabelNames,
         updateActiveImageIndex,
-        setOriginLabels,
         setProjectId,
         projectId,
     }) => {
@@ -52,8 +52,9 @@ const PreRenderView: React.FC<IProps> = (
     }
 
     const setLabelsToStore = (labels: LabelName[]) => {
-        // updateLabelNames(labels);
-        setOriginLabels(labels);
+        console.log(labels)
+        updateLabelNames(labels);
+        // setOriginLabels(labels);
     }
 
     const setProjectNameToStore = (name: string) => {
@@ -98,7 +99,7 @@ const mapDispatchToProps = {
     updateActivePopupType,
     addImageData,
     updateActiveImageIndex,
-    setOriginLabels,
+    updateLabelNames,
     setProjectId,
 };
 

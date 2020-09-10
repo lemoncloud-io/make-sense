@@ -69,7 +69,7 @@ class LabelInputField extends React.Component<IProps, IState> {
     }
 
     private openDropdown = () => {
-        if (LemonSelector.getOriginLabels().length === 0 && LabelsSelector.getLabelNames().length === 0) {
+        if (LabelsSelector.getLabelNames().length === 0) {
             this.props.updateActivePopupType(PopupWindowType.UPDATE_LABEL);
         } else {
             this.setState({isOpen: true});
