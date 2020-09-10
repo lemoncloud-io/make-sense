@@ -77,7 +77,10 @@ class ImagesList extends React.Component<IProps, IState> {
     };
 
     private onClickHandler = (index: number) => {
-        ImageActions.getImageByIndex(index)
+        if (this.props.activeImageIndex === index) {
+            return;
+        }
+        ImageActions.getImageByIndex(index);
     };
 
     private renderImagePreview = (index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties) => {

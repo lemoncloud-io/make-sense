@@ -34,7 +34,6 @@ const PreRenderView: React.FC<IProps> = (
 
     // set data
     setProjectId(projectId);
-
     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
     const lemonCore: AuthService = new AuthService(lemonOptions);
 

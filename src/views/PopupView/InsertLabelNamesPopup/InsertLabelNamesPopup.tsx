@@ -23,6 +23,7 @@ type LabelValue = {
 
 interface IProps {
     projectType: ProjectType;
+    projectId: string;
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     updateLabelNames: (labels: LabelName[]) => any;
     isUpdate: boolean;
@@ -30,6 +31,7 @@ interface IProps {
 
 const InsertLabelNamesPopup: React.FC<IProps> = (
     {
+        projectId,
         projectType,
         updateActivePopupType,
         updateLabelNames,
@@ -102,6 +104,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         LabelActions.removeLabelNames(missingIds);
         // TODO: request DELETE missingIds
         console.log('missingIds', missingIds);
+        // requestDeleteLabels(missingIds).then(res => console.log(res));
 
         if (labelNamesList.length > 0) {
             checkUpdatedLabels(updatedLabelNamesList);
@@ -127,6 +130,12 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
     const extractLabelNamesList = (): LabelValue[] => {
         return Object.values(labelNames).filter(((value: LabelValue) => !!value.name));
     };
+
+    // const requestDeleteLabels = async (labelIds: string[]) => {
+    //     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
+    //     const lemonCore: AuthService = new AuthService(lemonOptions);
+    //     return await lemonCore.request('PUT', 'http://localhost:8200', `/project/${projectId}`, {}, { labelIds });
+    // }
 
     const renderContent = () => {
         return(<div className="InsertLabelNamesPopup">
@@ -191,7 +200,8 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectType: state.general.projectData.type
+    projectType: state.general.projectData.type,
+    projectId: state.lemon.projectId,
 });
 
 export default connect(

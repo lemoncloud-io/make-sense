@@ -3,6 +3,7 @@ import {store} from "../../index";
 import {updateActiveImageIndex, updateActiveLabelId} from "../../store/labels/actionCreators";
 import {ViewPortActions} from "./ViewPortActions";
 import {EditorModel} from "../../staticModels/EditorModel";
+import {LemonActions} from './LemonActions';
 
 export class ImageActions {
     public static getPreviousImage(): void {
@@ -23,9 +24,11 @@ export class ImageActions {
         if (index < 0 || index > imageCount - 1) {
             return;
         } else {
+            LemonActions.saveUpdatedImagesData();
             ViewPortActions.setZoom(1);
             store.dispatch(updateActiveImageIndex(index));
             store.dispatch(updateActiveLabelId(null));
         }
     }
+
 }
