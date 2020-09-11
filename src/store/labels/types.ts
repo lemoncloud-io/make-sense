@@ -45,6 +45,7 @@ export type LabelName = {
     name: string;
     id: string;
     isEditable?: boolean;
+    isNew?: boolean;
 }
 
 export type ImageData = {

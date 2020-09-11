@@ -15,6 +15,7 @@ import {LabelUtil} from "../../../utils/LabelUtil";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 import {LabelActions} from "../../../logic/actions/LabelActions";
 import {ProjectType} from "../../../data/enums/ProjectType";
+import {LemonActions} from '../../../logic/actions/LemonActions';
 
 type LabelValue = {
     name: string;
@@ -100,22 +101,14 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         const updatedLabelNamesList: LabelName[] = LabelUtil.convertMapToLabelNamesList(labelNames);
         const missingIds: string[] = LabelUtil.labelNamesIdsDiff(LabelsSelector.getLabelNames(), updatedLabelNamesList);
         LabelActions.removeLabelNames(missingIds);
-        // TODO: request DELETE missingIds
-        console.log('missingIds', missingIds);
-        // requestDeleteLabels(missingIds).then(res => console.log(res));
 
         if (labelNamesList.length > 0) {
-            checkUpdatedLabels(updatedLabelNamesList);
-            updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
-            updateActivePopupType(null);
+            LemonActions.saveUpdatedLabels(LabelUtil.convertMapToLabelNamesList(labelNames)).then(updated => {
+                updateLabelNames(updated);
+                updateActivePopupType(null);
+            });
         }
     };
-
-    const checkUpdatedLabels = (updatedLabels: LabelName[], ) => {
-        const updated = updatedLabels.filter(updatedLabel => !originLabels.some(originLabel => originLabel.name === updatedLabel.name));
-        console.log('updated', updated);
-        // TODO: request PUT data
-    }
 
     const onCreateReject = () => {
         updateActivePopupType(PopupWindowType.LOAD_LABEL_NAMES);
@@ -128,12 +121,6 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
     const extractLabelNamesList = (): LabelValue[] => {
         return Object.values(labelNames).filter(((value: LabelValue) => !!value.name));
     };
-
-    // const requestDeleteLabels = async (labelIds: string[]) => {
-    //     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
-    //     const lemonCore: AuthService = new AuthService(lemonOptions);
-    //     return await lemonCore.request('PUT', 'http://localhost:8200', `/project/${projectId}`, {}, { labelIds });
-    // }
 
     const renderContent = () => {
         return(<div className="InsertLabelNamesPopup">

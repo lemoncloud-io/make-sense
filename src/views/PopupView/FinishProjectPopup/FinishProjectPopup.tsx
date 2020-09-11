@@ -14,6 +14,7 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
+import {LemonActions} from '../../../logic/actions/LemonActions';
 
 interface IProps {
     projectId: string;
@@ -49,10 +50,7 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     };
 
     const onAccept = () => {
-        resetStore();
-        // TODO: save data
         saveLabels();
-        PopupActions.close();
     };
 
     const onReject = () => {
@@ -60,8 +58,10 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     };
 
     const saveLabels = () => {
-        console.log(projectId);
-        console.log(imagesData);
+        LemonActions.saveUpdatedImagesData().then(() => {
+            // TODO: navigate to ...
+            PopupActions.close();
+        })
     }
 
     const resetStore = () => {
