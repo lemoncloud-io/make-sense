@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './PreRenderView.scss';
 import {AppState} from "../../store";
 import {connect} from "react-redux";
@@ -13,8 +13,9 @@ interface IProps {
 
 const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType }) => {
 
-    LemonActions.initProject(projectId).then(() => {
-        updateActivePopupType(PopupWindowType.CHOOSE_LABEL_TYPE)
+    useEffect(() => {
+        console.log('render')
+        LemonActions.initProject(projectId).then(() => updateActivePopupType(PopupWindowType.CHOOSE_LABEL_TYPE));
     });
 
     const test = <div className="FirstStage">TEST</div>;

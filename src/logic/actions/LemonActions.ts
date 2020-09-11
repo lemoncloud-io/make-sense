@@ -20,15 +20,21 @@ export class LemonActions {
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
 
     public static async initProject(projectId: string) {
-        const { data: { name, labels, images: imageUrls } } = await LemonActions.getProjectData(projectId);
-        store.dispatch(setProjectId(projectId));
-        store.dispatch(updateLabelNames(labels));
-        store.dispatch(updateProjectData({ name, type: null }));
+        try {
+            const { data: { name, labels, images: imageUrls } } = await LemonActions.getProjectData(projectId);
+            console.log(name, labels, imageUrls);
+            store.dispatch(setProjectId(projectId));
+            store.dispatch(updateLabelNames(labels));
+            store.dispatch(updateProjectData({ name, type: null }));
 
-        const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-        const images = LemonActions.setImagesToStore(imageFiles);
-        store.dispatch(updateActiveImageIndex(0));
-        store.dispatch(addImageData(images));
+            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+            const images = LemonActions.setImagesToStore(imageFiles);
+            store.dispatch(updateActiveImageIndex(0));
+            store.dispatch(addImageData(images));
+            LemonActions.resetLemonOptions();
+        } catch (e) {
+            alert(e);
+        }
     }
 
     public static saveAllUpdatedImagesData() {
@@ -76,6 +82,10 @@ export class LemonActions {
 
     private static setImagesToStore(files: any) {
         return files.map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
+    }
+
+    private static resetLemonOptions() {
+        LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
     }
 
 }
