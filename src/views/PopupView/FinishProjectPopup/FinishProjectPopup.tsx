@@ -3,7 +3,7 @@ import './FinishProjectPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {
     updateActiveImageIndex,
-    updateActiveLabelNameId,
+    updateActiveLabelNameId, updateActiveLabelType,
     updateFirstLabelCreatedFlag,
     updateImageData,
     updateLabelNames
@@ -15,22 +15,22 @@ import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
 import {LemonActions} from '../../../logic/actions/LemonActions';
+import {setProjectId} from '../../../store/lemon/actionCreators';
+import {LabelType} from '../../../data/enums/LabelType';
 
 interface IProps {
-    projectId: string;
-    imagesData: ImageData[];
+    updateActiveLabelType: (labelType: LabelType) => any;
     updateActiveImageIndex: (activeImageIndex: number) => any;
     updateActiveLabelNameId: (activeLabelId: string) => any;
     updateLabelNames: (labelNames: LabelName[]) => any;
     updateImageData: (imageData: ImageData[]) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
     updateProjectData: (projectData: ProjectData) => any;
+    setProjectId: (id: string) => any;
 }
 
 const FinishProjectPopup: React.FC<IProps> = (props) => {
     const {
-        projectId,
-        imagesData,
         updateActiveLabelNameId,
         updateLabelNames,
         updateActiveImageIndex,
@@ -60,17 +60,20 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     const saveLabels = () => {
         LemonActions.saveAllUpdatedImagesData().then(() => {
             // TODO: navigate to ...
+            resetStore();
             PopupActions.close();
         })
     }
 
     const resetStore = () => {
+        updateActiveLabelType(null);
         updateActiveLabelNameId(null);
         updateLabelNames([]);
         updateProjectData({type: null, name: "my-project-name"});
         updateActiveImageIndex(null);
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
+        setProjectId(null);
     }
 
     return(
@@ -85,17 +88,17 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
 };
 
 const mapDispatchToProps = {
+    updateActiveLabelType,
     updateActiveLabelNameId,
     updateLabelNames,
     updateProjectData,
     updateActiveImageIndex,
     updateImageData,
     updateFirstLabelCreatedFlag,
+    setProjectId,
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectId: state.lemon.projectId,
-    imagesData: state.labels.imagesData,
 });
 
 export default connect(

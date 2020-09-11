@@ -13,7 +13,6 @@ import Scrollbars from 'react-custom-scrollbars';
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelName} from "../../../../store/labels/types";
 import {LabelsSelector} from "../../../../store/selectors/LabelsSelector";
-import {LemonSelector} from "../../../../store/selectors/LemonSelector";
 import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
 

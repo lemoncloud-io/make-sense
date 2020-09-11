@@ -43,7 +43,6 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
 
     const initialLabels: LabelValue[] = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
     const [labelNames, setLabelNames] = useState(initialLabels);
-    const originLabels = [...LabelsSelector.getLabelNames()]; // to diff updated
 
     const addHandle = () => {
         const newLabel: LabelValue = { name: '', isEditable: true };
