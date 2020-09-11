@@ -68,14 +68,12 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     disabled={!labelNames[key].isEditable}
                 />
                 {
-                    labelNames[key].isEditable
-                        ? <ImageButton
-                            image={"ico/trash.png"}
-                            imageAlt={"remove_label"}
-                            buttonSize={{width: 30, height: 30}}
-                            onClick={() => deleteHandle(key)}
-                        />
-                        : <></>
+                    labelNames[key].isEditable && <ImageButton
+                        image={"ico/trash.png"}
+                        imageAlt={"remove_label"}
+                        buttonSize={{width: 30, height: 30}}
+                        onClick={() => deleteHandle(key)}
+                    />
                 }
         </div>
     });

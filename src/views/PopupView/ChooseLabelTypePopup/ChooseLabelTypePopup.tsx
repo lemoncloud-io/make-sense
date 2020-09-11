@@ -42,7 +42,8 @@ const ChooseLabelTypePopup: React.FC<IProps> = (
         return(
             <div className="ChooseLabelTypePopup">
                 <div className="Message">
-                    Select ~~~~
+                    In general, if you aim to identify the location of objects in an image, you can use object detection.
+                    On the other hand, if you want to classify an image into a certain category, you use image recognition.
                 </div>
             </div>
         );

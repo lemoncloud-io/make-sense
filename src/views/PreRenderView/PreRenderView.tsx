@@ -33,12 +33,22 @@ const PreRenderView: React.FC<IProps> = (
     }) => {
 
     // set data
-    setProjectId(projectId);
     const lemonOptions: LemonOptions = { project: 'lemonade', oAuthEndpoint: 'TODO: add env' };
     const lemonCore: AuthService = new AuthService(lemonOptions);
+    setProjectId(projectId);
+
+    const initProject = async () => {
+        const { data: { name, labels, images } } = await getProjectData(projectId);
+        setLabelsToStore(labels);
+        setProjectNameToStore(name);
+
+        const fileDatas = await convertUrlsToFiles(images);
+        setImagesToStore(fileDatas);
+        popUpChooseLabelType();
+    }
 
     const getProjectData = async (projectId: string) => {
-        return await lemonCore.request('GET', 'http://localhost:8200', `/project/${projectId}`);
+        return lemonCore.request('GET', 'http://localhost:8200', `/project/${projectId}`);
     }
 
     const convertUrlsToFiles = async (imageUrls) => {
@@ -73,17 +83,7 @@ const PreRenderView: React.FC<IProps> = (
         updateActivePopupType(PopupWindowType.CHOOSE_LABEL_TYPE);
     }
 
-    getProjectData(projectId)
-        .then(res => {
-            const { data: { name, labels, images } } = res;
-            setLabelsToStore(labels);
-            setProjectNameToStore(name);
-            return convertUrlsToFiles(images);
-        })
-        .then(datas => {
-            setImagesToStore(datas);
-            popUpChooseLabelType();
-        });
+    initProject();
 
     const test = <div className="FirstStage">TEST</div>;
     return (
