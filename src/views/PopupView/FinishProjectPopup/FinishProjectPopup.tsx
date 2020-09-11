@@ -58,7 +58,7 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     };
 
     const saveLabels = () => {
-        LemonActions.saveUpdatedImagesData().then(() => {
+        LemonActions.saveAllUpdatedImagesData().then(() => {
             // TODO: navigate to ...
             PopupActions.close();
         })

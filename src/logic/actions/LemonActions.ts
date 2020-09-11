@@ -31,6 +31,16 @@ export class LemonActions {
         store.dispatch(addImageData(images));
     }
 
+    public static saveAllUpdatedImagesData() {
+        const images = LabelsSelector.getImagesData();
+        return new Promise(resolve => {
+            setTimeout(() => {
+                console.log('TODO: request update all images', images);
+                resolve(true);
+            }, 300);
+        })
+    }
+
     public static saveUpdatedImagesData() {
         const imageIndex: number = LabelsSelector.getActiveImageIndex();
         return new Promise(resolve => {
