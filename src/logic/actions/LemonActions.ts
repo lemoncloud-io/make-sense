@@ -22,7 +22,6 @@ export class LemonActions {
     public static async initProject(projectId: string) {
         try {
             const { data: { name, labels, images: imageUrls } } = await LemonActions.getProjectData(projectId);
-            console.log(name, labels, imageUrls);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
             store.dispatch(updateProjectData({ name, type: null }));

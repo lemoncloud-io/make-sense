@@ -77,7 +77,7 @@ export class LabelActions {
             return LabelActions.removeLabelNamesFromImageData(imageData, labelNamesIds);
         });
         store.dispatch(updateImageData(newImagesData));
-        LemonActions.saveAllUpdatedImagesData().then(() => console.log('TODO: check this line'));
+        LemonActions.saveAllUpdatedImagesData().then();
     }
 
     private static removeLabelNamesFromImageData(imageData: ImageData, labelNamesIds: string[]): ImageData {
