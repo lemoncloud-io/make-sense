@@ -15,7 +15,8 @@ interface IProps {
 const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType}) => {
 
     useEffect(() => {
-        LemonActions.initProject(projectId).then(() => updateActivePopupType(PopupWindowType.CHOOSE_LABEL_TYPE));
+        updateActivePopupType(PopupWindowType.LOADER);
+        LemonActions.initProject(projectId).then(() => updateActivePopupType(null));
     });
 
     return (

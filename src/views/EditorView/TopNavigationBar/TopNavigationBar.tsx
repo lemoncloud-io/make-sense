@@ -1,14 +1,12 @@
 import React from 'react';
 import './TopNavigationBar.scss';
 import StateBar from "../StateBar/StateBar";
-import {UnderlineTextButton} from "../../Common/UnderlineTextButton/UnderlineTextButton";
 import {PopupWindowType} from "../../../data/enums/PopupWindowType";
 import {AppState} from "../../../store";
 import {connect} from "react-redux";
 import {updateActivePopupType, updateProjectData} from "../../../store/general/actionCreators";
 import TextInput from "../../Common/TextInput/TextInput";
 import {ImageButton} from "../../Common/ImageButton/ImageButton";
-import {Settings} from "../../../settings/Settings";
 import {ProjectData} from "../../../store/general/types";
 
 interface IProps {

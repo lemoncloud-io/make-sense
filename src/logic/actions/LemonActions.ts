@@ -8,6 +8,9 @@ import { updateProjectData } from '../../store/general/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
 import { setProjectId } from '../../store/lemon/actionCreators';
 import { Settings } from '../../settings/Settings';
+import {GeneralSelector} from '../../store/selectors/GeneralSelector';
+import {ProjectData} from '../../store/general/types';
+import {ProjectType} from '../../data/enums/ProjectType';
 
 type LemonImageUrl = {
     id: string;
@@ -21,7 +24,7 @@ export class LemonActions {
 
     public static async initProject(projectId: string) {
         try {
-            const { data: { name, labels, images: imageUrls } } = await LemonActions.getProjectData(projectId);
+            const { data: { name, labels, images: imageUrls, type: projectType } } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
             store.dispatch(updateProjectData({ name, type: null }));
@@ -31,6 +34,9 @@ export class LemonActions {
             store.dispatch(updateActiveImageIndex(0));
             store.dispatch(addImageData(images));
             LemonActions.resetLemonOptions();
+            const projectData = GeneralSelector.getProjectData();
+            const type = projectType || ProjectType.OBJECT_DETECTION;
+            store.dispatch(updateProjectData({ ...projectData, type }));
         } catch (e) {
             alert(e);
         }
