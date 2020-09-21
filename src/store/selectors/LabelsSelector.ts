@@ -4,6 +4,7 @@ import {find} from "lodash";
 import {LabelType} from "../../data/enums/LabelType";
 
 export class LabelsSelector {
+
     public static getLabelNames(): LabelName[] {
         return store.getState().labels.labels;
     }

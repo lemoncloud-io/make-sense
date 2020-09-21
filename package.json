@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@lemoncloud/lemon-front-lib": "^1.1.7",
     "@material-ui/core": "^4.1.1",
     "@tensorflow-models/coco-ssd": "^2.0.0",
     "@tensorflow-models/posenet": "^2.1.3",
@@ -11,6 +12,8 @@
     "@types/node": "12.0.8",
     "@types/react": "16.8.20",
     "@types/react-dom": "16.8.4",
+    "@types/react-router-dom": "^5.1.5",
+    "axios": "^0.20.0",
     "classnames": "^2.2.6",
     "file-saver": "^2.0.2",
     "jszip": "^3.2.2",
@@ -23,6 +26,7 @@
     "react-dom": "^16.8.6",
     "react-dropzone": "^10.1.5",
     "react-redux": "^7.1.0",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "3.0.1",
     "react-spinners": "^0.5.4",
     "redux": "^4.0.4",
@@ -52,16 +56,19 @@
     ]
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/classnames": "^2.2.8",
     "@types/file-saver": "^2.0.1",
     "@types/jszip": "^3.1.6",
     "@types/lodash": "^4.14.135",
     "@types/moment": "^2.13.0",
+    "@types/query-string": "^6.3.0",
     "@types/react-custom-scrollbars": "^4.0.5",
     "@types/react-dropzone": "^4.2.2",
     "@types/react-redux": "^7.1.0",
     "@types/uuid": "^3.4.4",
     "prettier": "^1.17.1",
+    "query-string": "^6.13.1",
     "redux-devtools": "^3.5.0"
   }
 }

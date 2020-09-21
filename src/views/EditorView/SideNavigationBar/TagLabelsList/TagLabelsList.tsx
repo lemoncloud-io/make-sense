@@ -66,7 +66,7 @@ const TagLabelsList: React.FC<IProps> = (
 
     const getChildren = () => {
         return [
-            ...labelNames.map((labelName: LabelName) => {
+            labelNames.map((labelName: LabelName) => {
                 return <div
                     className={getClassName(labelName.id)}
                     onClickCapture={() => onTagClick(labelName.id)}
@@ -123,7 +123,7 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    labelNames : state.labels.labels
+    labelNames : state.labels.labels,
 });
 
 export default connect(

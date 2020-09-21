@@ -13,6 +13,8 @@ import {CSSHelper} from "../../logic/helpers/CSSHelper";
 import {ClipLoader} from "react-spinners";
 import ImportLabelPopup from "./ImportLabelPopup/ImportLabelPopup";
 import ExportLabelPopup from "./ExportLabelsPopup/ExportLabelPopup";
+import ChooseLabelTypePopup from './ChooseLabelTypePopup/ChooseLabelTypePopup';
+import FinishProjectPopup from './FinishProjectPopup/FinishProjectPopup';
 
 interface IProps {
     activePopupType: PopupWindowType;
@@ -22,6 +24,8 @@ const PopupView: React.FC<IProps> = ({activePopupType}) => {
 
     const selectPopup = () => {
         switch (activePopupType) {
+            case PopupWindowType.CHOOSE_LABEL_TYPE:
+                return <ChooseLabelTypePopup/>;
             case PopupWindowType.LOAD_LABEL_NAMES:
                 return <LoadLabelsPopup/>;
             case PopupWindowType.EXPORT_ANNOTATIONS:
@@ -38,6 +42,8 @@ const PopupView: React.FC<IProps> = ({activePopupType}) => {
                 />;
             case PopupWindowType.EXIT_PROJECT:
                 return <ExitProjectPopup/>;
+            case PopupWindowType.FINISH_PROJECT:
+                return <FinishProjectPopup/>;
             case PopupWindowType.IMPORT_IMAGES:
                 return <LoadMoreImagesPopup/>;
             case PopupWindowType.LOAD_AI_MODEL:

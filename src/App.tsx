@@ -13,15 +13,36 @@ import {SizeItUpView} from "./views/SizeItUpView/SizeItUpView";
 import {PlatformModel} from "./staticModels/PlatformModel";
 import classNames from "classnames";
 
+import { RouteComponentProps } from 'react-router-dom';
+import PreRenderView  from './views/PreRenderView/PreRenderView';
+
+const queryString = require('query-string');
+
 interface IProps {
     projectType: ProjectType;
     windowSize: ISize;
     ObjectDetectorLoaded: boolean;
     PoseDetectionLoaded: boolean;
+    routeProps: RouteComponentProps;
 }
 
-const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded}) => {
+const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded, routeProps}) => {
+    const getProjectIdFromQuery = () => {
+        const { location } = routeProps;
+        const queryParams = queryString.parse(location.search);
+        return queryParams.projectId || '';
+    }
+
     const selectRoute = () => {
+        const projectId = getProjectIdFromQuery();
+        if (projectId) {
+            if (!projectType) {
+                return <PreRenderView projectId={projectId}/>;
+            } else {
+                return <EditorView/>;
+            }
+        }
+
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
             return <MobileMainView/>;
         if (!projectType)
@@ -35,21 +56,22 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
         }
     };
 
-      return (
-        <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
-            draggable={false}
-        >
-            {selectRoute()}
-            <PopupView/>
-        </div>
-      );
+    return (
+      <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
+          draggable={false}
+      >
+          {selectRoute()}
+          <PopupView/>
+      </div>
+    );
 };
 
-const mapStateToProps = (state: AppState) => ({
+const mapStateToProps = (state: AppState, routeProps: RouteComponentProps) => ({
     projectType: state.general.projectData.type,
     windowSize: state.general.windowSize,
     ObjectDetectorLoaded: state.ai.isObjectDetectorLoaded,
-    PoseDetectionLoaded: state.ai.isPoseDetectorLoaded
+    PoseDetectionLoaded: state.ai.isPoseDetectorLoaded,
+    routeProps
 });
 
 export default connect(

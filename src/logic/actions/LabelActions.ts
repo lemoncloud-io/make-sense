@@ -4,6 +4,7 @@ import {filter} from "lodash";
 import {store} from "../../index";
 import {updateImageData, updateImageDataById} from "../../store/labels/actionCreators";
 import {LabelType} from "../../data/enums/LabelType";
+import {LemonActions} from './LemonActions';
 
 export class LabelActions {
     public static deleteActiveLabel() {
@@ -75,7 +76,8 @@ export class LabelActions {
         const newImagesData: ImageData[] = imagesData.map((imageData: ImageData) => {
             return LabelActions.removeLabelNamesFromImageData(imageData, labelNamesIds);
         });
-        store.dispatch(updateImageData(newImagesData))
+        store.dispatch(updateImageData(newImagesData));
+        LemonActions.saveAllUpdatedImagesData().then();
     }
 
     private static removeLabelNamesFromImageData(imageData: ImageData, labelNamesIds: string[]): ImageData {

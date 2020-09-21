@@ -11,6 +11,7 @@ interface IProps {
     labelStyle?: React.CSSProperties;
     barStyle?: React.CSSProperties;
     value?: string;
+    disabled?: boolean;
 }
 
 const TextInput = (props: IProps) => {
@@ -24,7 +25,8 @@ const TextInput = (props: IProps) => {
         inputStyle,
         labelStyle,
         barStyle,
-        value
+        value,
+        disabled
     } = props;
 
     const getInputType = () => {
@@ -36,6 +38,7 @@ const TextInput = (props: IProps) => {
             <input
                 value={!!value ? value : undefined}
                 type={getInputType()}
+                disabled={disabled}
                 id={key}
                 style={inputStyle}
                 onChange={onChange ? onChange : undefined}

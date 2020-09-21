@@ -1,5 +1,5 @@
 import React from 'react'
-import './ExitProjectPopup.scss'
+import './FinishProjectPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {
     updateActiveImageIndex,
@@ -14,6 +14,7 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
+import {LemonActions} from '../../../logic/actions/LemonActions';
 import {setProjectId} from '../../../store/lemon/actionCreators';
 import {LabelType} from '../../../data/enums/LabelType';
 
@@ -28,29 +29,43 @@ interface IProps {
     setProjectId: (id: string) => any;
 }
 
-const ExitProjectPopup: React.FC<IProps> = (props) => {
+const FinishProjectPopup: React.FC<IProps> = (props) => {
     const {
-        updateActiveLabelType,
         updateActiveLabelNameId,
         updateLabelNames,
         updateActiveImageIndex,
         updateImageData,
         updateFirstLabelCreatedFlag,
         updateProjectData,
-        setProjectId,
     } = props;
 
     const renderContent = () => {
         return(
-            <div className="ExitProjectPopupContent">
+            <div className="FinishProjectPopup">
                 <div className="Message">
-                    Are you sure you want to leave the editor? You will permanently lose all your progress.
+                    Are you sure you want to finish the project?
                 </div>
             </div>
         )
     };
 
     const onAccept = () => {
+        saveLabels();
+    };
+
+    const onReject = () => {
+        PopupActions.close();
+    };
+
+    const saveLabels = () => {
+        LemonActions.saveAllUpdatedImagesData().then(() => {
+            // TODO: navigate to ...
+            resetStore();
+            PopupActions.close();
+        })
+    }
+
+    const resetStore = () => {
         updateActiveLabelType(null);
         updateActiveLabelNameId(null);
         updateLabelNames([]);
@@ -59,18 +74,13 @@ const ExitProjectPopup: React.FC<IProps> = (props) => {
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
         setProjectId(null);
-        PopupActions.close();
-    };
-
-    const onReject = () => {
-        PopupActions.close();
-    };
+    }
 
     return(
         <GenericYesNoPopup
-            title={"Exit project"}
+            title={"Finish project"}
             renderContent={renderContent}
-            acceptLabel={"Exit"}
+            acceptLabel={"Save"}
             onAccept={onAccept}
             rejectLabel={"Back"}
             onReject={onReject}
@@ -88,9 +98,10 @@ const mapDispatchToProps = {
     setProjectId,
 };
 
-const mapStateToProps = (state: AppState) => ({});
+const mapStateToProps = (state: AppState) => ({
+});
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(ExitProjectPopup);
+)(FinishProjectPopup);

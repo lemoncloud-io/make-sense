@@ -3,6 +3,7 @@ import {PopupWindowType} from "../../data/enums/PopupWindowType";
 import {ContextType} from "../../data/enums/ContextType";
 import {CustomCursorStyle} from "../../data/enums/CustomCursorStyle";
 import {ProjectType} from "../../data/enums/ProjectType";
+import {ProjectData} from '../general/types';
 
 export class GeneralSelector {
     public static getActivePopupType(): PopupWindowType {
@@ -35,6 +36,10 @@ export class GeneralSelector {
 
     public static getProjectType(): ProjectType {
         return store.getState().general.projectData.type;
+    }
+
+    public static getProjectData(): ProjectData {
+        return store.getState().general.projectData;
     }
 
     public static getZoom(): number {

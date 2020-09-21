@@ -1,6 +1,15 @@
 import {PopupWindowType} from "../data/enums/PopupWindowType";
+import {LemonOptions} from '@lemoncloud/lemon-front-lib';
 
 export class Settings {
+    public static readonly PROJECT_NAME: string = "lemonade";
+    public static readonly LEMONADE_API: string = "http://localhost:8200";
+    public static readonly LEMONADE_OAUTH_ENDPOINT: string = "http://localhost:8200";
+    public static readonly LEMON_OPTIONS: LemonOptions = {
+        project: Settings.PROJECT_NAME,
+        oAuthEndpoint: Settings.LEMONADE_OAUTH_ENDPOINT,
+    }
+
     public static readonly GITHUB_URL: string = "https://github.com/SkalskiP";
     public static readonly MEDIUM_URL: string = "https://medium.com/@piotr.skalski92";
     public static readonly PATREON_URL: string = "https://www.patreon.com/make_sense";
