@@ -13,8 +13,7 @@ import { ProjectData } from '../../store/general/types';
 
 type LemonImageUrl = {
     id: string;
-    url: string;
-    name: string;
+    imageUrl: string;
 }
 
 export class LemonActions {
@@ -23,21 +22,19 @@ export class LemonActions {
 
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
-            const { data: { name, labels, images: imageUrls, type } } = await LemonActions.getProjectData(projectId);
+            // init project
+            const { name, labels, type } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
             store.dispatch(updateProjectData({ name, type: null }));
 
-            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-            const images = LemonActions.setImagesToStore(imageFiles);
-            store.dispatch(updateActiveImageIndex(0));
-            store.dispatch(addImageData(images));
+            // load images and save into `labels` store
+            await this.loadProjectImages(projectId);
+
             LemonActions.resetLemonOptions();
 
             const projectData = GeneralSelector.getProjectData();
-            if (type) {
-                store.dispatch(updateProjectData({ ...projectData, type }));
-            }
+
             return { ...projectData, type: type ? type : null };
         } catch (e) {
             alert(e);
@@ -45,6 +42,7 @@ export class LemonActions {
         }
     }
 
+    // NOTE: 안써도 될듯?
     public static saveAllUpdatedImagesData() {
         const images = LabelsSelector.getImagesData();
         return new Promise(resolve => {
@@ -57,14 +55,15 @@ export class LemonActions {
 
     public static saveUpdatedImagesData() {
         const imageIndex: number = LabelsSelector.getActiveImageIndex();
-        return new Promise(resolve => {
-            setTimeout(() => {
-                console.log('TODO: request update images', LabelsSelector.getImageDataByIndex(imageIndex));
-                resolve(true);
-            }, 300);
-        })
+        const { id, labelLines, labelPoints, labelPolygons, labelRects } = LabelsSelector.getImageDataByIndex(imageIndex);
+        const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
+
+        console.table(mergeItmes);
+        // id, shape, label name 
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/annotations/${id}`, null, mergeItmes);
     }
 
+    // NOTE: Admin에서 사용할듯?
     public static saveUpdatedLabels(updatedLabels: LabelName[]): Promise<LabelName[]> {
         const projectId = LemonSelector.getProjectId();
         return new Promise(resolve => {
@@ -75,22 +74,43 @@ export class LemonActions {
         })
     }
 
-    private static async getProjectData(id: string) {
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/project/${id}`);
+    private static getProjectData(id: string) {
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
+    }
+
+    public static async loadProjectImages(id:string, pages?: number){
+        pages = pages ? pages : 0;
+        const { limit, list: imageUrls, page, total } = await LemonActions.getProjectImages(id, pages);
+        const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+        const images = LemonActions.setImagesToStore(imageFiles);
+
+        store.dispatch(updateActiveImageIndex(0));
+        store.dispatch(addImageData(images));
+        // limit, page, total
+        // store.dispatch(null);
+        return;
+    }
+    
+    private static getProjectImages(id: string, page?: number){
+        const param = { limit: 10, page };
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}/images`, param);
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]) {
         const customOptions = { responseType: 'blob' };
         LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
 
-        return Promise.all(imageUrls.map(({ id, url, name }) => {
-            return LemonActions.lemonCore.request('GET', url, '/').then(response => ({ id, file: new File([response], name) }));
+        return Promise.all(imageUrls.map(async ({ id, imageUrl }) => {
+            const name = imageUrl.split('/') ? imageUrl.split('/').pop() : 'null';
+            return LemonActions.lemonCore.request('GET', imageUrl, '').then(response => ({ id, file: new File([response], name) }));
         }))
     }
 
     private static setImagesToStore(files: any) {
         return files.map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
     }
+
+    
 
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);

@@ -88,7 +88,11 @@ export class VirtualList extends React.Component<IProps, IState> {
     };
 
     private onScrollStop = () => {
-        this.setState({isScrolling: false});
+        console.log('TODO: added infinite scroll', this);
+        // contentSize: { height: 1650 }
+        // viewportRect: { x: 0, y: 739, height: 911 }
+        // if (viewportRect.y + viewportRect.height >= math.floor(contentSize.height-50, 2)) => fetch images...
+        this.setState({isScrolling: false}); // at defenitely bottom..!!
     };
 
     private onScroll = (values) => {
