@@ -6,7 +6,7 @@ import { AuthService } from '@lemoncloud/lemon-front-lib';
 import { addImageData, updateActiveImageIndex, updateLabelNames } from '../../store/labels/actionCreators';
 import { updateProjectData } from '../../store/general/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import { setProjectId } from '../../store/lemon/actionCreators';
+import { setProjectId, setImagePagination } from '../../store/lemon/actionCreators';
 import { Settings } from '../../settings/Settings';
 import { GeneralSelector } from '../../store/selectors/GeneralSelector';
 import { ProjectData } from '../../store/general/types';
@@ -84,10 +84,9 @@ export class LemonActions {
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.setImagesToStore(imageFiles);
 
-        store.dispatch(updateActiveImageIndex(0));
+        store.dispatch(updateActiveImageIndex(0)); // select initial image!
         store.dispatch(addImageData(images));
-        // limit, page, total
-        // store.dispatch(null);
+        store.dispatch(setImagePagination(limit, page, total));
         return;
     }
     
