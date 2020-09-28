@@ -27,6 +27,12 @@ export function lemonReducer(
                 total: action.payload.total,
             }
         }
+        case Action.SET_CURRENT_PAGE: {
+            return {
+                ...state,
+                page: action.payload.page
+            }
+        }
         default:
             return state;
     }

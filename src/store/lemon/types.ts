@@ -14,7 +14,7 @@ interface SetProjectId {
     }
 }
 
-interface SetPagination {
+interface SetImagePagination {
     type: typeof Action.SET_IMAGE_PAGINATION;
     payload: {
         limit: number,
@@ -23,5 +23,13 @@ interface SetPagination {
     }
 }
 
+interface SetCurrentPage {
+    type: typeof Action.SET_CURRENT_PAGE;
+    payload: {
+        page: number
+    }
+}
+
 export type LemonActionTypes = SetProjectId
-    | SetPagination;
+    | SetImagePagination
+    | SetCurrentPage;

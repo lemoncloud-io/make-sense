@@ -21,3 +21,12 @@ export function setImagePagination(limit: number, page: number, total: number): 
     }
 }
 
+export function setCurrentPage(page: number): LemonActionTypes {
+    return {
+        type: Action.SET_CURRENT_PAGE,
+        payload: {
+            page
+        }
+    }
+}
+
