@@ -23,7 +23,8 @@ export class LemonActions {
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
             // init project
-            const { name, labels, type } = await LemonActions.getProjectData(projectId);
+            const { labels } = await LemonActions.getLabelData(projectId);
+            const { name, type } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
             store.dispatch(updateProjectData({ name, type: null }));
@@ -59,8 +60,7 @@ export class LemonActions {
         const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
 
         console.table(mergeItmes);
-        // id, shape, label name 
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/annotations/${id}`, null, mergeItmes);
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
     }
 
     // NOTE: Admin에서 사용할듯?
@@ -76,6 +76,11 @@ export class LemonActions {
 
     private static getProjectData(id: string) {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
+    }
+
+    private static getLabelData(projectId: string) {
+        const param = { projectId };
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
     }
 
     public static async loadProjectImages(id:string, pages?: number){
