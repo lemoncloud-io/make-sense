@@ -58,8 +58,6 @@ export class LemonActions {
         const imageIndex: number = LabelsSelector.getActiveImageIndex();
         const { id, labelLines, labelPoints, labelPolygons, labelRects } = LabelsSelector.getImageDataByIndex(imageIndex);
         const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
-
-        console.table(mergeItmes);
         return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
     }
 
