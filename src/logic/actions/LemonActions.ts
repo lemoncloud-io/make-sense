@@ -95,7 +95,7 @@ export class LemonActions {
     
     private static getProjectImages(id: string, page?: number){
         const param = { limit: 10, page };
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}/images`, param);
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images`, param);
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]) {
@@ -104,7 +104,9 @@ export class LemonActions {
 
         return Promise.all(imageUrls.map(async ({ id, imageUrl }) => {
             const name = imageUrl.split('/') ? imageUrl.split('/').pop() : 'null';
-            return LemonActions.lemonCore.request('GET', imageUrl, '').then(response => ({ id, file: new File([response], name) }));
+            return LemonActions.lemonCore.request('GET', imageUrl, '')
+                .then(response => ({ id, file: new File([response], name) }))
+                .catch(() => ({ id, file: new File([], name) }));
         }))
     }
 
