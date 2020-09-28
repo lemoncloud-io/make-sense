@@ -11,6 +11,6 @@ export class LemonSelector {
     }
 
     public static getTotalPage(): number {
-        return Math.ceil(store.getState().lemon.total / store.getState().lemon.limit);
+        return Math.ceil(store.getState().lemon.total / store.getState().lemon.limit) - 1;
     }
 }

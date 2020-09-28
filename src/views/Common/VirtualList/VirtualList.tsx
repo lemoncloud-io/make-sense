@@ -98,9 +98,8 @@ export class VirtualList extends React.Component<IProps, IState> {
         const { contentSize: { height: contentHeight }, state: { viewportRect: { y: yPosition, height } }  } = this;
 
         if (yPosition + height >= Math.floor(contentHeight/100)*100 ){
-            console.log('TODO: added infinite scroll', this);
             updateActivePopupType(PopupWindowType.LOADER); // show loader
-
+            
             const projectId = LemonSelector.getProjectId();
             const currentPage = LemonSelector.getCurrentPage();
             const totalPage = LemonSelector.getTotalPage();
