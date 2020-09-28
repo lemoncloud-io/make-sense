@@ -5,6 +5,13 @@ import Scrollbars from 'react-custom-scrollbars';
 import {VirtualListUtil} from "../../../utils/VirtualListUtil";
 import {IPoint} from "../../../interfaces/IPoint";
 import {RectUtil} from "../../../utils/RectUtil";
+import { LemonActions } from '../../../logic/actions/LemonActions';
+import { LemonSelector } from '../../../store/selectors/LemonSelector';
+import { updateActivePopupType } from '../../../store/general/actionCreators';
+import { PopupWindowType } from '../../../data/enums/PopupWindowType';
+import { store } from '../../..';
+import { setCurrentPage } from '../../../store/lemon/actionCreators';
+
 
 interface IProps {
     size: ISize;
@@ -88,11 +95,27 @@ export class VirtualList extends React.Component<IProps, IState> {
     };
 
     private onScrollStop = () => {
-        console.log('TODO: added infinite scroll', this);
-        // contentSize: { height: 1650 }
-        // viewportRect: { x: 0, y: 739, height: 911 }
-        // if (viewportRect.y + viewportRect.height >= math.floor(contentSize.height-50, 2)) => fetch images...
-        this.setState({isScrolling: false}); // at defenitely bottom..!!
+        const { contentSize: { height: contentHeight }, state: { viewportRect: { y: yPosition, height } }  } = this;
+
+        if (yPosition + height >= Math.floor(contentHeight/100)*100 ){
+            console.log('TODO: added infinite scroll', this);
+            updateActivePopupType(PopupWindowType.LOADER); // show loader
+
+            const projectId = LemonSelector.getProjectId();
+            const currentPage = LemonSelector.getCurrentPage();
+            const totalPage = LemonSelector.getTotalPage();
+
+            if (totalPage > currentPage) {
+                LemonActions.loadProjectImages(projectId, currentPage+1).then(() => {
+                    updateActivePopupType(null); // hide loader
+                    store.dispatch(setCurrentPage(currentPage+1));
+                }).catch((e) => {
+                    alert(e);
+                });
+            }
+        }
+
+        this.setState({ isScrolling: false });
     };
 
     private onScroll = (values) => {
