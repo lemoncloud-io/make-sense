@@ -12,6 +12,7 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {ImageActions} from "../../../../logic/actions/ImageActions";
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
+import { setOriginLabels } from "../../../../store/lemon/actionCreators";
 
 interface IProps {
     activeImageIndex: number;
@@ -35,6 +36,7 @@ class ImagesList extends React.Component<IProps, IState> {
     }
 
     public componentDidMount(): void {
+        ImageActions.getOriginLabelByIndex(0);
         this.updateListSize();
         window.addEventListener(EventType.RESIZE, this.updateListSize);
     }

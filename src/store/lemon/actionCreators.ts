@@ -1,5 +1,7 @@
 import { Action } from '../Actions';
 import { LemonActionTypes } from './types';
+import { ImageData } from '../labels/types';
+
 
 export function setProjectId(projectId: string): LemonActionTypes {
     return {
@@ -26,6 +28,15 @@ export function setCurrentPage(page: number): LemonActionTypes {
         type: Action.SET_CURRENT_PAGE,
         payload: {
             page
+        }
+    }
+}
+
+export function setOriginLabels(originLabels: ImageData): LemonActionTypes {
+    return {
+        type: Action.SET_ORIGIN_LABELS,
+        payload: {
+            originLabels: { ...originLabels }
         }
     }
 }
