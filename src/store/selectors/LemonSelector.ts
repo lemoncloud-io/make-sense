@@ -1,4 +1,6 @@
 import { store } from '../..';
+import { ImageData } from '../labels/types';
+
 
 export class LemonSelector {
 
@@ -12,5 +14,9 @@ export class LemonSelector {
 
     public static getTotalPage(): number {
         return Math.ceil(store.getState().lemon.total / store.getState().lemon.limit) - 1;
+    }
+
+    public static getOriginLabels(): ImageData {
+        return store.getState().lemon.originLabels;
     }
 }

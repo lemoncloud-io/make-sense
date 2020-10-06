@@ -10,6 +10,8 @@ import { setProjectId, setImagePagination } from '../../store/lemon/actionCreato
 import { Settings } from '../../settings/Settings';
 import { GeneralSelector } from '../../store/selectors/GeneralSelector';
 import { ProjectData } from '../../store/general/types';
+import { isEqual } from 'lodash';
+
 
 type LemonImageUrl = {
     id: string;
@@ -23,7 +25,7 @@ export class LemonActions {
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
             // init project
-            const { labels } = await LemonActions.getLabelData(projectId);
+            const { list:labels } = await LemonActions.getLabelData(projectId);
             const { name, type } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
@@ -55,8 +57,15 @@ export class LemonActions {
     }
 
     public static saveUpdatedImagesData() {
+        const originLabels = LemonSelector.getOriginLabels();
         const imageIndex: number = LabelsSelector.getActiveImageIndex();
-        const { id, labelLines, labelPoints, labelPolygons, labelRects } = LabelsSelector.getImageDataByIndex(imageIndex);
+        const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
+
+        if ( isEqual(originLabels, targetLabels) ){
+            return Promise.resolve();
+        }
+        
+        const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
         const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
         return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
     }
@@ -113,8 +122,6 @@ export class LemonActions {
     private static setImagesToStore(files: any) {
         return files.map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
     }
-
-    
 
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);

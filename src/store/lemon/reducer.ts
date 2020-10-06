@@ -6,6 +6,7 @@ const initialState: LemonState = {
     limit: null,
     total: null,
     page: null,
+    originLabels: null,
 };
 
 export function lemonReducer(
@@ -31,6 +32,12 @@ export function lemonReducer(
             return {
                 ...state,
                 page: action.payload.page
+            }
+        }
+        case Action.SET_ORIGIN_LABELS: {
+            return {
+                ...state,
+                originLabels: { ...action.payload.originLabels }
             }
         }
         default:

@@ -43,7 +43,7 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
         return(
             <div className="FinishProjectPopup">
                 <div className="Message">
-                    Are you sure you want to finish the project?
+                    작업을 마치시겠습니까?
                 </div>
             </div>
         )
@@ -59,9 +59,11 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
 
     const saveLabels = () => {
         LemonActions.saveAllUpdatedImagesData().then(() => {
-            // TODO: navigate to ...
             resetStore();
             PopupActions.close();
+        }).then(() => {
+            // TODO: navigate to ...
+            window.location.href = 'http://naver.com';
         })
     }
 
@@ -78,11 +80,11 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
 
     return(
         <GenericYesNoPopup
-            title={"Finish project"}
+            title={"작업 완료"}
             renderContent={renderContent}
-            acceptLabel={"Save"}
+            acceptLabel={"예"}
             onAccept={onAccept}
-            rejectLabel={"Back"}
+            rejectLabel={"아니요"}
             onReject={onReject}
         />)
 };
