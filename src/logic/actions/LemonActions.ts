@@ -60,7 +60,7 @@ export class LemonActions {
         this.isAuthenticated().then(( isAuth:boolean ) => {
             const isDev = process.env.NODE_ENV;
 
-            if (isDev != 'development' && isAuth == false) {
+            if (isDev !== 'development' && isAuth === false) {
                 window.location.href = Settings.LEMONADE_HOME;
             }
 
@@ -75,7 +75,9 @@ export class LemonActions {
             const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
             const mergeItmes = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
             return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
-        });
+        }).catch((e) => {
+            alert(e);
+        })
     }
 
     // NOTE: Admin에서 사용할듯?

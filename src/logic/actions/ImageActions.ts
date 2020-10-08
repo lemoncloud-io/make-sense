@@ -28,7 +28,7 @@ export class ImageActions {
         if (index < 0 || index > imageCount - 1) {
             return;
         } else {
-            LemonActions.saveUpdatedImagesData().catch((e) => alert(e));
+            LemonActions.saveUpdatedImagesData();
             ViewPortActions.setZoom(1);
             store.dispatch(updateActiveImageIndex(index));
             store.dispatch(updateActiveLabelId(null));
