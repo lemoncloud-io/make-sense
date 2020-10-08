@@ -21,9 +21,8 @@ const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, upd
 
     useEffect(() => {
         LemonActions.isAuthenticated().then((isAuth)=> {
-            console.log('none Auth', isAuth);
             const isDev = process.env.NODE_ENV;
-            if (isDev != 'development') {
+            if ( isDev != 'development' && isAuth == false ) {
                 window.location.href = Settings.LEMONADE_HOME;
             }
         })
