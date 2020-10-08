@@ -62,7 +62,7 @@ export class LemonActions {
 
             if (isDev !== 'development' && isAuth === false) {
                 // window.location.href = Settings.LEMONADE_HOME;
-                history.back();
+                window.history.back();
             }
 
             const originLabels = LemonSelector.getOriginLabels();

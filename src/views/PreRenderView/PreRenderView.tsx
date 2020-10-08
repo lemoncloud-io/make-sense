@@ -24,7 +24,7 @@ const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, upd
             const isDev = process.env.NODE_ENV;
             if ( isDev !== 'development' && isAuth === false ) {
                 // window.location.href = Settings.LEMONADE_HOME;
-                history.back();
+                window.history.back();
             }
         })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
