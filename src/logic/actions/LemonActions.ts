@@ -24,7 +24,6 @@ export class LemonActions {
 
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
-            console.log(Settings.LEMONADE_API);
             // init project
             const { list:labels } = await LemonActions.getLabelData(projectId);
             const { name, type } = await LemonActions.getProjectData(projectId);
