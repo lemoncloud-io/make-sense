@@ -61,7 +61,8 @@ export class LemonActions {
             const isDev = process.env.NODE_ENV;
 
             if (isDev !== 'development' && isAuth === false) {
-                window.location.href = Settings.LEMONADE_HOME;
+                // window.location.href = Settings.LEMONADE_HOME;
+                history.back();
             }
 
             const originLabels = LemonSelector.getOriginLabels();

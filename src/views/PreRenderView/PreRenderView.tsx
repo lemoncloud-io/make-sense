@@ -23,7 +23,8 @@ const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, upd
         LemonActions.isAuthenticated().then((isAuth)=> {
             const isDev = process.env.NODE_ENV;
             if ( isDev !== 'development' && isAuth === false ) {
-                window.location.href = Settings.LEMONADE_HOME;
+                // window.location.href = Settings.LEMONADE_HOME;
+                history.back();
             }
         })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
