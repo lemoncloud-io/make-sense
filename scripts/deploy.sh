@@ -28,10 +28,10 @@ else
     echo 'deploy on local'
      # NOTE: 현재는 PROD만 배포
     # sync data to AWS S3
-    aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME} --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" || { echo 'ERROR: s3 sync failed' ; exit 1; }
+    aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" || { echo 'ERROR: s3 sync failed' ; exit 1; }
     # aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME} --metadata-directive REPLACE --acl public-read --exclude "*" --include "assets/*" || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
     # aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME} --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" --content-encoding gzip || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
-    aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME} --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
-    aws s3 --profile lemon cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read || { echo 'ERROR: s3 cp index failed' ; exit 1; }
+    aws s3 --profile lemon sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
+    aws s3 --profile lemon cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/editor/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read || { echo 'ERROR: s3 cp index failed' ; exit 1; }
     # aws cloudfront --profile lemon create-invalidation --distribution-id ${DISTRIBUTION_ID} --paths '/*'
 fi
