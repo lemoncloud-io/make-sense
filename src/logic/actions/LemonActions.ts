@@ -57,17 +57,25 @@ export class LemonActions {
     }
 
     public static saveUpdatedImagesData() {
-        const originLabels = LemonSelector.getOriginLabels();
-        const imageIndex: number = LabelsSelector.getActiveImageIndex();
-        const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
+        this.isAuthenticated().then(( isAuth:boolean ) => {
+            const isDev = process.env.NODE_ENV;
 
-        if ( isEqual(originLabels, targetLabels) ){
-            return Promise.resolve();
-        }
-        
-        const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
-        const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
+            if (isDev != 'development' && isAuth == false) {
+                window.location.href = Settings.LEMONADE_HOME;
+            }
+
+            const originLabels = LemonSelector.getOriginLabels();
+            const imageIndex: number = LabelsSelector.getActiveImageIndex();
+            const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
+
+            if (isEqual(originLabels, targetLabels)) {
+                return Promise.resolve();
+            }
+
+            const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
+            const mergeItmes = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
+            return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
+        });
     }
 
     // NOTE: Admin에서 사용할듯?
