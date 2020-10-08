@@ -9,6 +9,7 @@ import { ProjectData } from '../../store/general/types';
 
 import TopNavigationBar from '../EditorView/TopNavigationBar/TopNavigationBar';
 import { ProjectType } from '../../data/enums/ProjectType';
+import { Settings } from '../../settings/Settings';
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -21,7 +22,10 @@ const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, upd
     useEffect(() => {
         LemonActions.isAuthenticated().then((isAuth)=> {
             console.log('none Auth', isAuth);
-            // Use your router to redirect them to login page
+            const isDev = process.env.NODE_ENV;
+            if (isDev != 'development') {
+                window.location.href = Settings.LEMONADE_HOME;
+            }
         })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
         LemonActions.initProject(projectId).then((projectData: ProjectData) => {
