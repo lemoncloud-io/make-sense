@@ -101,6 +101,10 @@ export class LemonActions {
         store.dispatch(setImagePagination(limit, page, total));
         return;
     }
+
+    public static isAuthenticated() {
+        return LemonActions.lemonCore.isAuthenticated();
+    }
     
     private static getProjectImages(id: string, page?: number){
         const param = { limit: 10, page };
@@ -126,5 +130,6 @@ export class LemonActions {
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
     }
+
 
 }

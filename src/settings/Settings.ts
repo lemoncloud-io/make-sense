@@ -5,6 +5,8 @@ export class Settings {
     public static readonly PROJECT_NAME: string = "lemonade";
     public static readonly LEMONADE_API: string = "http://localhost:8200";
     public static readonly LEMONADE_OAUTH_ENDPOINT: string = "http://localhost:8200";
+    public static readonly LEMONADE_OAUTH_ENDPOINT_PROD: 'https://dev.oauth.lemoncloud.io';
+    public static readonly LEMONADE_API_ENDPOINT_PROD: 'https://api.lemoncloud.io/ade-d1';
     public static readonly LEMON_OPTIONS: LemonOptions = {
         project: Settings.PROJECT_NAME,
         oAuthEndpoint: Settings.LEMONADE_OAUTH_ENDPOINT,

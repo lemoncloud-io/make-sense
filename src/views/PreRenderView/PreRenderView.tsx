@@ -19,11 +19,14 @@ interface IProps {
 const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, updateProjectData}) => {
 
     useEffect(() => {
+        LemonActions.isAuthenticated().then((isAuth)=> {
+            console.log('none Auth', isAuth);
+            // Use your router to redirect them to login page
+        })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
         LemonActions.initProject(projectId).then((projectData: ProjectData) => {
             updateActivePopupType(null); // hide loader
             updateProjectData({ ...projectData, type: ProjectType.OBJECT_DETECTION }); // go to OBJECT_DETECTION
-            return;
         });
     });
 
