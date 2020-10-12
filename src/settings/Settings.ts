@@ -3,8 +3,9 @@ import {LemonOptions} from '@lemoncloud/lemon-front-lib';
 
 export class Settings {
     public static readonly PROJECT_NAME: string = "lemonade";
-    public static readonly LEMONADE_API: string = "http://localhost:8200";
-    public static readonly LEMONADE_OAUTH_ENDPOINT: string = "http://localhost:8200";
+    public static readonly LEMONADE_HOME: string = process.env.REACT_APP_LEMONADE_HOME;
+    public static readonly LEMONADE_API: string = process.env.REACT_APP_LEMONADE_API;
+    public static readonly LEMONADE_OAUTH_ENDPOINT: string = process.env.REACT_APP_LEMONADE_OAUTH_ENDPOINT;
     public static readonly LEMON_OPTIONS: LemonOptions = {
         project: Settings.PROJECT_NAME,
         oAuthEndpoint: Settings.LEMONADE_OAUTH_ENDPOINT,

@@ -1,5 +1,5 @@
 {
-  "name": "make-sense",
+  "name": "lemon-lemonade-editor",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -35,14 +35,20 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "clean": "rm -rf ./dist",
     "build": "react-scripts build",
+    "postbuild": "mkdir -p dist/$(jq .name package.json -r) && mv build/* dist/$(jq .name package.json -r) && rm -rf build",
     "test": "CI=true react-scripts test --env=./src/__test__/custom-test-env.js",
     "test:coverage": "npm test -- --coverage",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "!deploy.prod": "------------- deploy -------------",
+    "predeploy.prod": "npm run clean && npm run build",
+    "deploy.prod": "./scripts/deploy.sh"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
+  "homepage": "https://ade.lemncloud.io/editor",
   "browserslist": {
     "production": [
       ">0.2%",

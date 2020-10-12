@@ -57,17 +57,28 @@ export class LemonActions {
     }
 
     public static saveUpdatedImagesData() {
-        const originLabels = LemonSelector.getOriginLabels();
-        const imageIndex: number = LabelsSelector.getActiveImageIndex();
-        const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
+        this.isAuthenticated().then(( isAuth:boolean ) => {
+            const isDev = process.env.NODE_ENV;
 
-        if ( isEqual(originLabels, targetLabels) ){
-            return Promise.resolve();
-        }
-        
-        const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
-        const mergeItmes = [ ...labelLines, ...labelPoints, ...labelPolygons, ...labelRects ];
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
+            if (isDev !== 'development' && isAuth === false) {
+                // window.location.href = Settings.LEMONADE_HOME;
+                window.history.back();
+            }
+
+            const originLabels = LemonSelector.getOriginLabels();
+            const imageIndex: number = LabelsSelector.getActiveImageIndex();
+            const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
+
+            if (isEqual(originLabels, targetLabels)) {
+                return Promise.resolve();
+            }
+
+            const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
+            const mergeItmes = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
+            return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
+        }).catch((e) => {
+            alert(e);
+        })
     }
 
     // NOTE: Admin에서 사용할듯?
@@ -101,6 +112,10 @@ export class LemonActions {
         store.dispatch(setImagePagination(limit, page, total));
         return;
     }
+
+    public static isAuthenticated() {
+        return LemonActions.lemonCore.isAuthenticated();
+    }
     
     private static getProjectImages(id: string, page?: number){
         const param = { limit: 10, page };
@@ -126,5 +141,6 @@ export class LemonActions {
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
     }
+
 
 }

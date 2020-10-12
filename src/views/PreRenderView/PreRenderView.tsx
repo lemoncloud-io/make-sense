@@ -9,6 +9,7 @@ import { ProjectData } from '../../store/general/types';
 
 import TopNavigationBar from '../EditorView/TopNavigationBar/TopNavigationBar';
 import { ProjectType } from '../../data/enums/ProjectType';
+import { Settings } from '../../settings/Settings';
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -19,11 +20,18 @@ interface IProps {
 const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, updateProjectData}) => {
 
     useEffect(() => {
+        LemonActions.isAuthenticated().then((isAuth)=> {
+            const isDev = process.env.NODE_ENV;
+            if ( isDev !== 'development' && isAuth === false ) {
+                // window.location.href = Settings.LEMONADE_HOME;
+                window.history.back();
+            }
+            console.log('isAuth', isAuth);
+        })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
         LemonActions.initProject(projectId).then((projectData: ProjectData) => {
             updateActivePopupType(null); // hide loader
             updateProjectData({ ...projectData, type: ProjectType.OBJECT_DETECTION }); // go to OBJECT_DETECTION
-            return;
         });
     });
 
