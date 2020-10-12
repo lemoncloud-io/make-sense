@@ -62,8 +62,8 @@ export class LemonActions {
         })
     }
 
-    public static saveUpdatedImagesData() {
-        this.isAuthenticated().then((isAuth: boolean) => {
+    public static async saveUpdatedImagesData() {
+        return this.isAuthenticated().then((isAuth: boolean) => {
             const isDev = process.env.NODE_ENV;
             console.log('isDev: ', isDev);
 
@@ -76,7 +76,6 @@ export class LemonActions {
             const imageIndex: number = LabelsSelector.getActiveImageIndex();
             const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
 
-            console.log(originLabels, targetLabels);
             if (isEqual(originLabels, targetLabels)) {
                 return Promise.resolve();
             }

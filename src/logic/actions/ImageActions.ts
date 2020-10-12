@@ -20,7 +20,7 @@ export class ImageActions {
         ImageActions.getImageByIndex(currentImageIndex + 1);
     }
 
-    public static getImageByIndex(index: number): void {
+    public static getImageByIndex(index: number) {
         if (EditorModel.viewPortActionsDisabled) return;
 
         const imageCount: number = LabelsSelector.getImagesData().length;
@@ -28,11 +28,12 @@ export class ImageActions {
         if (index < 0 || index > imageCount - 1) {
             return;
         } else {
-            LemonActions.saveUpdatedImagesData();
-            ViewPortActions.setZoom(1);
-            store.dispatch(updateActiveImageIndex(index));
-            store.dispatch(updateActiveLabelId(null));
-            this.getOriginLabelByIndex(index);
+            LemonActions.saveUpdatedImagesData().then(() => {
+                ViewPortActions.setZoom(1);
+                store.dispatch(updateActiveImageIndex(index));
+                store.dispatch(updateActiveLabelId(null));
+                this.getOriginLabelByIndex(index);
+            });
         }
     }
 
