@@ -31,7 +31,7 @@ export class LemonActions {
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
             // init project
-            const { list:labels } = await LemonActions.getLabelData(projectId);
+            const { list: labels } = await LemonActions.getLabelData(projectId);
             const { name, type } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
@@ -124,7 +124,11 @@ export class LemonActions {
     public static isAuthenticated() {
         return LemonActions.lemonCore.isAuthenticated();
     }
-    
+
+    public static getCredentials() {
+        return LemonActions.lemonCore.getCredentials();
+    }
+
     private static getProjectImages(id: string, page?: number){
         const param = { limit: 10, page };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images`, param);
