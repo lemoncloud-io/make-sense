@@ -11,11 +11,17 @@ import { Settings } from '../../settings/Settings';
 import { GeneralSelector } from '../../store/selectors/GeneralSelector';
 import { ProjectData } from '../../store/general/types';
 import { isEqual } from 'lodash';
+import axios, {AxiosRequestConfig} from 'axios';
 
 
 type LemonImageUrl = {
     id: string;
     imageUrl: string;
+}
+
+interface LemonFileImage {
+    id: string;
+    file?: File;
 }
 
 export class LemonActions {
@@ -57,8 +63,9 @@ export class LemonActions {
     }
 
     public static saveUpdatedImagesData() {
-        this.isAuthenticated().then(( isAuth:boolean ) => {
+        this.isAuthenticated().then((isAuth: boolean) => {
             const isDev = process.env.NODE_ENV;
+            console.log('isDev: ', isDev);
 
             if (isDev !== 'development' && isAuth === false) {
                 // window.location.href = Settings.LEMONADE_HOME;
@@ -69,13 +76,14 @@ export class LemonActions {
             const imageIndex: number = LabelsSelector.getActiveImageIndex();
             const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
 
+            console.log(originLabels, targetLabels);
             if (isEqual(originLabels, targetLabels)) {
                 return Promise.resolve();
             }
 
             const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
-            const mergeItmes = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
-            return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations:mergeItmes });
+            const mergeItems = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
+            return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
         }).catch((e) => {
             alert(e);
         })
@@ -122,20 +130,29 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images`, param);
     }
 
-    private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]) {
+    private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {
         const customOptions = { responseType: 'blob' };
         LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
 
         return Promise.all(imageUrls.map(async ({ id, imageUrl }) => {
             const name = imageUrl.split('/') ? imageUrl.split('/').pop() : 'null';
-            return LemonActions.lemonCore.request('GET', imageUrl, '')
-                .then(response => ({ id, file: new File([response], name) }))
-                .catch(() => ({ id, file: new File([], name) }));
+
+            const config: AxiosRequestConfig = { responseType: 'blob' };
+            return axios.get(imageUrl, config)
+                .then(response => ({ id, file: new File([response.data], name) }))
+                .catch(() => ({ id, file: null, name }));
+
+            // TODO: use below
+            // return LemonActions.lemonCore.request('GET', imageUrl, '')
+            //     .then(response => ({ id, file: new File([response], name) }))
+            //     .catch(() => ({ id, file: new File([], name) }));
         }))
     }
 
-    private static setImagesToStore(files: any) {
-        return files.map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
+    private static setImagesToStore(files: LemonFileImage[]) {
+        return files
+            .filter(({ file }) => !!file)
+            .map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
     }
 
     private static resetLemonOptions() {
