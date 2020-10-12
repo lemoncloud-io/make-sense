@@ -36,7 +36,7 @@ export class LabelsSelector {
 
     public static getImageDataByIndex(index: number): ImageData {
         const imagesData: ImageData[] = LabelsSelector.getImagesData();
-        return imagesData[index];
+        return { ...imagesData[index] };
     }
 
     public static getImageDataById(id: string): ImageData {

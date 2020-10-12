@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PreRenderView.scss';
 import { AppState } from '../../store';
 import { connect } from 'react-redux';
@@ -9,7 +9,6 @@ import { ProjectData } from '../../store/general/types';
 
 import TopNavigationBar from '../EditorView/TopNavigationBar/TopNavigationBar';
 import { ProjectType } from '../../data/enums/ProjectType';
-import { Settings } from '../../settings/Settings';
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -17,28 +16,32 @@ interface IProps {
     projectId: string;
 }
 
-const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, updateProjectData}) => {
+const PreRenderView: React.FC<IProps> = ({ projectId, updateActivePopupType, updateProjectData }) => {
+    const [isFetched, setIsFetched] = useState(false);
 
     useEffect(() => {
-        LemonActions.isAuthenticated().then((isAuth)=> {
-            const isDev = process.env.NODE_ENV;
-            if ( isDev !== 'development' && isAuth === false ) {
-                // window.location.href = Settings.LEMONADE_HOME;
-                window.history.back();
-            }
-            console.log('isAuth', isAuth);
-        })
         updateActivePopupType(PopupWindowType.LOADER); // show loader
-        LemonActions.initProject(projectId).then((projectData: ProjectData) => {
-            updateActivePopupType(null); // hide loader
-            updateProjectData({ ...projectData, type: ProjectType.OBJECT_DETECTION }); // go to OBJECT_DETECTION
-        });
-    });
+        LemonActions.isAuthenticated()
+            .then((isAuth)=> {
+                const isDev = process.env.NODE_ENV;
+                console.log(`isAuth: ${isAuth}, isDev: ${isDev}`);
+                if (isDev !== 'development' && !isAuth) {
+                    window.history.back();
+                }
+            })
+            .then(() => LemonActions.getCredentials())
+            .then(() => LemonActions.initProject(projectId))
+            .then((projectData: ProjectData) => {
+                setIsFetched(true);
+                updateActivePopupType(null); // hide loader
+                updateProjectData({ ...projectData, type: ProjectType.OBJECT_DETECTION }); // go to OBJECT_DETECTION
+            });
+    }, []);
 
     return (
         <div className='PreRenderView withPopup'
              draggable={false}>
-            <TopNavigationBar/>
+            {isFetched && <TopNavigationBar/>}
         </div>
     )
 };
