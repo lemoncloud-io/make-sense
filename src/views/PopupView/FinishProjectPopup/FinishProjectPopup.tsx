@@ -62,8 +62,7 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
             resetStore();
             PopupActions.close();
         }).then(() => {
-            // TODO: navigate to ...
-            window.location.href = 'http://naver.com';
+            window.history.back();
         })
     }
 
