@@ -31,19 +31,17 @@ export class LemonActions {
     public static async initProject(projectId: string): Promise<ProjectData> {
         try {
             // init project
-            const { list: labels } = await LemonActions.getLabelData(projectId);
             const { name, type } = await LemonActions.getProjectData(projectId);
+            const { list: labels } = await LemonActions.getLabelData(projectId);
+
+            // load images and save into `labels` store
+            await this.loadProjectImages(projectId);
+            LemonActions.resetLemonOptions();
             store.dispatch(setProjectId(projectId));
             store.dispatch(updateLabelNames(labels));
             store.dispatch(updateProjectData({ name, type: null }));
 
-            // load images and save into `labels` store
-            await this.loadProjectImages(projectId);
-
-            LemonActions.resetLemonOptions();
-
             const projectData = GeneralSelector.getProjectData();
-
             return { ...projectData, type: type ? type : null };
         } catch (e) {
             alert(e);
