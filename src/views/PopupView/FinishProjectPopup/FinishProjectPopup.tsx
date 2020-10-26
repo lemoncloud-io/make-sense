@@ -17,6 +17,7 @@ import {updateProjectData} from "../../../store/general/actionCreators";
 import {LemonActions} from '../../../logic/actions/LemonActions';
 import {setProjectId} from '../../../store/lemon/actionCreators';
 import {LabelType} from '../../../data/enums/LabelType';
+import {LabelsSelector} from '../../../store/selectors/LabelsSelector';
 
 interface IProps {
     updateActiveLabelType: (labelType: LabelType) => any;
@@ -58,7 +59,8 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     };
 
     const saveLabels = () => {
-        LemonActions.saveAllUpdatedImagesData().then(() => {
+        const currentIndex = LabelsSelector.getActiveImageIndex();
+        LemonActions.saveUpdatedImagesData(currentIndex).then(() => {
             resetStore();
             PopupActions.close();
         }).then(() => {

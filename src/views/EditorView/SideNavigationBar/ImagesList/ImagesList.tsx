@@ -36,7 +36,7 @@ class ImagesList extends React.Component<IProps, IState> {
     }
 
     public componentDidMount(): void {
-        ImageActions.getOriginLabelByIndex(0);
+        ImageActions.setOriginLabelByIndex(0);
         this.updateListSize();
         window.addEventListener(EventType.RESIZE, this.updateListSize);
     }
@@ -82,7 +82,8 @@ class ImagesList extends React.Component<IProps, IState> {
         if (this.props.activeImageIndex === index) {
             return;
         }
-        ImageActions.getImageByIndex(index);
+        const prevImageIndex = this.props.activeImageIndex;
+        ImageActions.getImageByIndex(index, prevImageIndex);
     };
 
     private renderImagePreview = (index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties) => {

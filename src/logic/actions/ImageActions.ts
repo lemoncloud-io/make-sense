@@ -12,15 +12,15 @@ import { cloneDeep } from 'lodash';
 export class ImageActions {
     public static getPreviousImage(): void {
         const currentImageIndex: number = LabelsSelector.getActiveImageIndex();
-        ImageActions.getImageByIndex(currentImageIndex - 1);
+        ImageActions.getImageByIndex(currentImageIndex - 1, currentImageIndex);
     }
 
     public static getNextImage(): void {
         const currentImageIndex: number = LabelsSelector.getActiveImageIndex();
-        ImageActions.getImageByIndex(currentImageIndex + 1);
+        ImageActions.getImageByIndex(currentImageIndex + 1, currentImageIndex);
     }
 
-    public static getImageByIndex(index: number): void {
+    public static getImageByIndex(index: number, prevIndex: number): void {
         if (EditorModel.viewPortActionsDisabled) return;
 
         const imageCount: number = LabelsSelector.getImagesData().length;
@@ -28,15 +28,16 @@ export class ImageActions {
         if (index < 0 || index > imageCount - 1) {
             return;
         } else {
-            LemonActions.saveUpdatedImagesData();
+            // TODO: refactor below
+            LemonActions.saveUpdatedImagesData(prevIndex);
             ViewPortActions.setZoom(1);
             store.dispatch(updateActiveImageIndex(index));
             store.dispatch(updateActiveLabelId(null));
-            this.getOriginLabelByIndex(index);
+            this.setOriginLabelByIndex(index);
         }
     }
 
-    public static getOriginLabelByIndex(index: number, loadStatus = true): void {
+    public static setOriginLabelByIndex(index: number, loadStatus = true): void {
         const originLabels = cloneDeep(LabelsSelector.getImageDataByIndex(index));
         store.dispatch(setOriginLabels({ ...originLabels, loadStatus })); // storing origin labels..
     }
