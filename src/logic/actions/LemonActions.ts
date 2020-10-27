@@ -6,12 +6,15 @@ import { AuthService } from '@lemoncloud/lemon-front-lib';
 import { addImageData, updateActiveImageIndex, updateLabelNames } from '../../store/labels/actionCreators';
 import { updateProjectData } from '../../store/general/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import { setProjectId, setImagePagination } from '../../store/lemon/actionCreators';
+import { setProjectId } from '../../store/lemon/actionCreators';
 import { Settings } from '../../settings/Settings';
 import { GeneralSelector } from '../../store/selectors/GeneralSelector';
 import { ProjectData } from '../../store/general/types';
+import { ImageData } from '../../store/labels/types';
 import { isEqual } from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {map} from 'rxjs/operators';
 
 
 type LemonImageUrl = {
@@ -85,6 +88,13 @@ export class LemonActions {
         })
     }
 
+    public static getTaskByImageData$(image: ImageData) {
+        const { id } = image;
+        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`)).pipe(
+            map(task => ({ task, origin: image }))
+        );
+    }
+
     private static getProjectData(id: string) {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
     }
@@ -94,7 +104,7 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
     }
 
-    public static async loadProjectImages(id:string, pages?: number){
+    public static async loadProjectImages(id: string, pages?: number){
         pages = pages ? pages : 0;
         const { list } = await LemonActions.getProjectImages(id, pages);
         const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
@@ -109,6 +119,10 @@ export class LemonActions {
 
     public static isAuthenticated() {
         return LemonActions.lemonCore.isAuthenticated();
+    }
+
+    public static isAuthenticated$() {
+        return fromPromise(LemonActions.lemonCore.isAuthenticated());
     }
 
     public static getCredentials() {
