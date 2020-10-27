@@ -6,12 +6,15 @@ import { AuthService } from '@lemoncloud/lemon-front-lib';
 import { addImageData, updateActiveImageIndex, updateLabelNames } from '../../store/labels/actionCreators';
 import { updateProjectData } from '../../store/general/actionCreators';
 import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import { setProjectId, setImagePagination } from '../../store/lemon/actionCreators';
+import { setProjectId } from '../../store/lemon/actionCreators';
 import { Settings } from '../../settings/Settings';
 import { GeneralSelector } from '../../store/selectors/GeneralSelector';
 import { ProjectData } from '../../store/general/types';
+import { ImageData } from '../../store/labels/types';
 import { isEqual } from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
+import {fromPromise} from 'rxjs/internal-compatibility';
+import {map} from 'rxjs/operators';
 
 
 type LemonImageUrl = {
@@ -59,31 +62,18 @@ export class LemonActions {
             }, 300);
         })
     }
+    public static saveUpdatedImagesData(index: number) {
+        const originLabels = LemonSelector.getOriginLabels();
+        const targetLabels = LabelsSelector.getImageDataByIndex(index);
 
-    public static async saveUpdatedImagesData() {
-        return this.isAuthenticated().then((isAuth: boolean) => {
-            const isDev = process.env.NODE_ENV;
-            console.log('isDev: ', isDev);
+        console.log(originLabels, targetLabels);
+        if (isEqual(originLabels, targetLabels)) {
+            return Promise.resolve();
+        }
 
-            if (isDev !== 'development' && isAuth === false) {
-                // window.location.href = Settings.LEMONADE_HOME;
-                window.history.back();
-            }
-
-            const originLabels = LemonSelector.getOriginLabels();
-            const imageIndex: number = LabelsSelector.getActiveImageIndex();
-            const targetLabels = LabelsSelector.getImageDataByIndex(imageIndex);
-
-            if (isEqual(originLabels, targetLabels)) {
-                return Promise.resolve();
-            }
-
-            const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
-            const mergeItems = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
-            return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
-        }).catch((e) => {
-            alert(e);
-        })
+        const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
+        const mergeItems = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
     }
 
     // NOTE: Admin에서 사용할듯?
@@ -97,6 +87,13 @@ export class LemonActions {
         })
     }
 
+    public static getTaskByImageData$(image: ImageData) {
+        const { id } = image;
+        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`)).pipe(
+            map(task => ({ task, origin: image }))
+        );
+    }
+
     private static getProjectData(id: string) {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
     }
@@ -106,15 +103,16 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
     }
 
-    public static async loadProjectImages(id:string, pages?: number){
+    public static async loadProjectImages(id: string, pages?: number){
         pages = pages ? pages : 0;
-        const { limit, list: imageUrls, page, total } = await LemonActions.getProjectImages(id, pages);
+        const { list } = await LemonActions.getProjectImages(id, pages);
+        const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.setImagesToStore(imageFiles);
 
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
         store.dispatch(addImageData(images));
-        store.dispatch(setImagePagination(limit, page, total));
+        // store.dispatch(setImagePagination(limit, page, total));
         return;
     }
 
@@ -122,13 +120,17 @@ export class LemonActions {
         return LemonActions.lemonCore.isAuthenticated();
     }
 
+    public static isAuthenticated$() {
+        return fromPromise(LemonActions.lemonCore.isAuthenticated());
+    }
+
     public static getCredentials() {
         return LemonActions.lemonCore.getCredentials();
     }
 
-    private static getProjectImages(id: string, page?: number){
-        const param = { limit: 10, page };
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images`, param);
+    private static getProjectImages(projectId: string, page?: number){
+        const param = { limit: 10, page, projectId };
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {
