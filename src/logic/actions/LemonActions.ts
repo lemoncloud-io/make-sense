@@ -62,7 +62,6 @@ export class LemonActions {
             }, 300);
         })
     }
-
     public static saveUpdatedImagesData(index: number) {
         const originLabels = LemonSelector.getOriginLabels();
         const targetLabels = LabelsSelector.getImageDataByIndex(index);
