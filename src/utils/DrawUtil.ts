@@ -6,6 +6,9 @@ import {UnitUtil} from "./UnitUtil";
 export class DrawUtil {
 
     public static clearCanvas(canvas:HTMLCanvasElement): void {
+        if (!canvas) {
+            return;
+        }
         let ctx:CanvasRenderingContext2D = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }

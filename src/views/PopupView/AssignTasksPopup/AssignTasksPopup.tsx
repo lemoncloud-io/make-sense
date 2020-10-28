@@ -69,10 +69,10 @@ const AssignTasksPopup: React.FC<IProps> = (
         setModelIsLoadingStatus(true);
         const limit = extractSelectedLimitOption();
         setTaskLimitAndPage(limit);
-        LemonActions.initTaskData(projectId, limit).then(({ projectId, category }) => {
+        LemonActions.initTaskData(projectId, limit).then(({ projectId, name, category }) => {
             updateActivePopupType(null);
             // TODO: set type as category
-            updateProjectData({ name: projectId, type: ProjectType.OBJECT_DETECTION });
+            updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
         });
     };
 

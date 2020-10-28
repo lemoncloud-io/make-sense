@@ -13,8 +13,9 @@ import {SizeItUpView} from "./views/SizeItUpView/SizeItUpView";
 import {PlatformModel} from "./staticModels/PlatformModel";
 import classNames from "classnames";
 
-import { RouteComponentProps } from 'react-router-dom';
-import PreRenderView  from './views/PreRenderView/PreRenderView';
+import {RouteComponentProps} from 'react-router-dom';
+import PreRenderView from './views/PreRenderView/PreRenderView';
+import {addImageData} from './store/labels/actionCreators';
 
 const queryString = require('query-string');
 
@@ -23,24 +24,35 @@ interface IProps {
     windowSize: ISize;
     ObjectDetectorLoaded: boolean;
     PoseDetectionLoaded: boolean;
+    imagesData: any;
     routeProps: RouteComponentProps;
 }
 
-const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded, routeProps}) => {
-    const getProjectIdFromQuery = () => {
+const App: React.FC<IProps> = (
+    {
+        projectType,
+        windowSize,
+        ObjectDetectorLoaded,
+        PoseDetectionLoaded,
+        imagesData,
+        routeProps
+    }) => {
+
+    const getQueryParams = () => {
         const { location } = routeProps;
-        const queryParams = queryString.parse(location.search);
-        return queryParams.projectId || '';
+        return queryString.parse(location.search);
     }
 
     const selectRoute = () => {
-        const projectId = getProjectIdFromQuery();
+        const { projectId, taskId } = getQueryParams();
         if (projectId) {
             if (!projectType) {
-                return <PreRenderView projectId={projectId}/>;
-            } else {
+                return <PreRenderView projectId={projectId} taskId={taskId}/>;
+            } else if (imagesData && imagesData.length > 0) {
                 return <EditorView/>;
             }
+        } else {
+            return <MainView/>;
         }
 
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
@@ -69,6 +81,7 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
 const mapStateToProps = (state: AppState, routeProps: RouteComponentProps) => ({
     projectType: state.general.projectData.type,
     windowSize: state.general.windowSize,
+    imagesData: state.labels.imagesData,
     ObjectDetectorLoaded: state.ai.isObjectDetectorLoaded,
     PoseDetectionLoaded: state.ai.isPoseDetectorLoaded,
     routeProps

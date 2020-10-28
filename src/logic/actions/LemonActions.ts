@@ -1,15 +1,15 @@
 import {store} from "../../index";
 import {LabelsSelector} from '../../store/selectors/LabelsSelector';
-import {ImageData, LabelName} from '../../store/labels/types';
+import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from '../../store/labels/types';
 import {AuthService} from '@lemoncloud/lemon-front-lib';
 import {
     addImageData,
     updateActiveImageIndex,
     updateActiveLabelType,
     updateLabelNames,
-    updateImageData,
+    updateImageData, updateImageDataById,
 } from '../../store/labels/actionCreators';
-import {updateProjectData} from '../../store/general/actionCreators';
+import {updateCustomCursorStyle, updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
 import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
@@ -19,6 +19,10 @@ import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {map} from 'rxjs/operators';
 import {ImageActions} from './ImageActions';
+import uuidv1 from 'uuid/v1';
+import {LabelStatus} from '../../data/enums/LabelStatus';
+import {GeneralSelector} from '../../store/selectors/GeneralSelector';
+import {CustomCursorStyle} from '../../data/enums/CustomCursorStyle';
 
 type LemonImageUrl = {
     id: string;
@@ -34,24 +38,65 @@ export class LemonActions {
 
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
 
+    public static getLabelsFromAnnotations(annotations: any[]): { labelLines: LabelLine[], labelPoints: LabelPoint[], labelRects: LabelRect[], labelPolygons: LabelPolygon[] } {
+        const lines = annotations.filter(annotation => !!annotation.line);
+        const points = annotations.filter(annotation => !!annotation.point);
+        const vertices = annotations.filter(annotation => !!annotation.vertices);
+        const rects = annotations.filter(annotation => !!annotation.rect);
+
+        // set label info from server
+        const labelLines = lines.map(({ label, line }) => ({ id: uuidv1(), labelId: label.id, line }));
+        const labelPoints = points.map(({ label, point }) => ({ id: uuidv1(), labelId: label.id, point, isCreatedByAI: false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
+        const labelRects = rects.map(({ label, rect }) => ({ id: uuidv1(), labelId: label.id, rect, isCreatedByAI:false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
+        const labelPolygons = vertices.map(({ label, vertices }) => ({ id: uuidv1(), labelId: label.id, vertices }));
+        return { labelLines, labelPoints, labelRects, labelPolygons };
+    }
+
     public static async setupProject(projectId: string) {
         try {
             // TODO: set category for tagging or labeling
             const { name, category } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectInfo(projectId, category));
             store.dispatch(updateProjectData({ name, type: null }));
+
+            const { list: labels } = await LemonActions.getLabelData(projectId);
+            store.dispatch(updateLabelNames(labels));
         } catch (e) {
             alert(`${e}`);
             window.history.back();
         }
     }
 
+    public static async initTaskByTaskId(taskId: string) {
+        try {
+            const { image: rawImage, projectId, annotations } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
+            const imageUrls = [rawImage].map(({ id, imageUrl }) => ({ id: taskId, imageUrl }));
+            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+            const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
+            store.dispatch(updateImageData(images));
+
+            store.dispatch(setTaskTotalPage(0));
+            store.dispatch(updateActiveImageIndex(0)); // select initial image!
+            LemonActions.resetLemonOptions();
+
+            // TODO: EditorContainer에서 한번 더 체크해서 필요없음. 개선해야 함
+            // const labels = LemonActions.getLabelsFromAnnotations(annotations);
+            // const origin = LabelsSelector.getImageDataById(taskId);
+            // store.dispatch(updateImageDataById(taskId, { ...origin, ...labels }));
+
+            return {
+                projectId: projectId,
+                name: GeneralSelector.getProjectName(),
+                category: LemonSelector.getProjectCategory()
+            };
+        } catch (e) {
+            alert(`${e}`);
+            return { projectId: null, name: null, category: null };
+        }
+    }
+
     public static async initTaskData(projectId: string, limit: number) {
         try {
-            // set labels
-            const { list: labels } = await LemonActions.getLabelData(projectId);
-            store.dispatch(updateLabelNames(labels));
-
             // load images
             const page = 0;
             const { list: taskList, total } = await LemonActions.fetchTasks(projectId, limit, page);
@@ -60,7 +105,7 @@ export class LemonActions {
             const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
-            store.dispatch(addImageData(images));
+            store.dispatch(updateImageData(images));
 
             // set total page
             const totalPage = Math.ceil(Math.max(total, 1) / Math.max(limit, 1));
@@ -72,11 +117,12 @@ export class LemonActions {
 
             return {
                 projectId: LemonSelector.getProjectId(),
+                name: GeneralSelector.getProjectName(),
                 category: LemonSelector.getProjectCategory()
             };
         } catch (e) {
             alert(`${e}`);
-            return { projectId: null, category: null };
+            return { projectId: null, name: null, category: null };
         }
     }
 
@@ -95,6 +141,9 @@ export class LemonActions {
     }
 
     public static async pageChanged(page: number) {
+        ImageActions.setOriginLabelByIndex(0);
+        store.dispatch(updateActiveImageIndex(0)); // select initial image!
+        
         const projectId = LemonSelector.getProjectId();
         const limit = LemonSelector.getTaskLimit();
         const { list, total } = await LemonActions.fetchTasks(projectId, limit, page);
@@ -105,7 +154,6 @@ export class LemonActions {
         const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
         store.dispatch(updateImageData(images));
         store.dispatch(setTaskCurrentPage(page));
-        ImageActions.setOriginLabelByIndex(0);
         return;
     }
 
@@ -144,25 +192,8 @@ export class LemonActions {
         return LemonActions.lemonCore.getCredentials();
     }
 
-    private static async getTaskImages(projectId: string, limit: number, page: number = 0) {
-        try {
-            const { list: taskList } = await LemonActions.fetchTasks(projectId, limit, page);
-            const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
-            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-            return LemonActions.getImageDataFromLemonFiles(imageFiles);
-        } catch (e) {
-            alert(`Error: ${e}`);
-            return [];
-        }
-    }
-
     public static fetchTasks(projectId: string, limit: number = 5, page: number = 0) {
         const param = { limit, projectId, page };
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
-    }
-
-    private static getProjectImages(projectId: string, page?: number) {
-        const param = { limit: 10, page, projectId };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }
 
@@ -194,6 +225,5 @@ export class LemonActions {
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
     }
-
 
 }
