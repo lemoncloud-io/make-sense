@@ -3,6 +3,7 @@ import { Action } from '../Actions';
 
 const initialState: LemonState = {
     projectId: null,
+    category: null,
     limit: null,
     total: null,
     page: null,
@@ -14,10 +15,11 @@ export function lemonReducer(
     action: LemonActionTypes
 ): LemonState {
     switch (action.type) {
-        case Action.SET_PROJECT_ID: {
+        case Action.SET_PROJECT_INFO: {
             return {
                 ...state,
-                projectId: action.payload.projectId
+                projectId: action.payload.projectId,
+                category: action.payload.category,
             }
         }
         case Action.SET_IMAGE_PAGINATION: {

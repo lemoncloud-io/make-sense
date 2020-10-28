@@ -1,21 +1,17 @@
-import { store } from "../../index";
-import { LabelsSelector } from '../../store/selectors/LabelsSelector';
-import { LemonSelector } from '../../store/selectors/LemonSelector';
-import { LabelName } from '../../store/labels/types';
-import { AuthService } from '@lemoncloud/lemon-front-lib';
-import { addImageData, updateActiveImageIndex, updateLabelNames } from '../../store/labels/actionCreators';
-import { updateProjectData } from '../../store/general/actionCreators';
-import { ImageDataUtil } from '../../utils/ImageDataUtil';
-import { setProjectId } from '../../store/lemon/actionCreators';
-import { Settings } from '../../settings/Settings';
-import { GeneralSelector } from '../../store/selectors/GeneralSelector';
-import { ProjectData } from '../../store/general/types';
-import { ImageData } from '../../store/labels/types';
-import { isEqual } from 'lodash';
+import {store} from "../../index";
+import {LabelsSelector} from '../../store/selectors/LabelsSelector';
+import {ImageData, LabelName} from '../../store/labels/types';
+import {AuthService} from '@lemoncloud/lemon-front-lib';
+import {addImageData, updateActiveImageIndex, updateLabelNames} from '../../store/labels/actionCreators';
+import {updateProjectData} from '../../store/general/actionCreators';
+import {ImageDataUtil} from '../../utils/ImageDataUtil';
+import {setProjectInfo} from '../../store/lemon/actionCreators';
+import {Settings} from '../../settings/Settings';
+import {LemonSelector} from '../../store/selectors/LemonSelector';
+import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {map} from 'rxjs/operators';
-
 
 type LemonImageUrl = {
     id: string;
@@ -31,37 +27,40 @@ export class LemonActions {
 
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
 
-    public static async initProject(projectId: string): Promise<ProjectData> {
+    public static async setupProject(projectId: string) {
         try {
-            // init project
-            const { name, type } = await LemonActions.getProjectData(projectId);
-            const { list: labels } = await LemonActions.getLabelData(projectId);
-
-            // load images and save into `labels` store
-            await this.loadProjectImages(projectId);
-            LemonActions.resetLemonOptions();
-            store.dispatch(setProjectId(projectId));
-            store.dispatch(updateLabelNames(labels));
+            // TODO: set category for tagging or labeling
+            const { name, category } = await LemonActions.getProjectData(projectId);
+            store.dispatch(setProjectInfo(projectId, category));
             store.dispatch(updateProjectData({ name, type: null }));
-
-            const projectData = GeneralSelector.getProjectData();
-            return { ...projectData, type: type ? type : null };
         } catch (e) {
-            alert(e);
-            return GeneralSelector.getProjectData();
+            alert(`Error: ${e}`);
+            window.location.reload();
         }
     }
 
-    // NOTE: 안써도 될듯?
-    public static saveAllUpdatedImagesData() {
-        const images = LabelsSelector.getImagesData();
-        return new Promise(resolve => {
-            setTimeout(() => {
-                console.log('TODO: request update all images', images);
-                resolve(true);
-            }, 300);
-        })
+    public static async getAllTaskData(projectId: string, limit: number) {
+        try {
+            // set labels
+            const { list: labels } = await LemonActions.getLabelData(projectId);
+            store.dispatch(updateLabelNames(labels));
+
+            // load images
+            const images = await LemonActions.getTaskImages(projectId, limit);
+            store.dispatch(addImageData(images));
+            store.dispatch(updateActiveImageIndex(0)); // select initial image!
+            LemonActions.resetLemonOptions();
+
+            return {
+                projectId: LemonSelector.getProjectId(),
+                category: LemonSelector.getProjectCategory()
+            };
+        } catch (e) {
+            alert(`Error: ${e}`);
+            return { projectId: null, category: null };
+        }
     }
+
     public static saveUpdatedImagesData(index: number) {
         const originLabels = LemonSelector.getOriginLabels();
         const targetLabels = LabelsSelector.getImageDataByIndex(index);
@@ -76,7 +75,7 @@ export class LemonActions {
         return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
     }
 
-    // NOTE: Admin에서 사용할듯?
+    // TODO: todo feature to modify label on editor
     public static saveUpdatedLabels(updatedLabels: LabelName[]): Promise<LabelName[]> {
         const projectId = LemonSelector.getProjectId();
         return new Promise(resolve => {
@@ -94,16 +93,16 @@ export class LemonActions {
         );
     }
 
-    private static getProjectData(id: string) {
+    public static getProjectData(id: string) {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
     }
 
-    private static getLabelData(projectId: string) {
+    public static getLabelData(projectId: string) {
         const param = { projectId };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
     }
 
-    public static async loadProjectImages(id: string, pages?: number){
+    public static async loadProjectImages(id: string, pages?: number) {
         pages = pages ? pages : 0;
         const { list } = await LemonActions.getProjectImages(id, pages);
         const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
@@ -112,7 +111,6 @@ export class LemonActions {
 
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
         store.dispatch(addImageData(images));
-        // store.dispatch(setImagePagination(limit, page, total));
         return;
     }
 
@@ -120,15 +118,28 @@ export class LemonActions {
         return LemonActions.lemonCore.isAuthenticated();
     }
 
-    public static isAuthenticated$() {
-        return fromPromise(LemonActions.lemonCore.isAuthenticated());
-    }
-
     public static getCredentials() {
         return LemonActions.lemonCore.getCredentials();
     }
 
-    private static getProjectImages(projectId: string, page?: number){
+    private static async getTaskImages(projectId: string, limit: number) {
+        try {
+            const { list: taskList } = await LemonActions.fetchTasks(projectId, limit);
+            const imageUrls = taskList.map(task => ({id: task.id, imageUrl: task.image.imageUrl}));
+            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+            return LemonActions.setImagesToStore(imageFiles);
+        } catch (e) {
+            alert(`Error: ${e}`);
+            return [];
+        }
+    }
+
+    private static fetchTasks(projectId: string, limit: number = 5) {
+        const param = { limit, projectId };
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
+    }
+
+    private static getProjectImages(projectId: string, page?: number) {
         const param = { limit: 10, page, projectId };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }

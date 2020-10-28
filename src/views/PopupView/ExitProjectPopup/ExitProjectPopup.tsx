@@ -14,7 +14,7 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
-import {setProjectId} from '../../../store/lemon/actionCreators';
+import {setProjectInfo} from '../../../store/lemon/actionCreators';
 import {LabelType} from '../../../data/enums/LabelType';
 
 interface IProps {
@@ -25,7 +25,7 @@ interface IProps {
     updateImageData: (imageData: ImageData[]) => any;
     updateFirstLabelCreatedFlag: (firstLabelCreatedFlag: boolean) => any;
     updateProjectData: (projectData: ProjectData) => any;
-    setProjectId: (id: string) => any;
+    setProjectInfo: (id: string, category: string) => any;
 }
 
 const ExitProjectPopup: React.FC<IProps> = (props) => {
@@ -37,7 +37,7 @@ const ExitProjectPopup: React.FC<IProps> = (props) => {
         updateImageData,
         updateFirstLabelCreatedFlag,
         updateProjectData,
-        setProjectId,
+        setProjectInfo,
     } = props;
 
     const renderContent = () => {
@@ -58,7 +58,7 @@ const ExitProjectPopup: React.FC<IProps> = (props) => {
         updateActiveImageIndex(null);
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
-        setProjectId(null);
+        setProjectInfo(null, null);
         PopupActions.close();
     };
 
@@ -85,7 +85,7 @@ const mapDispatchToProps = {
     updateActiveImageIndex,
     updateImageData,
     updateFirstLabelCreatedFlag,
-    setProjectId,
+    setProjectInfo,
 };
 
 const mapStateToProps = (state: AppState) => ({});

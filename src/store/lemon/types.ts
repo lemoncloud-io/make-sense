@@ -3,16 +3,18 @@ import { ImageData } from '../labels/types';
 
 export type LemonState = {
     projectId: string;
+    category: string;
     limit: number;
     total: number;
     page: number;
     originLabels: ImageData;
 }
 
-interface SetProjectId {
-    type: typeof Action.SET_PROJECT_ID;
+interface SetProjectInfo {
+    type: typeof Action.SET_PROJECT_INFO;
     payload: {
-        projectId: string
+        projectId: string,
+        category: string,
     }
 }
 
@@ -39,7 +41,7 @@ interface SetOriginLabels {
     }
 }
 
-export type LemonActionTypes = SetProjectId
+export type LemonActionTypes = SetProjectInfo
     | SetImagePagination
     | SetCurrentPage
     | SetOriginLabels;

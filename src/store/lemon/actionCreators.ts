@@ -3,11 +3,12 @@ import { LemonActionTypes } from './types';
 import { ImageData } from '../labels/types';
 
 
-export function setProjectId(projectId: string): LemonActionTypes {
+export function setProjectInfo(projectId: string, category: string = ''): LemonActionTypes {
     return {
-        type: Action.SET_PROJECT_ID,
+        type: Action.SET_PROJECT_INFO,
         payload: {
             projectId,
+            category,
         }
     }
 }

@@ -1,11 +1,14 @@
 import { store } from '../..';
 import { ImageData } from '../labels/types';
 
-
 export class LemonSelector {
 
     public static getProjectId(): string {
         return store.getState().lemon.projectId;
+    }
+
+    public static getProjectCategory(): string {
+        return store.getState().lemon.category;
     }
 
     public static getCurrentPage(): number {

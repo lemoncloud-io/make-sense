@@ -15,6 +15,7 @@ import ImportLabelPopup from "./ImportLabelPopup/ImportLabelPopup";
 import ExportLabelPopup from "./ExportLabelsPopup/ExportLabelPopup";
 import ChooseLabelTypePopup from './ChooseLabelTypePopup/ChooseLabelTypePopup';
 import FinishProjectPopup from './FinishProjectPopup/FinishProjectPopup';
+import AssignTasksPopup from './AssignTasksPopup/AssignTasksPopup';
 
 interface IProps {
     activePopupType: PopupWindowType;
@@ -57,6 +58,8 @@ const PopupView: React.FC<IProps> = ({activePopupType}) => {
                     color={CSSHelper.getLeadingColor()}
                     loading={true}
                 />;
+            case PopupWindowType.ASSIGN_TASKS_POPUP:
+                return <AssignTasksPopup/>;
             default:
                 return null;
         }
