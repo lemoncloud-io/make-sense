@@ -6,17 +6,19 @@ import {
     addImageData,
     updateActiveImageIndex,
     updateActiveLabelType,
-    updateLabelNames
+    updateLabelNames,
+    updateImageData,
 } from '../../store/labels/actionCreators';
 import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import {setProjectInfo} from '../../store/lemon/actionCreators';
+import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {map} from 'rxjs/operators';
+import {ImageActions} from './ImageActions';
 
 type LemonImageUrl = {
     id: string;
@@ -44,15 +46,27 @@ export class LemonActions {
         }
     }
 
-    public static async getAllTaskData(projectId: string, limit: number) {
+    public static async initTaskData(projectId: string, limit: number) {
         try {
             // set labels
             const { list: labels } = await LemonActions.getLabelData(projectId);
             store.dispatch(updateLabelNames(labels));
 
             // load images
-            const images = await LemonActions.getTaskImages(projectId, limit);
+            const page = 0;
+            const { list: taskList, total } = await LemonActions.fetchTasks(projectId, limit, page);
+
+            // set images
+            const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
+            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+            const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
             store.dispatch(addImageData(images));
+
+            // set total page
+            const totalPage = Math.ceil(Math.max(total, 1) / Math.max(limit, 1));
+            store.dispatch(setTaskTotalPage(totalPage));
+
+            // set active image index
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
             LemonActions.resetLemonOptions();
 
@@ -78,6 +92,21 @@ export class LemonActions {
         const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
         const mergeItems = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
         return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
+    }
+
+    public static async pageChanged(page: number) {
+        const projectId = LemonSelector.getProjectId();
+        const limit = LemonSelector.getTaskLimit();
+        const { list, total } = await LemonActions.fetchTasks(projectId, limit, page);
+
+        // set images
+        const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
+        const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+        const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
+        store.dispatch(updateImageData(images));
+        store.dispatch(setTaskCurrentPage(page));
+        ImageActions.setOriginLabelByIndex(0);
+        return;
     }
 
     // TODO: todo feature to modify label on editor
@@ -107,18 +136,6 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
     }
 
-    public static async loadProjectImages(id: string, pages?: number) {
-        pages = pages ? pages : 0;
-        const { list } = await LemonActions.getProjectImages(id, pages);
-        const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
-        const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-        const images = LemonActions.setImagesToStore(imageFiles);
-
-        store.dispatch(updateActiveImageIndex(0)); // select initial image!
-        store.dispatch(addImageData(images));
-        return;
-    }
-
     public static isAuthenticated() {
         return LemonActions.lemonCore.isAuthenticated();
     }
@@ -127,20 +144,20 @@ export class LemonActions {
         return LemonActions.lemonCore.getCredentials();
     }
 
-    private static async getTaskImages(projectId: string, limit: number) {
+    private static async getTaskImages(projectId: string, limit: number, page: number = 0) {
         try {
-            const { list: taskList } = await LemonActions.fetchTasks(projectId, limit);
-            const imageUrls = taskList.map(task => ({id: task.id, imageUrl: task.image.imageUrl}));
+            const { list: taskList } = await LemonActions.fetchTasks(projectId, limit, page);
+            const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-            return LemonActions.setImagesToStore(imageFiles);
+            return LemonActions.getImageDataFromLemonFiles(imageFiles);
         } catch (e) {
             alert(`Error: ${e}`);
             return [];
         }
     }
 
-    private static fetchTasks(projectId: string, limit: number = 5) {
-        const param = { limit, projectId };
+    public static fetchTasks(projectId: string, limit: number = 5, page: number = 0) {
+        const param = { limit, projectId, page };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }
 
@@ -150,8 +167,8 @@ export class LemonActions {
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {
-        const customOptions = { responseType: 'blob' };
-        LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
+        // const customOptions = { responseType: 'blob' };
+        // LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
 
         return Promise.all(imageUrls.map(async ({ id, imageUrl }) => {
             const name = imageUrl.split('/') ? imageUrl.split('/').pop() : 'null';
@@ -168,7 +185,7 @@ export class LemonActions {
         }))
     }
 
-    private static setImagesToStore(files: LemonFileImage[]) {
+    private static getImageDataFromLemonFiles(files: LemonFileImage[]): ImageData[] {
         return files
             .filter(({ file }) => !!file)
             .map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));

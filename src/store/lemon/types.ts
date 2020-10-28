@@ -5,8 +5,8 @@ export type LemonState = {
     projectId: string;
     category: string;
     limit: number;
-    total: number;
     page: number;
+    totalPage: number;
     originLabels: ImageData;
 }
 
@@ -18,19 +18,24 @@ interface SetProjectInfo {
     }
 }
 
-interface SetImagePagination {
-    type: typeof Action.SET_IMAGE_PAGINATION;
+interface SetTaskCurrentPage {
+    type: typeof Action.SET_TASK_CURRENT_PAGE;
     payload: {
-        limit: number,
-        total: number,
         page: number
     }
 }
 
-interface SetCurrentPage {
-    type: typeof Action.SET_CURRENT_PAGE;
+interface SetTaskTotalPage {
+    type: typeof Action.SET_TASK_TOTAL_PAGE;
     payload: {
-        page: number
+        totalPage: number
+    }
+}
+
+interface SetTaskLimit {
+    type: typeof Action.SET_TASK_LIMIT;
+    payload: {
+        limit: number
     }
 }
 
@@ -42,6 +47,7 @@ interface SetOriginLabels {
 }
 
 export type LemonActionTypes = SetProjectInfo
-    | SetImagePagination
-    | SetCurrentPage
-    | SetOriginLabels;
+    | SetTaskCurrentPage
+    | SetOriginLabels
+    | SetTaskTotalPage
+    | SetTaskLimit;

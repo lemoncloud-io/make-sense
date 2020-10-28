@@ -22,6 +22,7 @@ import {from} from 'rxjs';
 import {LemonActions} from '../../../logic/actions/LemonActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../../data/enums/LabelStatus';
+import PaginationBar from '../PaginationBar/PaginationBar';
 
 interface IProps {
     windowSize: ISize;
@@ -101,7 +102,10 @@ const EditorContainer: React.FC<IProps> = (
     };
 
     const leftSideBarRender = () => {
-        return <ImagesList/>
+        return <>
+            <ImagesList/>
+            <PaginationBar/>
+        </>
     };
 
     const rightSideBarButtonOnClick = () => {
@@ -179,7 +183,7 @@ const mapStateToProps = (state: AppState) => ({
     activeImageIndex: state.labels.activeImageIndex,
     imagesData: state.labels.imagesData,
     activeContext: state.general.activeContext,
-    projectType: state.general.projectData.type
+    projectType: state.general.projectData.type,
 });
 
 export default connect(
