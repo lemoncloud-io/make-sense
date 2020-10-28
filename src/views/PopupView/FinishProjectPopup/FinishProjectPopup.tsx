@@ -65,6 +65,9 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
             PopupActions.close();
         }).then(() => {
             window.history.back();
+        }).catch(e => {
+            console.log(e);
+            alert(`Submit Error: ${e}`)
         })
     }
 

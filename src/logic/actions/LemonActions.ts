@@ -2,7 +2,12 @@ import {store} from "../../index";
 import {LabelsSelector} from '../../store/selectors/LabelsSelector';
 import {ImageData, LabelName} from '../../store/labels/types';
 import {AuthService} from '@lemoncloud/lemon-front-lib';
-import {addImageData, updateActiveImageIndex, updateLabelNames} from '../../store/labels/actionCreators';
+import {
+    addImageData,
+    updateActiveImageIndex,
+    updateActiveLabelType,
+    updateLabelNames
+} from '../../store/labels/actionCreators';
 import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
 import {setProjectInfo} from '../../store/lemon/actionCreators';
@@ -34,8 +39,8 @@ export class LemonActions {
             store.dispatch(setProjectInfo(projectId, category));
             store.dispatch(updateProjectData({ name, type: null }));
         } catch (e) {
-            alert(`Error: ${e}`);
-            window.location.reload();
+            alert(`${e}`);
+            window.history.back();
         }
     }
 
@@ -56,7 +61,7 @@ export class LemonActions {
                 category: LemonSelector.getProjectCategory()
             };
         } catch (e) {
-            alert(`Error: ${e}`);
+            alert(`${e}`);
             return { projectId: null, category: null };
         }
     }

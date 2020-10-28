@@ -29,7 +29,10 @@ export class ImageActions {
             return;
         } else {
             // TODO: refactor below
-            LemonActions.saveUpdatedImagesData(prevIndex);
+            LemonActions.saveUpdatedImagesData(prevIndex).catch(e => {
+                console.log(e);
+                alert(`Submit Error: ${e}`)
+            });
             ViewPortActions.setZoom(1);
             store.dispatch(updateActiveImageIndex(index));
             store.dispatch(updateActiveLabelId(null));
