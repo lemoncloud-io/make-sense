@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom'
 export const store = configureStore();
 AppInitializer.inti();
 
-const BASE_HREF = '/editor';
+const BASE_HREF = process.env.REACT_APP_BASE_REF;
 
 ReactDOM.render(
     (<Provider store={store}>

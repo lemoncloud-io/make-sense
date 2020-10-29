@@ -1,6 +1,6 @@
 {
   "name": "lemon-lemonade-editor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@lemoncloud/lemon-front-lib": "^1.1.7",
@@ -15,6 +15,7 @@
     "@types/react-router-dom": "^5.1.5",
     "axios": "^0.20.0",
     "classnames": "^2.2.6",
+    "env-cmd": "^10.1.0",
     "file-saver": "^2.0.2",
     "jszip": "^3.2.2",
     "lodash": "^4.17.11",
@@ -37,19 +38,23 @@
   "scripts": {
     "start": "react-scripts start",
     "clean": "rm -rf ./dist",
-    "build": "react-scripts build",
-    "postbuild": "mkdir -p dist/$(jq .name package.json -r) && mv build/* dist/$(jq .name package.json -r) && rm -rf build",
+    "build:stage": "env-cmd -f .env.stage react-scripts build",
+    "build:prod": "react-scripts build",
+    "postbuild:stage": "mkdir -p dist/$(jq .name package.json -r) && mv build/* dist/$(jq .name package.json -r) && rm -rf build",
+    "postbuild:prod": "mkdir -p dist/$(jq .name package.json -r) && mv build/* dist/$(jq .name package.json -r) && rm -rf build",
     "test": "CI=true react-scripts test --env=./src/__test__/custom-test-env.js",
     "test:coverage": "npm test -- --coverage",
     "eject": "react-scripts eject",
-    "!deploy.prod": "------------- deploy -------------",
-    "predeploy.prod": "npm run clean && npm run build",
-    "deploy.prod": "./scripts/deploy.sh"
+    "!deploy.stage": "------------- deploy to stage -------------",
+    "predeploy.stage": "npm run clean && npm run build:stage",
+    "deploy.stage": "./scripts/deploy.sh stage",
+    "!deploy.prod": "------------- deploy to prod -------------",
+    "predeploy.prod": "npm run clean && npm run build:prod",
+    "deploy.prod": "./scripts/deploy.sh prod"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
-  "homepage": "https://ade.lemncloud.io/editor",
   "browserslist": {
     "production": [
       ">0.2%",
