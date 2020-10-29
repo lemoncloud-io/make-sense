@@ -133,8 +133,13 @@ export class LemonActions {
         }
 
         const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
-        const mergeItems = [...labelLines, ...labelPoints, ...labelPolygons, ...labelRects];
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations: mergeItems });
+        // TODO: refactor below
+        const filteredLabelLines = labelLines.filter(line => !!line.labelId);
+        const filteredLabelPoints = labelPoints.filter(point => !!point.labelId);
+        const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
+        const filteredLabelRects = labelRects.filter(rect => !!rect.labelId);
+        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects];
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations });
     }
 
     public static async pageChanged(page: number) {
