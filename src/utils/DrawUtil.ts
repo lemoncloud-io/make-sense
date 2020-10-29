@@ -126,8 +126,6 @@ export class DrawUtil {
         return "rgb(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + ")";
     }
 
-
-
     public static hexToRGB(hex: string, alpha: number): string {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
