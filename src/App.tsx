@@ -15,7 +15,6 @@ import classNames from "classnames";
 
 import {RouteComponentProps} from 'react-router-dom';
 import PreRenderView from './views/PreRenderView/PreRenderView';
-import {addImageData} from './store/labels/actionCreators';
 
 const queryString = require('query-string');
 

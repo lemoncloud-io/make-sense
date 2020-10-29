@@ -45,11 +45,12 @@ const PreRenderView: React.FC<IProps> = (
                             updateActivePopupType(null);
                             // TODO: set type as category
                             const { name, category } = res;
+                            console.log(category);
                             updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
                         });
                     }
                 })
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className='PreRenderView withPopup'

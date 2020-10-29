@@ -3,13 +3,11 @@ import {LabelsSelector} from '../../store/selectors/LabelsSelector';
 import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from '../../store/labels/types';
 import {AuthService} from '@lemoncloud/lemon-front-lib';
 import {
-    addImageData,
     updateActiveImageIndex,
-    updateActiveLabelType,
     updateLabelNames,
     updateImageData, updateImageDataById,
 } from '../../store/labels/actionCreators';
-import {updateCustomCursorStyle, updateProjectData} from '../../store/general/actionCreators';
+import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
 import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
@@ -17,12 +15,11 @@ import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {map, mergeMap} from 'rxjs/operators';
+import {map } from 'rxjs/operators';
 import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
-import {PopupActions} from './PopupActions';
 
 type LemonImageUrl = {
     id: string;
@@ -72,7 +69,7 @@ export class LemonActions {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
-            const { image: rawImage, projectId, annotations } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
+            const { image: rawImage, projectId } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
             const imageUrls = [rawImage].map(({ _, imageUrl }) => ({ id: taskId, imageUrl }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
@@ -150,7 +147,7 @@ export class LemonActions {
 
         const projectId = LemonSelector.getProjectId();
         const limit = LemonSelector.getTaskLimit();
-        const { list, total } = await LemonActions.fetchTasks(projectId, limit, page);
+        const { list } = await LemonActions.fetchTasks(projectId, limit, page);
 
         // set images
         const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));

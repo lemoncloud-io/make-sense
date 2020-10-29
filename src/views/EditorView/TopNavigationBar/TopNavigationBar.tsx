@@ -6,7 +6,6 @@ import {AppState} from "../../../store";
 import {connect} from "react-redux";
 import {updateActivePopupType, updateProjectData} from "../../../store/general/actionCreators";
 import TextInput from "../../Common/TextInput/TextInput";
-import {ImageButton} from "../../Common/ImageButton/ImageButton";
 import {ProjectData} from "../../../store/general/types";
 import { TextButton } from '../../Common/TextButton/TextButton';
 

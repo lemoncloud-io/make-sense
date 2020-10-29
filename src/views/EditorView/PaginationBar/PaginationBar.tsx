@@ -47,7 +47,7 @@ const PaginationBar: React.FC<IProps> = (
                 setOriginLabels({ ...origin, ...labels}); // storing origin labels..
             }
         })
-    }, [page]);
+    }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const getImageCounter = () => {
         return (page + 1) + " / " + totalPage;

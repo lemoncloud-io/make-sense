@@ -5,11 +5,9 @@ import Scrollbars from 'react-custom-scrollbars';
 import {VirtualListUtil} from "../../../utils/VirtualListUtil";
 import {IPoint} from "../../../interfaces/IPoint";
 import {RectUtil} from "../../../utils/RectUtil";
-import { LemonActions } from '../../../logic/actions/LemonActions';
 import { LemonSelector } from '../../../store/selectors/LemonSelector';
 import { updateActivePopupType } from '../../../store/general/actionCreators';
 import { PopupWindowType } from '../../../data/enums/PopupWindowType';
-import { store } from '../../..';
 
 interface IProps {
     size: ISize;
@@ -98,7 +96,6 @@ export class VirtualList extends React.Component<IProps, IState> {
         if (yPosition + height >= Math.floor(contentHeight/100)*100 ){
             updateActivePopupType(PopupWindowType.LOADER); // show loader
             
-            const projectId = LemonSelector.getProjectId();
             const currentPage = LemonSelector.getCurrentPage();
             const totalPage = LemonSelector.getTotalPage();
 

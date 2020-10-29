@@ -63,7 +63,7 @@ const EditorContainer: React.FC<IProps> = (
                 updateImageDataById(origin.id, { ...origin, ...labels });
             })
         }
-    },[]);
+    },[]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const calculateEditorSize = (): ISize => {
         if (windowSize) {

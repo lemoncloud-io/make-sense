@@ -13,7 +13,6 @@ import {FileUtil} from "../../../../utils/FileUtil";
 import {RectUtil} from "../../../../utils/RectUtil";
 import './ImagePreview.scss';
 import {CSSHelper} from "../../../../logic/helpers/CSSHelper";
-import {isEqual} from 'lodash';
 
 interface IProps {
     imageData: ImageData;

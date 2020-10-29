@@ -4,7 +4,6 @@ import {filter} from "lodash";
 import {store} from "../../index";
 import {updateImageData, updateImageDataById} from "../../store/labels/actionCreators";
 import {LabelType} from "../../data/enums/LabelType";
-import {LemonActions} from './LemonActions';
 
 export class LabelActions {
     public static deleteActiveLabel() {
