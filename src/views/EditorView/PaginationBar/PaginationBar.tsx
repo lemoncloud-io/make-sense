@@ -8,9 +8,10 @@ import {LemonActions} from "../../../logic/actions/LemonActions";
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
 import { updateActivePopupType } from '../../../store/general/actionCreators';
 import {from} from 'rxjs';
-import {delay, filter, mergeMap} from 'rxjs/operators';
+import {delay, filter, mergeMap, skip} from 'rxjs/operators';
 import {updateImageDataById} from '../../../store/labels/actionCreators';
 import {ImageData} from '../../../store/labels/types';
+import {setOriginLabels} from '../../../store/lemon/actionCreators';
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -18,6 +19,7 @@ interface IProps {
     totalPage: number;
     imagesData: ImageData[];
     updateImageDataById: (id: string, newImageData: ImageData) => any;
+    setOriginLabels: (originLabels: ImageData) => any;
 }
 
 const PaginationBar: React.FC<IProps> = (
@@ -26,11 +28,13 @@ const PaginationBar: React.FC<IProps> = (
         totalPage,
         page,
         imagesData,
-        updateImageDataById
+        updateImageDataById,
+        setOriginLabels
     }) => {
 
     useEffect(() => {
         const parallelRequest$ = from(imagesData).pipe(
+            skip(page === 0 ? 0 : 1), // 처음 로딩 때만 전부 가져옴
             mergeMap(data => LemonActions.getTaskByImageData$(data)),
             delay(200),
             filter(({ task, origin }) => !!task)
@@ -39,6 +43,9 @@ const PaginationBar: React.FC<IProps> = (
             const { annotations } = task;
             const labels = LemonActions.getLabelsFromAnnotations(annotations);
             updateImageDataById(origin.id, { ...origin, ...labels });
+            if (imagesData.length > 0 && imagesData[0].id === origin.id) {
+                setOriginLabels({ ...origin, ...labels}); // storing origin labels..
+            }
         })
     }, [page]);
 
@@ -102,6 +109,7 @@ const PaginationBar: React.FC<IProps> = (
 const mapDispatchToProps = {
     updateActivePopupType,
     updateImageDataById,
+    setOriginLabels,
 };
 
 const mapStateToProps = (state: AppState) => ({

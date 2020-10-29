@@ -17,6 +17,11 @@ import EditorBottomNavigationBar from "../EditorBottomNavigationBar/EditorBottom
 import EditorTopNavigationBar from "../EditorTopNavigationBar/EditorTopNavigationBar";
 import {ProjectType} from "../../../data/enums/ProjectType";
 import PaginationBar from '../PaginationBar/PaginationBar';
+import {from} from 'rxjs';
+import {filter, mergeMap} from 'rxjs/operators';
+import {LemonActions} from '../../../logic/actions/LemonActions';
+import {updateImageDataById} from "../../../store/labels/actionCreators";
+import {setOriginLabels} from "../../../store/lemon/actionCreators";
 
 interface IProps {
     windowSize: ISize;
@@ -24,6 +29,9 @@ interface IProps {
     imagesData: ImageData[];
     activeContext: ContextType;
     projectType: ProjectType;
+    updateImageDataById: (id: string, newImageData: ImageData) => any;
+    totalPage: number;
+    setOriginLabels: (originLabels: ImageData) => any;
 }
 
 const EditorContainer: React.FC<IProps> = (
@@ -33,9 +41,29 @@ const EditorContainer: React.FC<IProps> = (
         imagesData,
         activeContext,
         projectType,
+        updateImageDataById,
+        totalPage,
+        setOriginLabels,
     }) => {
     const [leftTabStatus, setLeftTabStatus] = useState(true);
     const [rightTabStatus, setRightTabStatus] = useState(true);
+
+    useEffect(() => {
+        // TODO: refactor below
+        // taskId로 데이터 가져왔을 때 (수정케이스)
+        if (imagesData.length === 1 && totalPage === 0) {
+            const parallelRequest$ = from(imagesData).pipe(
+                mergeMap(data => LemonActions.getTaskByImageData$(data)),
+                filter(({ task, origin }) => !!task)
+            );
+            parallelRequest$.subscribe(({ task, origin }) => {
+                const { annotations } = task;
+                const labels = LemonActions.getLabelsFromAnnotations(annotations);
+                setOriginLabels({ ...origin, ...labels });
+                updateImageDataById(origin.id, { ...origin, ...labels });
+            })
+        }
+    },[]);
 
     const calculateEditorSize = (): ISize => {
         if (windowSize) {
@@ -146,6 +174,8 @@ const EditorContainer: React.FC<IProps> = (
 };
 
 const mapDispatchToProps = {
+    updateImageDataById,
+    setOriginLabels
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -154,6 +184,7 @@ const mapStateToProps = (state: AppState) => ({
     imagesData: state.labels.imagesData,
     activeContext: state.general.activeContext,
     projectType: state.general.projectData.type,
+    totalPage: state.lemon.totalPage,
 });
 
 export default connect(

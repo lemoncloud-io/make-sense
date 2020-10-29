@@ -17,12 +17,12 @@ import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {map} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
-import {CustomCursorStyle} from '../../data/enums/CustomCursorStyle';
+import {PopupActions} from './PopupActions';
 
 type LemonImageUrl = {
     id: string;
@@ -69,25 +69,22 @@ export class LemonActions {
 
     public static async initTaskByTaskId(taskId: string) {
         try {
-            const { image: rawImage, projectId, annotations } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
-            const imageUrls = [rawImage].map(({ id, imageUrl }) => ({ id: taskId, imageUrl }));
-            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
-            const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
-            store.dispatch(updateImageData(images));
-
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
-            LemonActions.resetLemonOptions();
 
-            // TODO: EditorContainer에서 한번 더 체크해서 필요없음. 개선해야 함
-            // const labels = LemonActions.getLabelsFromAnnotations(annotations);
-            // const origin = LabelsSelector.getImageDataById(taskId);
-            // store.dispatch(updateImageDataById(taskId, { ...origin, ...labels }));
+            const { image: rawImage, projectId, annotations } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
+            const imageUrls = [rawImage].map(({ _, imageUrl }) => ({ id: taskId, imageUrl }));
+            const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
+            const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
+
+            store.dispatch(updateImageData(images));
+
+            LemonActions.resetLemonOptions();
 
             return {
                 projectId: projectId,
                 name: GeneralSelector.getProjectName(),
-                category: LemonSelector.getProjectCategory()
+                category: LemonSelector.getProjectCategory(),
             };
         } catch (e) {
             alert(`${e}`);
@@ -141,9 +138,11 @@ export class LemonActions {
     }
 
     public static async pageChanged(page: number) {
-        ImageActions.setOriginLabelByIndex(0);
+        const currentIndex = LabelsSelector.getActiveImageIndex();
+        await LemonActions.saveUpdatedImagesData(currentIndex);
+
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
-        
+
         const projectId = LemonSelector.getProjectId();
         const limit = LemonSelector.getTaskLimit();
         const { list, total } = await LemonActions.fetchTasks(projectId, limit, page);
@@ -153,7 +152,18 @@ export class LemonActions {
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
         store.dispatch(updateImageData(images));
+
+        // get first image info
+        if (images.length > 0) {
+            const firstImage = images[0];
+            const task = await LemonActions.getTaskByImageData(firstImage);
+            const { annotations } = task;
+            const labels = LemonActions.getLabelsFromAnnotations(annotations);
+            store.dispatch(updateImageDataById(firstImage.id, { ...firstImage, ...labels }));
+        }
+
         store.dispatch(setTaskCurrentPage(page));
+        ImageActions.setOriginLabelByIndex(0);
         return;
     }
 
@@ -166,6 +176,11 @@ export class LemonActions {
                 resolve(updatedLabels);
             }, 300);
         })
+    }
+
+    public static getTaskByImageData(image: ImageData) {
+        const { id } = image;
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`);
     }
 
     public static getTaskByImageData$(image: ImageData) {

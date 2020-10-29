@@ -3,7 +3,7 @@ import './PreRenderView.scss';
 import { AppState } from '../../store';
 import { connect } from 'react-redux';
 import { PopupWindowType } from '../../data/enums/PopupWindowType';
-import { updateActivePopupType, updateProjectData } from '../../store/general/actionCreators';
+import { updateActivePopupType, updateProjectData, } from '../../store/general/actionCreators';
 import { LemonActions } from '../../logic/actions/LemonActions';
 import {ProjectType} from '../../data/enums/ProjectType';
 import {ProjectData} from '../../store/general/types';
@@ -15,7 +15,13 @@ interface IProps {
     taskId: string;
 }
 
-const PreRenderView: React.FC<IProps> = ({ projectId, taskId, updateActivePopupType, updateProjectData }) => {
+const PreRenderView: React.FC<IProps> = (
+    {
+        projectId,
+        taskId,
+        updateActivePopupType,
+        updateProjectData,
+    }) => {
     updateActivePopupType(PopupWindowType.LOADER);
 
     useEffect(() => {
@@ -36,9 +42,9 @@ const PreRenderView: React.FC<IProps> = ({ projectId, taskId, updateActivePopupT
                     } else {
                         // get only one task
                         LemonActions.initTaskByTaskId(taskId).then(res => {
-                            const { name } = res;
                             updateActivePopupType(null);
                             // TODO: set type as category
+                            const { name, category } = res;
                             updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
                         });
                     }
