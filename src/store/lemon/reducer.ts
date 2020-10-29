@@ -5,7 +5,7 @@ const initialState: LemonState = {
     projectId: null,
     category: null,
     limit: null,
-    total: null,
+    totalPage: null,
     page: null,
     originLabels: null,
 };
@@ -22,18 +22,22 @@ export function lemonReducer(
                 category: action.payload.category,
             }
         }
-        case Action.SET_IMAGE_PAGINATION: {
-            return {
-                ...state,
-                limit: action.payload.limit,
-                page: action.payload.page,
-                total: action.payload.total,
-            }
-        }
-        case Action.SET_CURRENT_PAGE: {
+        case Action.SET_TASK_CURRENT_PAGE: {
             return {
                 ...state,
                 page: action.payload.page
+            }
+        }
+        case Action.SET_TASK_LIMIT: {
+            return {
+                ...state,
+                limit: action.payload.limit
+            }
+        }
+        case Action.SET_TASK_TOTAL_PAGE: {
+            return {
+                ...state,
+                totalPage: action.payload.totalPage
             }
         }
         case Action.SET_ORIGIN_LABELS: {

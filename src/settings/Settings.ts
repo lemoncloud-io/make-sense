@@ -28,6 +28,7 @@ export class Settings {
 
     public static readonly PRIMARY_COLOR: string = "#2af598";
     public static readonly SECONDARY_COLOR: string = "#009efd";
+    public static readonly INACTIVE_LINE_COLOR: string = "#d0d0d0";
 
     public static readonly DARK_THEME_FIRST_COLOR: string = "#171717";
     public static readonly DARK_THEME_SECOND_COLOR: string = "#282828";
@@ -35,7 +36,7 @@ export class Settings {
     public static readonly DARK_THEME_FORTH_COLOR: string = "#262c2f";
 
     public static readonly CROSS_HAIR_THICKNESS_PX: number = 1;
-    public static readonly CROSS_HAIR_COLOR: string = "#fff";
+    public static readonly CROSS_HAIR_COLOR: string = "#d0d0d0";
 
     public static readonly RESIZE_HANDLE_DIMENSION_PX: number = 8;
     public static readonly RESIZE_HANDLE_HOVER_DIMENSION_PX = 16;

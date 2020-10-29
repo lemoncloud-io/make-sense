@@ -9,6 +9,7 @@ import {AppState} from '../../../store';
 import {connect} from 'react-redux';
 import {LemonActions} from '../../../logic/actions/LemonActions';
 import {updateActivePopupType, updateProjectData} from '../../../store/general/actionCreators';
+import {setTaskCurrentPage, setTaskLimit} from '../../../store/lemon/actionCreators';
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
 import {ProjectData} from '../../../store/general/types';
 import {ProjectType} from '../../../data/enums/ProjectType';
@@ -45,6 +46,8 @@ const options: SelectLimitOption[] = [
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     updateProjectData: (projectData: ProjectData) => any;
+    setTaskLimit: (limit: number) => any;
+    setTaskCurrentPage: (page: number) => any;
     projectId: string;
 }
 
@@ -52,7 +55,9 @@ const AssignTasksPopup: React.FC<IProps> = (
     {
         projectId,
         updateActivePopupType,
-        updateProjectData
+        updateProjectData,
+        setTaskLimit,
+        setTaskCurrentPage
     }) => {
     const [modelIsLoadingStatus, setModelIsLoadingStatus] = useState(false);
     const [selectedLimitOption, updateSelectedLimitOption] = useState(options);
@@ -63,10 +68,11 @@ const AssignTasksPopup: React.FC<IProps> = (
         }
         setModelIsLoadingStatus(true);
         const limit = extractSelectedLimitOption();
-        LemonActions.getAllTaskData(projectId, limit).then(({ projectId, category }) => {
+        setTaskLimitAndPage(limit);
+        LemonActions.initTaskData(projectId, limit).then(({ projectId, name, category }) => {
             updateActivePopupType(null);
             // TODO: set type as category
-            updateProjectData({ name: projectId, type: ProjectType.OBJECT_DETECTION });
+            updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
         });
     };
 
@@ -78,6 +84,12 @@ const AssignTasksPopup: React.FC<IProps> = (
             return null;
         }
     };
+
+    const setTaskLimitAndPage = (limit: number) => {
+        // save to lemon store
+        setTaskLimit(limit);
+        setTaskCurrentPage(0);
+    }
 
     const onSelect = (selectedLimit: number) => {
         const nextSelectedLimit: SelectLimitOption[] = selectedLimitOption.map((option: SelectLimitOption) => {
@@ -161,7 +173,9 @@ const AssignTasksPopup: React.FC<IProps> = (
 
 const mapDispatchToProps = {
     updateActivePopupType,
-    updateProjectData
+    updateProjectData,
+    setTaskLimit,
+    setTaskCurrentPage,
 }
 
 const mapStateToProps = (state: AppState) => ({

@@ -6,6 +6,9 @@ import {UnitUtil} from "./UnitUtil";
 export class DrawUtil {
 
     public static clearCanvas(canvas:HTMLCanvasElement): void {
+        if (!canvas) {
+            return;
+        }
         let ctx:CanvasRenderingContext2D = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -122,8 +125,6 @@ export class DrawUtil {
     public static getRandomRGBColor():string {
         return "rgb(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + ")";
     }
-
-
 
     public static hexToRGB(hex: string, alpha: number): string {
         const r = parseInt(hex.slice(1, 3), 16);

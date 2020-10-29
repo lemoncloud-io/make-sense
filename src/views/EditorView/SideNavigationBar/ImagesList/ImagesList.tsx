@@ -12,7 +12,6 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {ImageActions} from "../../../../logic/actions/ImageActions";
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
-import { setOriginLabels } from "../../../../store/lemon/actionCreators";
 
 interface IProps {
     activeImageIndex: number;
@@ -124,7 +123,7 @@ const mapDispatchToProps = {};
 const mapStateToProps = (state: AppState) => ({
     activeImageIndex: state.labels.activeImageIndex,
     imagesData: state.labels.imagesData,
-    activeLabelType: state.labels.activeLabelType
+    activeLabelType: state.labels.activeLabelType,
 });
 
 export default connect(

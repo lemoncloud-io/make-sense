@@ -2,7 +2,6 @@ import { Action } from '../Actions';
 import { LemonActionTypes } from './types';
 import { ImageData } from '../labels/types';
 
-
 export function setProjectInfo(projectId: string, category: string = ''): LemonActionTypes {
     return {
         type: Action.SET_PROJECT_INFO,
@@ -13,22 +12,29 @@ export function setProjectInfo(projectId: string, category: string = ''): LemonA
     }
 }
 
-export function setImagePagination(limit: number, page: number, total: number): LemonActionTypes {
+export function setTaskCurrentPage(page: number): LemonActionTypes {
     return {
-        type: Action.SET_IMAGE_PAGINATION,
+        type: Action.SET_TASK_CURRENT_PAGE,
         payload: {
-            limit,
-            page,
-            total
+            page
         }
     }
 }
 
-export function setCurrentPage(page: number): LemonActionTypes {
+export function setTaskLimit(limit: number): LemonActionTypes {
     return {
-        type: Action.SET_CURRENT_PAGE,
+        type: Action.SET_TASK_LIMIT,
         payload: {
-            page
+            limit
+        }
+    }
+}
+
+export function setTaskTotalPage(totalPage: number): LemonActionTypes {
+    return {
+        type: Action.SET_TASK_TOTAL_PAGE,
+        payload: {
+            totalPage
         }
     }
 }

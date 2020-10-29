@@ -10,8 +10,6 @@ import { LemonSelector } from '../../../store/selectors/LemonSelector';
 import { updateActivePopupType } from '../../../store/general/actionCreators';
 import { PopupWindowType } from '../../../data/enums/PopupWindowType';
 import { store } from '../../..';
-import { setCurrentPage } from '../../../store/lemon/actionCreators';
-
 
 interface IProps {
     size: ISize;
@@ -105,12 +103,7 @@ export class VirtualList extends React.Component<IProps, IState> {
             const totalPage = LemonSelector.getTotalPage();
 
             if (totalPage > currentPage) {
-                LemonActions.loadProjectImages(projectId, currentPage+1).then(() => {
-                    updateActivePopupType(null); // hide loader
-                    store.dispatch(setCurrentPage(currentPage+1));
-                }).catch((e) => {
-                    alert(e);
-                });
+
             }
         }
 

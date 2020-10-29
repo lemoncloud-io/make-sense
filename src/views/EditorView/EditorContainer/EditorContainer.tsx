@@ -16,12 +16,12 @@ import {ContextType} from "../../../data/enums/ContextType";
 import EditorBottomNavigationBar from "../EditorBottomNavigationBar/EditorBottomNavigationBar";
 import EditorTopNavigationBar from "../EditorTopNavigationBar/EditorTopNavigationBar";
 import {ProjectType} from "../../../data/enums/ProjectType";
-import {updateImageDataById} from '../../../store/labels/actionCreators';
-import {filter, mergeMap} from 'rxjs/operators';
+import PaginationBar from '../PaginationBar/PaginationBar';
 import {from} from 'rxjs';
+import {filter, mergeMap} from 'rxjs/operators';
 import {LemonActions} from '../../../logic/actions/LemonActions';
-import uuidv1 from 'uuid/v1';
-import {LabelStatus} from '../../../data/enums/LabelStatus';
+import {updateImageDataById} from "../../../store/labels/actionCreators";
+import {setOriginLabels} from "../../../store/lemon/actionCreators";
 
 interface IProps {
     windowSize: ISize;
@@ -30,6 +30,8 @@ interface IProps {
     activeContext: ContextType;
     projectType: ProjectType;
     updateImageDataById: (id: string, newImageData: ImageData) => any;
+    totalPage: number;
+    setOriginLabels: (originLabels: ImageData) => any;
 }
 
 const EditorContainer: React.FC<IProps> = (
@@ -39,30 +41,28 @@ const EditorContainer: React.FC<IProps> = (
         imagesData,
         activeContext,
         projectType,
-        updateImageDataById
+        updateImageDataById,
+        totalPage,
+        setOriginLabels,
     }) => {
     const [leftTabStatus, setLeftTabStatus] = useState(true);
     const [rightTabStatus, setRightTabStatus] = useState(true);
 
-    useEffect(() =>{
-        const parallelRequest$ = from(imagesData).pipe(
-            mergeMap(data => LemonActions.getTaskByImageData$(data)),
-            filter(({ task, origin }) => !!task)
-        );
-        parallelRequest$.subscribe(({ task, origin }) => {
-            const { annotations } = task;
-            const lines = annotations.filter(annotation => !!annotation.line);
-            const points = annotations.filter(annotation => !!annotation.point);
-            const vertices = annotations.filter(annotation => !!annotation.vertices);
-            const rects = annotations.filter(annotation => !!annotation.rect);
-
-            // set label info from server
-            const labelLines = lines.map(({ label, line }) => ({ id: uuidv1(), labelId: label.id, line }));
-            const labelPoints = points.map(({ label, point }) => ({ id: uuidv1(), labelId: label.id, point, isCreatedByAI: false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
-            const labelRects = rects.map(({ label, rect }) => ({ id: uuidv1(), labelId: label.id, rect, isCreatedByAI:false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
-            const labelPolygons = vertices.map(({ label, vertices }) => ({ id: uuidv1(), labelId: label.id, vertices }));
-            updateImageDataById(origin.id, { ...origin, labelLines, labelPoints, labelRects, labelPolygons });
-        })
+    useEffect(() => {
+        // TODO: refactor below
+        // taskId로 데이터 가져왔을 때 (수정케이스)
+        if (imagesData.length === 1 && totalPage === 0) {
+            const parallelRequest$ = from(imagesData).pipe(
+                mergeMap(data => LemonActions.getTaskByImageData$(data)),
+                filter(({ task, origin }) => !!task)
+            );
+            parallelRequest$.subscribe(({ task, origin }) => {
+                const { annotations } = task;
+                const labels = LemonActions.getLabelsFromAnnotations(annotations);
+                setOriginLabels({ ...origin, ...labels });
+                updateImageDataById(origin.id, { ...origin, ...labels });
+            })
+        }
     },[]);
 
     const calculateEditorSize = (): ISize => {
@@ -101,7 +101,10 @@ const EditorContainer: React.FC<IProps> = (
     };
 
     const leftSideBarRender = () => {
-        return <ImagesList/>
+        return <>
+            <ImagesList/>
+            <PaginationBar/>
+        </>
     };
 
     const rightSideBarButtonOnClick = () => {
@@ -171,7 +174,8 @@ const EditorContainer: React.FC<IProps> = (
 };
 
 const mapDispatchToProps = {
-    updateImageDataById
+    updateImageDataById,
+    setOriginLabels
 };
 
 const mapStateToProps = (state: AppState) => ({
@@ -179,7 +183,8 @@ const mapStateToProps = (state: AppState) => ({
     activeImageIndex: state.labels.activeImageIndex,
     imagesData: state.labels.imagesData,
     activeContext: state.general.activeContext,
-    projectType: state.general.projectData.type
+    projectType: state.general.projectData.type,
+    totalPage: state.lemon.totalPage,
 });
 
 export default connect(

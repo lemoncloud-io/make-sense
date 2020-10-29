@@ -16,7 +16,11 @@ export class LemonSelector {
     }
 
     public static getTotalPage(): number {
-        return Math.ceil(store.getState().lemon.total / store.getState().lemon.limit) - 1;
+        return store.getState().lemon.totalPage;
+    }
+
+    public static getTaskLimit(): number {
+        return store.getState().lemon.limit;
     }
 
     public static getOriginLabels(): ImageData {

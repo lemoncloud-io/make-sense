@@ -20,6 +20,7 @@ import {GeneralSelector} from "../../store/selectors/GeneralSelector";
 import {ViewPortHelper} from "../helpers/ViewPortHelper";
 import {CustomCursorStyle} from "../../data/enums/CustomCursorStyle";
 import {LineRenderEngine} from "../render/LineRenderEngine";
+import {Settings} from '../../settings/Settings';
 
 export class EditorActions {
 
@@ -123,6 +124,7 @@ export class EditorActions {
             EditorModel.cursor.style.left = mousePositionOverViewPort.x + "px";
             EditorModel.cursor.style.top = mousePositionOverViewPort.y + "px";
             EditorModel.cursor.style.display = "block";
+            EditorModel.cursor.style.borderColor = Settings.CROSS_HAIR_COLOR;
 
             if (isMouseOverImage && ![CustomCursorStyle.GRAB, CustomCursorStyle.GRABBING].includes(GeneralSelector.getCustomCursorStyle())) {
                 const imageSize: ISize = ImageUtil.getSize(EditorModel.image);
@@ -135,6 +137,7 @@ export class EditorActions {
                 EditorModel.mousePositionIndicator.style.left = (mousePositionOverViewPort.x + 15) + "px";
                 EditorModel.mousePositionIndicator.style.top = (mousePositionOverViewPort.y + 15) + "px";
                 EditorModel.mousePositionIndicator.style.display = "block";
+                EditorModel.mousePositionIndicator.style.color = Settings.CROSS_HAIR_COLOR;
             } else {
                 EditorModel.mousePositionIndicator.style.display = "none";
             }
