@@ -140,6 +140,12 @@ export class LemonActions {
     }
 
     public static async pageChanged(page: number) {
+        // refresh token
+        const credentials = await LemonActions.getCredentials();
+        if (!credentials) {
+            // TODO: add something
+        }
+
         const currentIndex = LabelsSelector.getActiveImageIndex();
         await LemonActions.saveUpdatedImagesData(currentIndex);
 
