@@ -12,7 +12,7 @@ import {updateActivePopupType, updateProjectData} from '../../../store/general/a
 import {setTaskCurrentPage, setTaskLimit} from '../../../store/lemon/actionCreators';
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
 import {ProjectData} from '../../../store/general/types';
-import {ProjectType} from '../../../data/enums/ProjectType';
+import {ProjectCategory, ProjectType} from '../../../data/enums/ProjectType';
 
 interface SelectLimitOption {
     title: string,
@@ -71,8 +71,11 @@ const AssignTasksPopup: React.FC<IProps> = (
         setTaskLimitAndPage(limit);
         LemonActions.initTaskData(projectId, limit).then(({ projectId, name, category }) => {
             updateActivePopupType(null);
-            // TODO: set type as category
-            updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
+            let type = ProjectType.OBJECT_DETECTION;
+            if (category === ProjectCategory.IMAGE_TAG) {
+                type = ProjectType.IMAGE_RECOGNITION;
+            }
+            updateProjectData({ name, type });
         });
     };
 

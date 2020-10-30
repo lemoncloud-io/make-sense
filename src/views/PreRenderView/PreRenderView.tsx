@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import './PreRenderView.scss';
-import { AppState } from '../../store';
-import { connect } from 'react-redux';
-import { PopupWindowType } from '../../data/enums/PopupWindowType';
-import { updateActivePopupType, updateProjectData, } from '../../store/general/actionCreators';
-import { LemonActions } from '../../logic/actions/LemonActions';
-import {ProjectType} from '../../data/enums/ProjectType';
+import {AppState} from '../../store';
+import {connect} from 'react-redux';
+import {PopupWindowType} from '../../data/enums/PopupWindowType';
+import {updateActivePopupType, updateProjectData,} from '../../store/general/actionCreators';
+import {LemonActions} from '../../logic/actions/LemonActions';
+import {ProjectCategory, ProjectType} from '../../data/enums/ProjectType';
 import {ProjectData} from '../../store/general/types';
 
 interface IProps {
@@ -43,10 +43,12 @@ const PreRenderView: React.FC<IProps> = (
                         // get only one task
                         LemonActions.initTaskByTaskId(taskId).then(res => {
                             updateActivePopupType(null);
-                            // TODO: set type as category
                             const { name, category } = res;
-                            console.log(category);
-                            updateProjectData({ name, type: ProjectType.OBJECT_DETECTION });
+                            let type = ProjectType.OBJECT_DETECTION;
+                            if (category === ProjectCategory.IMAGE_TAG) {
+                                type = ProjectType.IMAGE_RECOGNITION;
+                            }
+                            updateProjectData({ name, type });
                         });
                     }
                 })
