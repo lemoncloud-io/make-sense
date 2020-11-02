@@ -75,12 +75,12 @@ const TagLabelsList: React.FC<IProps> = (
                     {labelName.name}
                 </div>
             }),
-            <ImageButton
-                image={"ico/plus.png"}
-                imageAlt={"plus"}
-                buttonSize={{width: 32, height: 32}}
-                onClick={addNewOnClick}
-            />
+            // <ImageButton
+            //     image={"ico/plus.png"}
+            //     imageAlt={"plus"}
+            //     buttonSize={{width: 32, height: 32}}
+            //     onClick={addNewOnClick}
+            // />
         ]
     };
 
@@ -93,7 +93,7 @@ const TagLabelsList: React.FC<IProps> = (
             {labelNames.length === 0 ?
                 <div
                     className="EmptyLabelList"
-                    onClick={addNewOnClick}
+                    // onClick={addNewOnClick}
                     key="empty-label-list"
                 >
                     <img
