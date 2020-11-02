@@ -1,5 +1,5 @@
 import React from 'react'
-import './FinishProjectPopup.scss'
+import './NoTasksPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {
     updateActiveImageIndex,
@@ -14,10 +14,8 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
-import {LemonActions} from '../../../logic/actions/LemonActions';
 import {setProjectInfo} from '../../../store/lemon/actionCreators';
 import {LabelType} from '../../../data/enums/LabelType';
-import {LabelsSelector} from '../../../store/selectors/LabelsSelector';
 
 interface IProps {
     updateActiveLabelType: (labelType: LabelType) => any;
@@ -30,48 +28,29 @@ interface IProps {
     setProjectInfo: (id: string, category: string) => any;
 }
 
-const FinishProjectPopup: React.FC<IProps> = (props) => {
+const NoTasksPopup: React.FC<IProps> = (props) => {
     const {
+        updateActiveLabelType,
         updateActiveLabelNameId,
         updateLabelNames,
         updateActiveImageIndex,
         updateImageData,
         updateFirstLabelCreatedFlag,
         updateProjectData,
+        setProjectInfo,
     } = props;
 
     const renderContent = () => {
         return(
-            <div className="FinishProjectPopup">
+            <div className="NoTasksPopup">
                 <div className="Message">
-                    작업을 마치시겠습니까?
+                    작업 정보가 없습니다. 이전 페이지로 이동합니다.
                 </div>
             </div>
         )
     };
 
     const onAccept = () => {
-        saveLabels();
-    };
-
-    const onReject = () => {
-        PopupActions.close();
-    };
-
-    const saveLabels = () => {
-        const currentIndex = LabelsSelector.getActiveImageIndex();
-        LemonActions.saveUpdatedImagesData(currentIndex).then(() => {
-            resetStore();
-            PopupActions.close();
-        }).then(() => {
-            window.history.back();
-        }).catch(e => {
-            console.log(e);
-            alert(`Submit Error: ${e}`)
-        })
-    }
-
-    const resetStore = () => {
         updateActiveLabelType(null);
         updateActiveLabelNameId(null);
         updateLabelNames([]);
@@ -80,14 +59,22 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
         setProjectInfo(null, null);
-    }
+        PopupActions.close();
+        window.history.back();
+    };
+
+    const onReject = () => {
+        PopupActions.close();
+        window.history.back();
+    };
 
     return(
         <GenericYesNoPopup
-            title={"작업 완료"}
+            title={"에러"}
             renderContent={renderContent}
             acceptLabel={"취소"}
             onAccept={onReject}
+            skipAcceptButton={true}
             rejectLabel={"확인"}
             onReject={onAccept}
         />)
@@ -104,10 +91,9 @@ const mapDispatchToProps = {
     setProjectInfo,
 };
 
-const mapStateToProps = (state: AppState) => ({
-});
+const mapStateToProps = (state: AppState) => ({});
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(FinishProjectPopup);
+)(NoTasksPopup);

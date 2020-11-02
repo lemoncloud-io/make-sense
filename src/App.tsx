@@ -49,9 +49,9 @@ const App: React.FC<IProps> = (
                 return <PreRenderView projectId={projectId} taskId={taskId}/>;
             } else if (imagesData && imagesData.length > 0) {
                 return <EditorView/>;
+            } else if (imagesData && imagesData.length === 0) {
+                return <PreRenderView projectId={null} taskId={null}/>;
             }
-        } else {
-            return <MainView/>;
         }
 
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
