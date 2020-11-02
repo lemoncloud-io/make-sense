@@ -22,36 +22,46 @@ const PreRenderView: React.FC<IProps> = (
         updateActivePopupType,
         updateProjectData,
     }) => {
+
     updateActivePopupType(PopupWindowType.LOADER);
+    if (!projectId && !taskId) {
+        updateActivePopupType(PopupWindowType.NO_TASKS_POPUP);
+    }
+
+    const initProject = projectId => {
+        LemonActions.isAuthenticated()
+            .then((isAuth)=> {
+                const isDev = process.env.NODE_ENV;
+                const shouldGoBack = isDev !== 'development' && !isAuth;
+                if (shouldGoBack) {
+                    window.history.back();
+                }
+            })
+            .then(() => LemonActions.getCredentials())
+            .then(() => LemonActions.setupProject(projectId))
+            .then(() => {
+                if (!taskId) {
+                    // show assign tasks limit popup
+                    updateActivePopupType(PopupWindowType.ASSIGN_TASKS_POPUP)
+                } else {
+                    // get only one task
+                    LemonActions.initTaskByTaskId(taskId).then(res => {
+                        updateActivePopupType(null);
+                        const { name, category } = res;
+                        let type = ProjectType.OBJECT_DETECTION;
+                        if (category === ProjectCategory.IMAGE_TAG) {
+                            type = ProjectType.IMAGE_RECOGNITION;
+                        }
+                        updateProjectData({ name, type });
+                    });
+                }
+            });
+    }
 
     useEffect(() => {
-            LemonActions.isAuthenticated()
-                .then((isAuth)=> {
-                    const isDev = process.env.NODE_ENV;
-                    const shouldGoBack = isDev !== 'development' && !isAuth;
-                    if (shouldGoBack) {
-                        window.history.back();
-                    }
-                })
-                .then(() => LemonActions.getCredentials())
-                .then(() => LemonActions.setupProject(projectId))
-                .then(() => {
-                    if (!taskId) {
-                        // show assign tasks limit popup
-                        updateActivePopupType(PopupWindowType.ASSIGN_TASKS_POPUP)
-                    } else {
-                        // get only one task
-                        LemonActions.initTaskByTaskId(taskId).then(res => {
-                            updateActivePopupType(null);
-                            const { name, category } = res;
-                            let type = ProjectType.OBJECT_DETECTION;
-                            if (category === ProjectCategory.IMAGE_TAG) {
-                                type = ProjectType.IMAGE_RECOGNITION;
-                            }
-                            updateProjectData({ name, type });
-                        });
-                    }
-                })
+        if (projectId) {
+            initProject(projectId);
+        }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (

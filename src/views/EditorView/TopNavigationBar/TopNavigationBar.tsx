@@ -38,7 +38,6 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                 <div>
                     <div
                         className="Header"
-                        onClick={() => updateActivePopupType(PopupWindowType.EXIT_PROJECT)}
                     >
                     LEMONADE
                     </div>

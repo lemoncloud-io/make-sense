@@ -56,9 +56,9 @@ const App: React.FC<IProps> = (
                 return <PreRenderView projectId={projectId} taskId={taskId}/>;
             } else if (imagesData && imagesData.length > 0) {
                 return <EditorView/>;
+            } else if (imagesData && imagesData.length === 0) {
+                return <PreRenderView projectId={null} taskId={null}/>;
             }
-        } else {
-            return <MainView/>;
         }
 
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
@@ -76,13 +76,10 @@ const App: React.FC<IProps> = (
 
     const onIdleMonitorEvent = type => {
         return (state) => {
-            const entry = { type, ...state };
-            console.log('event', entry);
             if (type === 'idle') {
+                const entry = { type, ...state };
+                console.log('event', entry);
                 const currentIndex = LabelsSelector.getActiveImageIndex();
-                if (!currentIndex) {
-                    return;
-                }
                 LemonActions.saveUpdatedImagesData(currentIndex).then(() => {
                     updateActivePopupType(null);
                     updateActivePopupType(PopupWindowType.IDLE_POPUP);
@@ -95,9 +92,7 @@ const App: React.FC<IProps> = (
     }
 
     return (
-        <IdleMonitorEvents timeout={50000}
-                           activeClassName="active"
-                           idleClassName="idle"
+        <IdleMonitorEvents timeout={1000 * 60 * 5} // 5minutes
                            onRun={onIdleMonitorEvent('run')}
                            onStop={onIdleMonitorEvent('stop')}
                            onActive={onIdleMonitorEvent('active')}

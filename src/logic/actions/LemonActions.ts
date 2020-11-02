@@ -93,16 +93,17 @@ export class LemonActions {
         try {
             // load images
             const page = 0;
-            const { list: taskList, total } = await LemonActions.fetchTasks(projectId, limit, page);
+            // const { tasks, total } = await LemonActions.fetchTasksAssign(projectId, limit, page);
+            const { list: tasks, total } = await LemonActions.fetchTasks(projectId, limit, page);
 
             // set images
-            const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
+            const imageUrls = tasks.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
             store.dispatch(updateImageData(images));
 
             // set total page
-            const totalPage = Math.ceil(Math.max(total, 1) / Math.max(limit, 1));
+            const totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
             store.dispatch(setTaskTotalPage(totalPage));
 
             // set active image index
@@ -123,19 +124,18 @@ export class LemonActions {
     public static saveUpdatedImagesData(index: number) {
         const originLabels = LemonSelector.getOriginLabels();
         const targetLabels = LabelsSelector.getImageDataByIndex(index);
-
-        console.log(originLabels, targetLabels);
         if (isEqual(originLabels, targetLabels)) {
             return Promise.resolve();
         }
 
-        const { id, labelLines, labelPoints, labelPolygons, labelRects } = targetLabels;
+        const { id, labelLines, labelPoints, labelPolygons, labelRects, labelNameIds } = targetLabels;
         // TODO: refactor below
         const filteredLabelLines = labelLines.filter(line => !!line.labelId);
         const filteredLabelPoints = labelPoints.filter(point => !!point.labelId);
         const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
         const filteredLabelRects = labelRects.filter(rect => !!rect.labelId);
-        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects];
+        const filteredLabelIds = labelNameIds.filter(labelId => !!labelId).map(labelId => ({ labelId })); // 이미지 태깅일 때
+        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects, ...filteredLabelIds];
         return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations });
     }
 
@@ -153,10 +153,10 @@ export class LemonActions {
 
         const projectId = LemonSelector.getProjectId();
         const limit = LemonSelector.getTaskLimit();
-        const { list } = await LemonActions.fetchTasks(projectId, limit, page);
+        const { list: tasks } = await LemonActions.fetchTasks(projectId, limit, page);
 
         // set images
-        const imageUrls = list.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
+        const imageUrls = tasks.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
         store.dispatch(updateImageData(images));
@@ -219,6 +219,11 @@ export class LemonActions {
         const status = 'open'; // TODO: refactor
         const param = { limit, projectId, page, status };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
+    }
+
+    public static fetchTasksAssign(projectId: string, limit: number = 5, page: number = 0) {
+        const param = { limit, projectId, page };
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/0/assign`, param);
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {

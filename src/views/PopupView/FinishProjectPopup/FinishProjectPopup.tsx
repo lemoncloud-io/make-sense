@@ -86,10 +86,10 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
         <GenericYesNoPopup
             title={"작업 완료"}
             renderContent={renderContent}
-            acceptLabel={"예"}
-            onAccept={onAccept}
-            rejectLabel={"아니요"}
-            onReject={onReject}
+            acceptLabel={"취소"}
+            onAccept={onReject}
+            rejectLabel={"확인"}
+            onReject={onAccept}
         />)
 };
 

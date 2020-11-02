@@ -1,5 +1,5 @@
 import React from 'react'
-import './IdlePopup.scss'
+import './NoTasksPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {
     updateActiveImageIndex,
@@ -28,7 +28,7 @@ interface IProps {
     setProjectInfo: (id: string, category: string) => any;
 }
 
-const IdlePopup: React.FC<IProps> = (props) => {
+const NoTasksPopup: React.FC<IProps> = (props) => {
     const {
         updateActiveLabelType,
         updateActiveLabelNameId,
@@ -42,21 +42,15 @@ const IdlePopup: React.FC<IProps> = (props) => {
 
     const renderContent = () => {
         return(
-            <div className="IdlePopupContent">
+            <div className="NoTasksPopup">
                 <div className="Message">
-                    장시간 입력이 없어 로그아웃되었습니다. 새로고침 후 이용해주세요.
+                    작업 정보가 없습니다. 이전 페이지로 이동합니다.
                 </div>
             </div>
         )
     };
 
     const onAccept = () => {
-        resetStore();
-        PopupActions.close();
-        window.location.reload();
-    };
-
-    const resetStore = () => {
         updateActiveLabelType(null);
         updateActiveLabelNameId(null);
         updateLabelNames([]);
@@ -65,15 +59,24 @@ const IdlePopup: React.FC<IProps> = (props) => {
         updateImageData([]);
         updateFirstLabelCreatedFlag(false);
         setProjectInfo(null, null);
-    }
+        PopupActions.close();
+        window.history.back();
+    };
+
+    const onReject = () => {
+        PopupActions.close();
+        window.history.back();
+    };
 
     return(
         <GenericYesNoPopup
-            title={"장시간 미입력"}
+            title={"에러"}
             renderContent={renderContent}
-            acceptLabel={"새로고침"}
-            onAccept={onAccept}
-            skipRejectButton={true}
+            acceptLabel={"취소"}
+            onAccept={onReject}
+            skipAcceptButton={true}
+            rejectLabel={"확인"}
+            onReject={onAccept}
         />)
 };
 
@@ -88,10 +91,9 @@ const mapDispatchToProps = {
     setProjectInfo,
 };
 
-const mapStateToProps = (state: AppState) => ({
-});
+const mapStateToProps = (state: AppState) => ({});
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(IdlePopup);
+)(NoTasksPopup);
