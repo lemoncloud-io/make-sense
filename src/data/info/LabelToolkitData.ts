@@ -12,7 +12,7 @@ export interface ILabelToolkit {
 export const LabelToolkitData: ILabelToolkit[] = [
     {
         labelType: LabelType.IMAGE_RECOGNITION,
-        headerText: "Image recognition",
+        headerText: "Image Tagging",
         imageSrc: "ico/object.png",
         imageAlt: "object",
         projectType: ProjectType.IMAGE_RECOGNITION,
