@@ -23,7 +23,9 @@ import {GeneralSelector} from '../../store/selectors/GeneralSelector';
 
 type LemonImageUrl = {
     id: string;
-    imageUrl: string;
+    url: string;
+    width?: number;
+    height?: number;
 }
 
 interface LemonFileImage {
@@ -70,7 +72,7 @@ export class LemonActions {
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
             const { image: rawImage, projectId } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
-            const imageUrls = [rawImage].map(({ _, imageUrl }) => ({ id: taskId, imageUrl }));
+            const imageUrls = [rawImage].map(({ _, url }) => ({ id: taskId, url }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
 
@@ -96,7 +98,7 @@ export class LemonActions {
             const { list: taskList, total } = await LemonActions.fetchTasks(projectId, limit, page);
 
             // set images
-            const imageUrls = taskList.map(task => ({ id: task.id, imageUrl: task.image.imageUrl }));
+            const imageUrls = taskList.map(task => ({ id: task.id, url: task.image.url }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
             store.dispatch(updateImageData(images));
@@ -224,11 +226,11 @@ export class LemonActions {
         // const customOptions = { responseType: 'blob' };
         // LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
 
-        return Promise.all(imageUrls.map(async ({ id, imageUrl }) => {
-            const name = imageUrl.split('/') ? imageUrl.split('/').pop() : 'null';
+        return Promise.all(imageUrls.map(async ({ id, url }) => {
+            const name = url.split('/') ? url.split('/').pop() : 'null';
 
             const config: AxiosRequestConfig = { responseType: 'blob' };
-            return axios.get(imageUrl, config)
+            return axios.get(url, config)
                 .then(response => ({ id, file: new File([response.data], name) }))
                 .catch(() => ({ id, file: null, name }));
 
