@@ -124,9 +124,9 @@ export class LemonActions {
         }
     }
 
-    public static saveWorkingTimeByImageIndex(index: number, submittedAt: number = new Date().getTime()) {
+    public static saveWorkingTimeByImageIndex(index: number, submittedAt: number | null) {
         const startTime = LemonSelector.getTaskStartTime();
-        if (!startTime) {
+        if (!submittedAt || !startTime) {
             return Promise.resolve();
         }
 
@@ -141,7 +141,7 @@ export class LemonActions {
         const originLabels = LemonSelector.getOriginLabels();
         const targetLabels = LabelsSelector.getImageDataByIndex(index);
         if (isEqual(originLabels, targetLabels)) {
-            return Promise.resolve();
+            return Promise.resolve({ submittedAt: null }); // TODO: fix it. just workaround
         }
 
         const { id, labelLines, labelPoints, labelPolygons, labelRects, labelNameIds } = targetLabels;
