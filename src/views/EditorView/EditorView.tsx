@@ -6,12 +6,14 @@ import {AppState} from "../../store";
 import {connect} from "react-redux";
 import classNames from "classnames";
 import TopNavigationBar from "./TopNavigationBar/TopNavigationBar";
+import IdleMonitorEvents from 'react-simple-idle-monitor/lib/IdleMonitorEvents.js';
 
 interface IProps {
     activePopupType: PopupWindowType;
 }
 
 const EditorView: React.FC<IProps> = ({activePopupType}) => {
+
 
     const getClassName = () => {
         return classNames(
@@ -23,6 +25,7 @@ const EditorView: React.FC<IProps> = ({activePopupType}) => {
     };
 
     return (
+
         <div
             className={getClassName()}
             draggable={false}

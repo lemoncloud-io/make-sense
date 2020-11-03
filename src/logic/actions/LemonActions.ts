@@ -216,7 +216,8 @@ export class LemonActions {
     }
 
     public static fetchTasks(projectId: string, limit: number = 5, page: number = 0) {
-        const param = { limit, projectId, page };
+        const status = 'open'; // TODO: refactor
+        const param = { limit, projectId, page, status };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }
 

@@ -15,6 +15,11 @@ import classNames from "classnames";
 
 import {RouteComponentProps} from 'react-router-dom';
 import PreRenderView from './views/PreRenderView/PreRenderView';
+import IdleMonitorEvents from 'react-simple-idle-monitor/lib/IdleMonitorEvents';
+import {updateActivePopupType } from './store/general/actionCreators';
+import {PopupWindowType} from './data/enums/PopupWindowType';
+import {LabelsSelector} from './store/selectors/LabelsSelector';
+import {LemonActions} from './logic/actions/LemonActions';
 
 const queryString = require('query-string');
 
@@ -25,6 +30,7 @@ interface IProps {
     PoseDetectionLoaded: boolean;
     imagesData: any;
     routeProps: RouteComponentProps;
+    updateActivePopupType: (activePopupType: PopupWindowType) => any;
 }
 
 const App: React.FC<IProps> = (
@@ -34,7 +40,8 @@ const App: React.FC<IProps> = (
         ObjectDetectorLoaded,
         PoseDetectionLoaded,
         imagesData,
-        routeProps
+        routeProps,
+        updateActivePopupType,
     }) => {
 
     const getQueryParams = () => {
@@ -67,13 +74,41 @@ const App: React.FC<IProps> = (
         }
     };
 
+    const onIdleMonitorEvent = type => {
+        return (state) => {
+            const entry = { type, ...state };
+            console.log('event', entry);
+            if (type === 'idle') {
+                const currentIndex = LabelsSelector.getActiveImageIndex();
+                if (!currentIndex) {
+                    return;
+                }
+                LemonActions.saveUpdatedImagesData(currentIndex).then(() => {
+                    updateActivePopupType(null);
+                    updateActivePopupType(PopupWindowType.IDLE_POPUP);
+                }).catch(e => {
+                    console.log(e);
+                    alert(`Submit Error: ${e}`)
+                })
+            }
+        };
+    }
+
     return (
-      <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
-          draggable={false}
-      >
-          {selectRoute()}
-          <PopupView/>
-      </div>
+        <IdleMonitorEvents timeout={50000}
+                           activeClassName="active"
+                           idleClassName="idle"
+                           onRun={onIdleMonitorEvent('run')}
+                           onStop={onIdleMonitorEvent('stop')}
+                           onActive={onIdleMonitorEvent('active')}
+                           onIdle={onIdleMonitorEvent('idle')}>
+        <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
+             draggable={false}
+        >
+            {selectRoute()}
+            <PopupView/>
+        </div>
+        </IdleMonitorEvents>
     );
 };
 
@@ -86,6 +121,11 @@ const mapStateToProps = (state: AppState, routeProps: RouteComponentProps) => ({
     routeProps
 });
 
+const mapDispatchToProps = {
+    updateActivePopupType,
+};
+
 export default connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(App);
