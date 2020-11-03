@@ -48,3 +48,13 @@ export function setOriginLabels(originLabels: ImageData): LemonActionTypes {
     }
 }
 
+export function setTaskStartTime(taskStartTime: Date | null): LemonActionTypes {
+    return {
+        type: Action.SET_TASK_START_TIME,
+        payload: {
+            taskStartTime
+        }
+    }
+}
+
+

@@ -9,7 +9,7 @@ import {
 } from '../../store/labels/actionCreators';
 import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage} from '../../store/lemon/actionCreators';
+import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage, setTaskStartTime} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
@@ -95,11 +95,12 @@ export class LemonActions {
         try {
             // load images
             const page = 0;
-            // const { tasks, total } = await LemonActions.fetchTasksAssign(projectId, limit, page);
-            const { list: tasks, total } = await LemonActions.fetchTasks(projectId, limit, page);
+            const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
+            const view = 'workspace'; // TODO: modify this line
+            const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
             // set images
-            const imageUrls = tasks.map(task => ({ id: task.id, url: task.image.url }));
+            const imageUrls = list.map(task => ({ id: task.id, url: task.image.url }));
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
             store.dispatch(updateImageData(images));
@@ -121,6 +122,19 @@ export class LemonActions {
             alert(`${e}`);
             return { projectId: null, name: null, category: null };
         }
+    }
+
+    public static saveWorkingTimeByImageIndex(index: number, submittedAt: number = new Date().getTime()) {
+        const startTime = LemonSelector.getTaskStartTime();
+        if (!startTime) {
+            return Promise.resolve();
+        }
+
+        // log working time
+        const time = submittedAt - startTime.getTime();
+        const targetLabels = LabelsSelector.getImageDataByIndex(index);
+        const { id } = targetLabels;
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/log`, null, { time });
     }
 
     public static saveUpdatedImagesData(index: number) {
@@ -149,16 +163,18 @@ export class LemonActions {
         }
 
         const currentIndex = LabelsSelector.getActiveImageIndex();
-        await LemonActions.saveUpdatedImagesData(currentIndex);
+        const { submittedAt } = await LemonActions.saveUpdatedImagesData(currentIndex);
+        await LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt);
 
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
         const projectId = LemonSelector.getProjectId();
         const limit = LemonSelector.getTaskLimit();
-        const { list: tasks } = await LemonActions.fetchTasks(projectId, limit, page);
+        const view = 'workspace'; // TODO: modify this line
+        const { list } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
         // set images
-        const imageUrls = tasks.map(task => ({ id: task.id, url: task.image.imageUrl }));
+        const imageUrls = list.map(task => ({ id: task.id, url: task.image.imageUrl }));
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
         store.dispatch(updateImageData(images));
@@ -217,13 +233,13 @@ export class LemonActions {
         return LemonActions.lemonCore.getCredentials();
     }
 
-    public static fetchTasks(projectId: string, limit: number = 5, page: number = 0) {
-        const param = { limit, projectId, page };
+    public static fetchTasks(projectId: string, limit: number = 5, page: number = 0, view: string = 'workspace') {
+        const param = { limit, projectId, page, view };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
     }
 
-    public static fetchTasksAssign(projectId: string, limit: number = 5, page: number = 0) {
-        const param = { limit, projectId, page };
+    public static assignTasks(projectId: string, limit: number = 5) {
+        const param = { limit, projectId };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/0/assign`, param);
     }
 

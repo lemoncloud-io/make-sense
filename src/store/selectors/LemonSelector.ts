@@ -26,4 +26,8 @@ export class LemonSelector {
     public static getOriginLabels(): ImageData {
         return store.getState().lemon.originLabels;
     }
+
+    public static getTaskStartTime(): Date {
+        return store.getState().lemon.taskStartTime;
+    }
 }
