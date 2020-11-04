@@ -58,9 +58,9 @@ const App: React.FC<IProps> = (
 
     const handleOnIdle = () => {
         setIsIdle(true);
-
-        const currentIndex = LabelsSelector.getActiveImageIndex();
-        if (!currentIndex) {
+        console.log('idle!');
+        const currentIndex: number | null = LabelsSelector.getActiveImageIndex();
+        if (currentIndex === null) {
             popupIdle();
             return;
         }
@@ -70,6 +70,7 @@ const App: React.FC<IProps> = (
             .catch(e => {
                 console.log(e);
                 alert(`Submit Error: ${e}`);
+                popupIdle();
             })
     }
 
