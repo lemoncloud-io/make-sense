@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.scss';
 import EditorView from "./views/EditorView/EditorView";
 import MainView from "./views/MainView/MainView";
@@ -15,11 +15,11 @@ import classNames from "classnames";
 
 import {RouteComponentProps} from 'react-router-dom';
 import PreRenderView from './views/PreRenderView/PreRenderView';
-import IdleMonitorEvents from 'react-simple-idle-monitor/lib/IdleMonitorEvents';
 import {updateActivePopupType } from './store/general/actionCreators';
 import {PopupWindowType} from './data/enums/PopupWindowType';
 import {LabelsSelector} from './store/selectors/LabelsSelector';
 import {LemonActions} from './logic/actions/LemonActions';
+import { useIdleTimer } from 'react-idle-timer'
 
 const queryString = require('query-string');
 
@@ -44,28 +44,36 @@ const App: React.FC<IProps> = (
         updateActivePopupType,
     }) => {
 
-    const onIdleMonitorEvent = type => {
-        return (state) => {
-            const entry = { type, ...state };
-            console.log('event', entry);
-            if (type === 'idle') {
-                const currentIndex = LabelsSelector.getActiveImageIndex();
-                if (!currentIndex) {
-                    return;
-                }
-                LemonActions.saveUpdatedImagesData(currentIndex)
-                    .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
-                    .then(() => {
-                        updateActivePopupType(null);
-                        updateActivePopupType(PopupWindowType.IDLE_POPUP);
-                    })
-                    .catch(e => {
-                        console.log(e);
-                        alert(`Submit Error: ${e}`);
-                    })
-            }
-        };
+    const timeout = 1000 * 60 * 5; // 5minutes
+    const [isIdle, setIsIdle] = useState(false)
+
+    const popupIdle = () => {
+        updateActivePopupType(null);
+        updateActivePopupType(PopupWindowType.IDLE_POPUP);
+    };
+
+    const handleOnActive = () => {
+        setIsIdle(false);
     }
+
+    const handleOnIdle = () => {
+        setIsIdle(true);
+
+        const currentIndex = LabelsSelector.getActiveImageIndex();
+        if (!currentIndex) {
+            popupIdle();
+            return;
+        }
+        LemonActions.saveUpdatedImagesData(currentIndex)
+            .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
+            .then(() => popupIdle())
+            .catch(e => {
+                console.log(e);
+                alert(`Submit Error: ${e}`);
+            })
+    }
+
+    useIdleTimer({ timeout, onActive: handleOnActive, onIdle: handleOnIdle });
 
     const getQueryParams = () => {
         const { location } = routeProps;
@@ -98,17 +106,12 @@ const App: React.FC<IProps> = (
     };
 
     return (
-        <IdleMonitorEvents timeout={1000 * 60 * 5} // 5 minutes
-                           onRun={onIdleMonitorEvent('run')}
-                           onStop={onIdleMonitorEvent('stop')}
-                           onIdle={onIdleMonitorEvent('idle')}>
-            <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
-                 draggable={false}
-            >
-                {selectRoute()}
-                <PopupView/>
-            </div>
-        </IdleMonitorEvents>
+        <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
+             draggable={false}
+        >
+            {selectRoute()}
+            <PopupView/>
+        </div>
     );
 };
 
