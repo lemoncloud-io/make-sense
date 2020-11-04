@@ -33,22 +33,32 @@ interface LemonFileImage {
     file?: File;
 }
 
+interface MakeSenseAnnotation {
+    labelLines: LabelLine[];
+    labelPoints: LabelPoint[];
+    labelRects: LabelRect[];
+    labelPolygons: LabelPolygon[];
+    labelNameIds: string[];
+}
+
 export class LemonActions {
 
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
 
-    public static getLabelsFromAnnotations(annotations: any[]): { labelLines: LabelLine[], labelPoints: LabelPoint[], labelRects: LabelRect[], labelPolygons: LabelPolygon[] } {
+    public static getLabelsFromAnnotations(annotations: any[]): MakeSenseAnnotation {
         const lines = annotations.filter(annotation => !!annotation.line);
         const points = annotations.filter(annotation => !!annotation.point);
         const vertices = annotations.filter(annotation => !!annotation.vertices);
         const rects = annotations.filter(annotation => !!annotation.rect);
+        const tags = annotations.filter(annotation => !!annotation.label && !annotation.rect && !annotation.point && !annotation.vertices && !annotation.rect);
 
         // set label info from server
         const labelLines = lines.map(({ label, line }) => ({ id: uuidv1(), labelId: label.id, line }));
         const labelPoints = points.map(({ label, point }) => ({ id: uuidv1(), labelId: label.id, point, isCreatedByAI: false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
         const labelRects = rects.map(({ label, rect }) => ({ id: uuidv1(), labelId: label.id, rect, isCreatedByAI:false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
         const labelPolygons = vertices.map(({ label, vertices }) => ({ id: uuidv1(), labelId: label.id, vertices }));
-        return { labelLines, labelPoints, labelRects, labelPolygons };
+        const labelNameIds = tags.map(({ label }) => label.id);
+        return { labelLines, labelPoints, labelRects, labelPolygons, labelNameIds };
     }
 
     public static async setupProject(projectId: string) {
@@ -96,6 +106,8 @@ export class LemonActions {
             // load images
             const page = 0;
             const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
+            console.log('assignedTo: ', assignedTo);
+            console.log('tasks: ', tasks);
             const view = 'workspace'; // TODO: modify this line
             const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
