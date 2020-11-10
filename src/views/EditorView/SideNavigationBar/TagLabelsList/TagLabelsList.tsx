@@ -8,7 +8,6 @@ import {connect} from "react-redux";
 import {remove} from "lodash";
 import './TagLabelsList.scss';
 import classNames from "classnames";
-import {ImageButton} from "../../../Common/ImageButton/ImageButton";
 import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
 interface IProps {
@@ -60,9 +59,9 @@ const TagLabelsList: React.FC<IProps> = (
         );
     };
 
-    const addNewOnClick = () => {
-        updateActivePopupType(PopupWindowType.UPDATE_LABEL)
-    }
+    // const addNewOnClick = () => {
+    //     updateActivePopupType(PopupWindowType.UPDATE_LABEL)
+    // }
 
     const getChildren = () => {
         return [

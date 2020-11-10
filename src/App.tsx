@@ -58,7 +58,7 @@ const App: React.FC<IProps> = (
 
     const handleOnIdle = () => {
         setIsIdle(true);
-        console.log('idle!');
+        console.log('idle!: ', isIdle);
         const currentIndex: number | null = LabelsSelector.getActiveImageIndex();
         if (currentIndex === null) {
             popupIdle();

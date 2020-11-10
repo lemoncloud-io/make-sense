@@ -9,7 +9,7 @@ import {
 } from '../../store/labels/actionCreators';
 import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage, setTaskStartTime} from '../../store/lemon/actionCreators';
+import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage } from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
