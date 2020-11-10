@@ -44,6 +44,7 @@
     align-content: center;
   }
 
+
   .Footer {
     padding: 0 40px;
     height: 80px;
@@ -86,5 +87,16 @@
         }
       }
     }
+
+    .accept {
+      box-shadow: $redColor 0 0 0 2px inset; // fallback if new css variables are not supported by browser
+      background-color: $redColor; // fallback if new css variables are not supported by browser
+
+      &:hover {
+        background-color: transparent;
+        color: $redColor; // fallback if new css variables are not supported by browser
+      }
+    }
+
   }
 }

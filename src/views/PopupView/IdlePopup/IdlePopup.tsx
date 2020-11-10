@@ -1,5 +1,5 @@
 import React from 'react'
-import './FinishProjectPopup.scss'
+import './IdlePopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {
     updateActiveImageIndex,
@@ -14,10 +14,8 @@ import {ImageData, LabelName} from "../../../store/labels/types";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ProjectData} from "../../../store/general/types";
 import {updateProjectData} from "../../../store/general/actionCreators";
-import {LemonActions} from '../../../logic/actions/LemonActions';
 import {setProjectInfo} from '../../../store/lemon/actionCreators';
 import {LabelType} from '../../../data/enums/LabelType';
-import {LabelsSelector} from '../../../store/selectors/LabelsSelector';
 
 interface IProps {
     updateActiveLabelType: (labelType: LabelType) => any;
@@ -30,45 +28,33 @@ interface IProps {
     setProjectInfo: (id: string, category: string) => any;
 }
 
-const FinishProjectPopup: React.FC<IProps> = (props) => {
+const IdlePopup: React.FC<IProps> = (props) => {
     const {
+        updateActiveLabelType,
         updateActiveLabelNameId,
         updateLabelNames,
         updateActiveImageIndex,
         updateImageData,
         updateFirstLabelCreatedFlag,
         updateProjectData,
+        setProjectInfo,
     } = props;
 
     const renderContent = () => {
         return(
-            <div className="FinishProjectPopup">
+            <div className="IdlePopupContent">
                 <div className="Message">
-                    작업을 마치시겠습니까?
+                    장시간 입력이 없어 로그아웃되었습니다. 새로고침 후 이용해주세요.
                 </div>
             </div>
         )
     };
 
     const onAccept = () => {
-        saveLabels();
-    };
-
-    const onReject = () => {
+        resetStore();
         PopupActions.close();
+        window.location.reload();
     };
-
-    const saveLabels = () => {
-        const currentIndex = LabelsSelector.getActiveImageIndex();
-        LemonActions.saveUpdatedImagesData(currentIndex)
-            .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
-            .then(() => resetStoreAndClosePopup())
-            .then(() => window.history.back())
-            .catch(e => {
-                console.log(e);
-                alert(`Submit Error: ${e}`)
-            })
-    }
 
     const resetStore = () => {
         updateActiveLabelType(null);
@@ -81,19 +67,13 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
         setProjectInfo(null, null);
     }
 
-    const resetStoreAndClosePopup = () => {
-        resetStore();
-        PopupActions.close();
-    }
-
     return(
         <GenericYesNoPopup
-            title={"작업 완료"}
+            title={"장시간 미입력"}
             renderContent={renderContent}
-            acceptLabel={"취소"}
-            onAccept={onReject}
-            rejectLabel={"확인"}
-            onReject={onAccept}
+            acceptLabel={"새로고침"}
+            onAccept={onAccept}
+            skipRejectButton={true}
         />)
 };
 
@@ -114,4 +94,4 @@ const mapStateToProps = (state: AppState) => ({
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-)(FinishProjectPopup);
+)(IdlePopup);

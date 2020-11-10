@@ -8,6 +8,7 @@ export type LemonState = {
     page: number;
     totalPage: number;
     originLabels: ImageData;
+    taskStartTime: Date;
 }
 
 interface SetProjectInfo {
@@ -46,8 +47,17 @@ interface SetOriginLabels {
     }
 }
 
+interface SetTaskStartTime {
+    type: typeof Action.SET_TASK_START_TIME;
+    payload: {
+        taskStartTime: Date;
+    }
+}
+
 export type LemonActionTypes = SetProjectInfo
     | SetTaskCurrentPage
     | SetOriginLabels
     | SetTaskTotalPage
+    | SetTaskStartTime
     | SetTaskLimit;
+

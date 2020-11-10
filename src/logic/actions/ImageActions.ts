@@ -4,12 +4,13 @@ import { ViewPortActions } from "./ViewPortActions";
 import { LemonActions } from './LemonActions';
 import { LabelsSelector } from "../../store/selectors/LabelsSelector";
 import { updateActiveImageIndex, updateActiveLabelId } from "../../store/labels/actionCreators";
-import { setOriginLabels } from "../../store/lemon/actionCreators";
+import { setOriginLabels, setTaskStartTime } from "../../store/lemon/actionCreators";
 import { EditorModel } from "../../staticModels/EditorModel";
 
 import { cloneDeep } from 'lodash';
 
 export class ImageActions {
+
     public static getPreviousImage(): void {
         const currentImageIndex: number = LabelsSelector.getActiveImageIndex();
         ImageActions.getImageByIndex(currentImageIndex - 1, currentImageIndex);
@@ -29,10 +30,12 @@ export class ImageActions {
             return;
         } else {
             // TODO: refactor below
-            LemonActions.saveUpdatedImagesData(prevIndex).catch(e => {
-                console.log(e);
-                alert(`Submit Error: ${e}`)
-            });
+            LemonActions.saveUpdatedImagesData(prevIndex)
+                .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(prevIndex, submittedAt))
+                .catch(e => {
+                    console.log(e);
+                    alert(`Submit Error: ${e}`)
+                });
             ViewPortActions.setZoom(1);
             store.dispatch(updateActiveImageIndex(index));
             store.dispatch(updateActiveLabelId(null));
@@ -41,6 +44,10 @@ export class ImageActions {
     }
 
     public static setOriginLabelByIndex(index: number, loadStatus = true): void {
+        // set working start time
+        const taskStartTime = new Date();
+        store.dispatch(setTaskStartTime(taskStartTime));
+
         const originLabels = cloneDeep(LabelsSelector.getImageDataByIndex(index));
         store.dispatch(setOriginLabels({ ...originLabels, loadStatus })); // storing origin labels..
     }
