@@ -3,7 +3,7 @@ import uuidv1 from "uuid/v1";
 import {TextTagInfo} from '../logic/actions/LemonActions';
 
 export class ImageDataUtil {
-    public static createImageDataFromFileData(fileData: File, id: string = uuidv1(), textInfo: TextTagInfo = null): ImageData {
+    public static createImageDataFromFileData(fileData: File, id: string = uuidv1(), textData: TextTagInfo = null): ImageData {
         return {
             id: id,
             fileData: fileData,
@@ -15,7 +15,7 @@ export class ImageDataUtil {
             labelNameIds: [],
             isVisitedByObjectDetector: false,
             isVisitedByPoseDetector: false,
-            textData: textInfo
+            textData: textData
         }
     }
 
