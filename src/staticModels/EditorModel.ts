@@ -5,6 +5,7 @@ import {IPoint} from "../interfaces/IPoint";
 import {ISize} from "../interfaces/ISize";
 import Scrollbars from "react-custom-scrollbars";
 import {ViewPortHelper} from "../logic/helpers/ViewPortHelper";
+import {TextEditorRenderEngine} from '../logic/render/TextEditorRenderEngine';
 
 export class EditorModel {
     public static editor: HTMLDivElement;
@@ -15,6 +16,7 @@ export class EditorModel {
     public static image: HTMLImageElement;
 
     public static primaryRenderingEngine: PrimaryEditorRenderEngine;
+    public static textRenderingEngine: TextEditorRenderEngine;
     public static supportRenderingEngine: BaseRenderEngine;
 
     public static viewPortHelper: ViewPortHelper;

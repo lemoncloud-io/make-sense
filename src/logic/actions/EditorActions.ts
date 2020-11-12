@@ -11,6 +11,7 @@ import React from "react";
 import {IPoint} from "../../interfaces/IPoint";
 import {DrawUtil} from "../../utils/DrawUtil";
 import {PrimaryEditorRenderEngine} from "../render/PrimaryEditorRenderEngine";
+import {TextEditorRenderEngine} from "../render/TextEditorRenderEngine";
 import {ContextManager} from "../context/ContextManager";
 import {PointUtil} from "../../utils/PointUtil";
 import {ViewPortActions} from "./ViewPortActions";
@@ -55,6 +56,7 @@ export class EditorActions {
     public static mountRenderEnginesAndHelpers(activeLabelType: LabelType) {
         EditorModel.viewPortHelper = new ViewPortHelper();
         EditorModel.primaryRenderingEngine = new PrimaryEditorRenderEngine(EditorModel.canvas);
+        EditorModel.textRenderingEngine = new TextEditorRenderEngine(EditorModel.canvas);
         EditorActions.mountSupportRenderingEngine(activeLabelType);
     }
 
@@ -65,6 +67,7 @@ export class EditorActions {
     public static fullRender() {
         DrawUtil.clearCanvas(EditorModel.canvas);
         EditorModel.primaryRenderingEngine.render(EditorActions.getEditorData());
+        EditorModel.textRenderingEngine.render(EditorActions.getEditorData());
         EditorModel.supportRenderingEngine && EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
     }
 

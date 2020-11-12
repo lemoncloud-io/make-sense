@@ -20,17 +20,25 @@ import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
+import {ProjectCategory} from '../../data/enums/ProjectType';
+
+export interface TextTagInfo {
+    title: string;
+    description: string;
+}
 
 type LemonImageUrl = {
     id: string;
     url: string;
     width?: number;
     height?: number;
+    textInfo?: TextTagInfo;
 }
 
 interface LemonFileImage {
     id: string;
     file?: File;
+    textInfo?: TextTagInfo;
 }
 
 interface MakeSenseAnnotation {
@@ -40,6 +48,16 @@ interface MakeSenseAnnotation {
     labelPolygons: LabelPolygon[];
     labelNameIds: string[];
 }
+
+const WHITE_IMAGE_URL = 'img/white-bg.jpg';
+
+const tmpTextInfo: TextTagInfo = {
+    title: '살짝 크게보이는 느낌은 있는데 전체적으르 괜찮아요',
+    description: '살짝 크게보이는 느낌은 있는데 전체적으르 괜찮아요\n' +
+        '신발이 이뻐서 왠만한 스타일은 무난하게 소화가능할거 같네요.\n' +
+        '그리고 일반 긴청바지입으시는 분들은 밑단 수선해서 나이키마크잇는 윗단이랑 안겹치게 수선하시고 입으시는게 깔끔하게 보이실꺼에요\n' +
+        '오늘도 좋은 하루 되세요'
+};
 
 export class LemonActions {
 
@@ -63,7 +81,6 @@ export class LemonActions {
 
     public static async setupProject(projectId: string) {
         try {
-            // TODO: set category for tagging or labeling
             const { name, category } = await LemonActions.getProjectData(projectId);
             store.dispatch(setProjectInfo(projectId, category));
             store.dispatch(updateProjectData({ name, type: null }));
@@ -81,8 +98,14 @@ export class LemonActions {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
-            const { image: rawImage, projectId } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
-            const imageUrls = [rawImage].map(({ _, url }) => ({ id: taskId, url }));
+            const { image: rawImage, project: { id, category } } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
+            const imageUrls = [rawImage].map(({ _, url }) => {
+                // if (category === ProjectCategory.TEXT_TAG) {
+                if (category === ProjectCategory.IMAGE_LABEL) {
+                    return { id: taskId, url: WHITE_IMAGE_URL, textInfo: tmpTextInfo };
+                }
+                return { id: taskId, url };
+            });
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
 
@@ -91,7 +114,7 @@ export class LemonActions {
             LemonActions.resetLemonOptions();
 
             return {
-                projectId: projectId,
+                projectId: id,
                 name: GeneralSelector.getProjectName(),
                 category: LemonSelector.getProjectCategory(),
             };
@@ -112,7 +135,15 @@ export class LemonActions {
             const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
             // set images
-            const imageUrls = list.map(task => ({ id: task.id, url: task.image.url }));
+            const imageUrls = list.map(task => {
+                const { project } = task;
+                const { category } = project;
+                // if (category === ProjectCategory.TEXT_TAG) {
+                if (category === ProjectCategory.IMAGE_LABEL) {
+                    return { id: task.id, url: WHITE_IMAGE_URL, textInfo: tmpTextInfo };
+                }
+                return { id: task.id, url: task.image.url };
+            });
             const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
             const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
             store.dispatch(updateImageData(images));
@@ -186,7 +217,16 @@ export class LemonActions {
         const { list } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
         // set images
-        const imageUrls = list.map(task => ({ id: task.id, url: task.image.imageUrl }));
+        // const imageUrls = list.map(task => ({ id: task.id, url: task.image.url }));
+        const imageUrls = list.map(task => {
+            const { project } = task;
+            const { category } = project;
+            // if (category === ProjectCategory.TEXT_TAG) {
+            if (category === ProjectCategory.IMAGE_LABEL) {
+                return { id: task.id, url: WHITE_IMAGE_URL, textInfo: tmpTextInfo };
+            }
+            return { id: task.id, url: task.image.url };
+        });
         const imageFiles = await LemonActions.convertUrlsToFiles(imageUrls);
         const images = LemonActions.getImageDataFromLemonFiles(imageFiles);
         store.dispatch(updateImageData(images));
@@ -259,13 +299,13 @@ export class LemonActions {
         // const customOptions = { responseType: 'blob' };
         // LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
 
-        return Promise.all(imageUrls.map(async ({ id, url }) => {
+        return Promise.all(imageUrls.map(async ({ id, url, textInfo }) => {
             const name = url.split('/') ? url.split('/').pop() : 'null';
 
             const config: AxiosRequestConfig = { responseType: 'blob' };
             return axios.get(url, config)
-                .then(response => ({ id, file: new File([response.data], name) }))
-                .catch(() => ({ id, file: null, name }));
+                .then(response => ({ id, file: new File([response.data], name), textInfo }))
+                .catch(() => ({ id, file: null, textInfo }));
 
             // TODO: use below
             // return LemonActions.lemonCore.request('GET', imageUrl, '')
@@ -277,7 +317,7 @@ export class LemonActions {
     private static getImageDataFromLemonFiles(files: LemonFileImage[]): ImageData[] {
         return files
             .filter(({ file }) => !!file)
-            .map(({ file, id }) => ImageDataUtil.createImageDataFromFileData(file, id));
+            .map(({ file, id , textInfo}) => ImageDataUtil.createImageDataFromFileData(file, id, textInfo));
     }
 
     private static resetLemonOptions() {

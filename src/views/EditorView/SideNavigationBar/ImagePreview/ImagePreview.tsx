@@ -28,6 +28,7 @@ interface IProps {
 
 interface IState {
     image: HTMLImageElement;
+    isTextMode: boolean;
 }
 
 class ImagePreview extends React.Component<IProps, IState> {
@@ -38,11 +39,15 @@ class ImagePreview extends React.Component<IProps, IState> {
 
         this.state = {
             image: null,
+            isTextMode: false,
         }
     }
 
     public componentDidMount(): void {
         ImageLoadManager.addAndRun(this.loadImage(this.props.imageData, this.props.isScrolling));
+        if (!!this.props.imageData.textData) {
+            this.setState({ isTextMode: true });
+        }
     }
 
     public componentWillUpdate(nextProps: Readonly<IProps>, nextState: Readonly<IState>, nextContext: any): void {
@@ -169,6 +174,7 @@ class ImagePreview extends React.Component<IProps, IState> {
                                 src={"ico/ok.png"}
                                 alt={"checkbox"}
                             />}
+                            {this.state.isTextMode && <span style={{ position: 'absolute', top: 25, left: 30 }}>TEXT</span>}
                         </div>,
                         <div
                             className="Background"

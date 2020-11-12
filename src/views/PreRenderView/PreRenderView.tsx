@@ -49,7 +49,8 @@ const PreRenderView: React.FC<IProps> = (
                         updateActivePopupType(null);
                         const { name, category } = res;
                         let type = ProjectType.OBJECT_DETECTION;
-                        if (category === ProjectCategory.IMAGE_TAG) {
+                        // TODO: refactor below
+                        if (category === ProjectCategory.IMAGE_TAG || category === ProjectCategory.TEXT_TAG) {
                             type = ProjectType.IMAGE_RECOGNITION;
                         }
                         updateProjectData({ name, type });

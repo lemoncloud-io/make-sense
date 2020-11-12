@@ -72,7 +72,8 @@ const AssignTasksPopup: React.FC<IProps> = (
         LemonActions.initTaskData(projectId, limit).then(({ projectId, name, category }) => {
             updateActivePopupType(null);
             let type = ProjectType.OBJECT_DETECTION;
-            if (category === ProjectCategory.IMAGE_TAG) {
+            // TODO: refactor below
+            if (category === ProjectCategory.IMAGE_TAG || category === ProjectCategory.TEXT_TAG) {
                 type = ProjectType.IMAGE_RECOGNITION;
             }
             updateProjectData({ name, type });
