@@ -56,7 +56,7 @@ export class TextEditorRenderEngine extends BaseRenderEngine {
     private drawTitleText(title: string = '') {
         const { x, y } = this.defaultTitlePoint;
         // for multi-line text
-        title.split('\n').forEach((text, i) => {
+        title.split(/[!,?,.]/).forEach((text, i) => {
             const point = { x: x, y: y + (paddingY * i + 1) };
             DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, true, 'left');
             this.defaultContentPoint = point;
@@ -65,7 +65,7 @@ export class TextEditorRenderEngine extends BaseRenderEngine {
 
     private drawContentText(content: string = '') {
         const { x, y } = this.defaultContentPoint;
-        content.split('\n').forEach((text, i) => {
+        content.split(/[!,?,.]/).forEach((text, i) => {
             const point = { x: x, y: y + (paddingY + paddingY * i + 1) };
             DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, false, 'left');
         });
