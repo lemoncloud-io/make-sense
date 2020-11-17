@@ -12,7 +12,7 @@ const paddingY = 20;
 export class TextEditorRenderEngine extends BaseRenderEngine {
 
     private defaultTitlePoint: IPoint;
-    private defaultDescriptionPoint: IPoint;
+    private defaultContentPoint: IPoint;
 
     public constructor(canvas: HTMLCanvasElement) {
         super(canvas);
@@ -49,25 +49,25 @@ export class TextEditorRenderEngine extends BaseRenderEngine {
         const imageData: ImageData = LabelsSelector.getActiveImageData();
         if (imageData.textData) {
             this.drawTitleText(imageData.textData.title);
-            this.drawDescriptionText(imageData.textData.description);
+            this.drawContentText(imageData.textData.content);
         }
     }
 
-    private drawTitleText(title: string) {
+    private drawTitleText(title: string = '') {
         const { x, y } = this.defaultTitlePoint;
         // for multi-line text
         title.split('\n').forEach((text, i) => {
             const point = { x: x, y: y + (paddingY * i + 1) };
-            DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, true,'left');
-            this.defaultDescriptionPoint = point;
+            DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, true, 'left');
+            this.defaultContentPoint = point;
         });
     }
 
-    private drawDescriptionText(description: string) {
-        const { x, y } = this.defaultDescriptionPoint;
-        description.split('\n').forEach((text, i) => {
+    private drawContentText(content: string = '') {
+        const { x, y } = this.defaultContentPoint;
+        content.split('\n').forEach((text, i) => {
             const point = { x: x, y: y + (paddingY + paddingY * i + 1) };
-            DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, false,'left');
+            DrawUtil.drawText(this.canvas, text, 16, point, Settings.TEXT_COLOR, false, 'left');
         });
     }
 
