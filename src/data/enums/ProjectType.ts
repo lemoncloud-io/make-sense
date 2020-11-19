@@ -7,4 +7,5 @@ export enum ProjectType {
 export enum ProjectCategory {
     IMAGE_LABEL = 'image_label',
     IMAGE_TAG = 'image_tag',
+    TEXT_TAG = 'text',
 }

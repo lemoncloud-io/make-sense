@@ -29,6 +29,7 @@ export class Settings {
     public static readonly PRIMARY_COLOR: string = "#2af598";
     public static readonly SECONDARY_COLOR: string = "#009efd";
     public static readonly INACTIVE_LINE_COLOR: string = "#d0d0d0";
+    public static readonly TEXT_COLOR: string = "#171717";
 
     public static readonly DARK_THEME_FIRST_COLOR: string = "#171717";
     public static readonly DARK_THEME_SECOND_COLOR: string = "#282828";
