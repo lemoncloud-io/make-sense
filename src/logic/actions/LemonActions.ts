@@ -53,14 +53,6 @@ interface MakeSenseAnnotation {
 
 const WHITE_IMAGE_URL = 'img/white-bg.jpg';
 
-const tmpTextInfo: TextTagInfo = {
-    title: '살짝 크게보이는 느낌은 있는데 전체적으르 괜찮아요',
-    content: '살짝 크게보이는 느낌은 있는데 전체적으르 괜찮아요\n' +
-        '신발이 이뻐서 왠만한 스타일은 무난하게 소화가능할거 같네요.\n' +
-        '그리고 일반 긴청바지입으시는 분들은 밑단 수선해서 나이키마크잇는 윗단이랑 안겹치게 수선하시고 입으시는게 깔끔하게 보이실꺼에요\n' +
-        '오늘도 좋은 하루 되세요'
-};
-
 export class LemonActions {
 
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
