@@ -97,16 +97,30 @@ export class TextEditorRenderEngine extends BaseRenderEngine {
             return d > 0 ? arr.reduce((acc, val) => acc.concat(Array.isArray(val) ? flatDeep(val, d - 1) : val), []) : arr.slice();
         };
 
-        const splits = text.replace(/\.(?!\d)|([^\d])\.(?=\d)/g, '$1.|').split('|').map(str => {
-            const measureWidth = ctx.measureText(str).width;
-            const isLongText = measureWidth > canvasWidth;
-            if (isLongText) {
-                return halfSplitter(str);
-            }
-            return str;
-        });
+        const splitText = textArray => {
+            return [...textArray].map(str => {
+                const measureWidth = ctx.measureText(str).width;
+                const isLongText = measureWidth > canvasWidth;
+                if (isLongText) {
+                    return halfSplitter(str);
+                }
+                return str;
+            });
+        };
 
-        return flatDeep(splits);
+        const shortenTexts = textArray => {
+            const isAllShort = textArray.filter(txt => {
+                const measureWidth = ctx.measureText(txt).width;
+                return measureWidth > canvasWidth;
+            }).length === 0;
+
+            if (isAllShort) {
+                return textArray;
+            }
+            return shortenTexts(flatDeep(splitText(textArray)));
+        };
+
+        return shortenTexts([text]);
     }
 
     isInProgress(): boolean {
