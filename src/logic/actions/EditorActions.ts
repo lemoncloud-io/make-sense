@@ -11,6 +11,7 @@ import React from "react";
 import {IPoint} from "../../interfaces/IPoint";
 import {DrawUtil} from "../../utils/DrawUtil";
 import {PrimaryEditorRenderEngine} from "../render/PrimaryEditorRenderEngine";
+import {TextEditorRenderEngine} from "../render/TextEditorRenderEngine";
 import {ContextManager} from "../context/ContextManager";
 import {PointUtil} from "../../utils/PointUtil";
 import {ViewPortActions} from "./ViewPortActions";
@@ -20,6 +21,7 @@ import {GeneralSelector} from "../../store/selectors/GeneralSelector";
 import {ViewPortHelper} from "../helpers/ViewPortHelper";
 import {CustomCursorStyle} from "../../data/enums/CustomCursorStyle";
 import {LineRenderEngine} from "../render/LineRenderEngine";
+import {Settings} from '../../settings/Settings';
 
 export class EditorActions {
 
@@ -54,6 +56,7 @@ export class EditorActions {
     public static mountRenderEnginesAndHelpers(activeLabelType: LabelType) {
         EditorModel.viewPortHelper = new ViewPortHelper();
         EditorModel.primaryRenderingEngine = new PrimaryEditorRenderEngine(EditorModel.canvas);
+        EditorModel.textRenderingEngine = new TextEditorRenderEngine(EditorModel.canvas);
         EditorActions.mountSupportRenderingEngine(activeLabelType);
     }
 
@@ -64,6 +67,7 @@ export class EditorActions {
     public static fullRender() {
         DrawUtil.clearCanvas(EditorModel.canvas);
         EditorModel.primaryRenderingEngine.render(EditorActions.getEditorData());
+        EditorModel.textRenderingEngine.render(EditorActions.getEditorData());
         EditorModel.supportRenderingEngine && EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
     }
 
@@ -123,6 +127,7 @@ export class EditorActions {
             EditorModel.cursor.style.left = mousePositionOverViewPort.x + "px";
             EditorModel.cursor.style.top = mousePositionOverViewPort.y + "px";
             EditorModel.cursor.style.display = "block";
+            EditorModel.cursor.style.borderColor = Settings.CROSS_HAIR_COLOR;
 
             if (isMouseOverImage && ![CustomCursorStyle.GRAB, CustomCursorStyle.GRABBING].includes(GeneralSelector.getCustomCursorStyle())) {
                 const imageSize: ISize = ImageUtil.getSize(EditorModel.image);
@@ -135,6 +140,7 @@ export class EditorActions {
                 EditorModel.mousePositionIndicator.style.left = (mousePositionOverViewPort.x + 15) + "px";
                 EditorModel.mousePositionIndicator.style.top = (mousePositionOverViewPort.y + 15) + "px";
                 EditorModel.mousePositionIndicator.style.display = "block";
+                EditorModel.mousePositionIndicator.style.color = Settings.CROSS_HAIR_COLOR;
             } else {
                 EditorModel.mousePositionIndicator.style.display = "none";
             }

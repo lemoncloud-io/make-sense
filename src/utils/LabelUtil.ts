@@ -34,7 +34,8 @@ export class LabelUtil {
 
     public static convertLabelNamesListToMap(labelNames: LabelName[]): any {
         return labelNames.reduce((map: any, labelNameRecord: LabelName) => {
-            map[labelNameRecord.id] = labelNameRecord.name;
+            const isEditable = labelNameRecord.hasOwnProperty('isEditable') ? labelNameRecord.isEditable : true;
+            map[labelNameRecord.id] = { name: labelNameRecord.name, isEditable };
             return map;
         }, {})
     }
@@ -43,9 +44,11 @@ export class LabelUtil {
         const labelNamesList: LabelName[] = [];
         Object.keys(object).forEach((key) => {
             if (!!object[key]) {
+                const isEditable = object[key].hasOwnProperty('isEditable') ? object[key].isEditable : true;
                 labelNamesList.push({
                     id: key,
-                    name: object[key]
+                    name: object[key].name,
+                    isEditable
                 })
             }
         });

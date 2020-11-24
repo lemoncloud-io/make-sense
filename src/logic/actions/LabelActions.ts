@@ -75,7 +75,7 @@ export class LabelActions {
         const newImagesData: ImageData[] = imagesData.map((imageData: ImageData) => {
             return LabelActions.removeLabelNamesFromImageData(imageData, labelNamesIds);
         });
-        store.dispatch(updateImageData(newImagesData))
+        store.dispatch(updateImageData(newImagesData));
     }
 
     private static removeLabelNamesFromImageData(imageData: ImageData, labelNamesIds: string[]): ImageData {

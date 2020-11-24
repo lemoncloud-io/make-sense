@@ -4,6 +4,7 @@ import {find} from "lodash";
 import {LabelType} from "../../data/enums/LabelType";
 
 export class LabelsSelector {
+
     public static getLabelNames(): LabelName[] {
         return store.getState().labels.labels;
     }
@@ -35,7 +36,7 @@ export class LabelsSelector {
 
     public static getImageDataByIndex(index: number): ImageData {
         const imagesData: ImageData[] = LabelsSelector.getImagesData();
-        return imagesData[index];
+        return { ...imagesData[index] };
     }
 
     public static getImageDataById(id: string): ImageData {

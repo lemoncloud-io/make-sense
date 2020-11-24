@@ -33,6 +33,13 @@ input {
   background: $main-color;
   font-size: $width/20;
   transition: .3s ease;
+  &:disabled {
+    ~label {
+      top: 0;
+      font: 700 $width/25;
+      color: white;
+    }
+  }
   &:valid {
     ~label {
       top: 0;

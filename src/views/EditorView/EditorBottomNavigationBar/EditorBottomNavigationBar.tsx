@@ -43,8 +43,8 @@ const EditorBottomNavigationBar: React.FC<IProps> = ({size, imageData, totalImag
                 isDisabled={activeImageIndex === 0}
                 externalClassName={"left"}
             />
-            {size.width > minWidth ?
-                <div className="CurrentImageName"> {imageData.fileData.name} </div> :
+            {size.width > minWidth && imageData && imageData.id ?
+                <div className="CurrentImageName"> {imageData.id} </div> :
                 <div className="CurrentImageCount"> {getImageCounter()} </div>
             }
             <ImageButton

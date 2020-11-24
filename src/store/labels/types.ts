@@ -4,6 +4,7 @@ import {LabelType} from "../../data/enums/LabelType";
 import {IPoint} from "../../interfaces/IPoint";
 import {LabelStatus} from "../../data/enums/LabelStatus";
 import {ILine} from "../../interfaces/ILine";
+import {TextTagInfo} from '../../logic/actions/LemonActions';
 
 export type LabelRect = {
     // GENERAL
@@ -44,6 +45,8 @@ export type LabelLine = {
 export type LabelName = {
     name: string;
     id: string;
+    isEditable?: boolean;
+    isNew?: boolean;
 }
 
 export type ImageData = {
@@ -61,6 +64,9 @@ export type ImageData = {
 
     // POSE NET
     isVisitedByPoseDetector: boolean;
+
+    // Lemon Text data
+    textData?: TextTagInfo;
 }
 
 export type LabelsState = {

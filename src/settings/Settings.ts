@@ -1,6 +1,16 @@
 import {PopupWindowType} from "../data/enums/PopupWindowType";
+import {LemonOptions} from '@lemoncloud/lemon-front-lib';
 
 export class Settings {
+    public static readonly PROJECT_NAME: string = "lemonade";
+    public static readonly LEMONADE_HOME: string = process.env.REACT_APP_LEMONADE_HOME;
+    public static readonly LEMONADE_API: string = process.env.REACT_APP_LEMONADE_API;
+    public static readonly LEMONADE_OAUTH_ENDPOINT: string = process.env.REACT_APP_LEMONADE_OAUTH_ENDPOINT;
+    public static readonly LEMON_OPTIONS: LemonOptions = {
+        project: Settings.PROJECT_NAME,
+        oAuthEndpoint: Settings.LEMONADE_OAUTH_ENDPOINT,
+    }
+
     public static readonly GITHUB_URL: string = "https://github.com/SkalskiP";
     public static readonly MEDIUM_URL: string = "https://medium.com/@piotr.skalski92";
     public static readonly PATREON_URL: string = "https://www.patreon.com/make_sense";
@@ -18,6 +28,8 @@ export class Settings {
 
     public static readonly PRIMARY_COLOR: string = "#2af598";
     public static readonly SECONDARY_COLOR: string = "#009efd";
+    public static readonly INACTIVE_LINE_COLOR: string = "#d0d0d0";
+    public static readonly TEXT_COLOR: string = "#171717";
 
     public static readonly DARK_THEME_FIRST_COLOR: string = "#171717";
     public static readonly DARK_THEME_SECOND_COLOR: string = "#282828";
@@ -25,7 +37,7 @@ export class Settings {
     public static readonly DARK_THEME_FORTH_COLOR: string = "#262c2f";
 
     public static readonly CROSS_HAIR_THICKNESS_PX: number = 1;
-    public static readonly CROSS_HAIR_COLOR: string = "#fff";
+    public static readonly CROSS_HAIR_COLOR: string = "#d0d0d0";
 
     public static readonly RESIZE_HANDLE_DIMENSION_PX: number = 8;
     public static readonly RESIZE_HANDLE_HOVER_DIMENSION_PX = 16;

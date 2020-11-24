@@ -35,6 +35,7 @@ class ImagesList extends React.Component<IProps, IState> {
     }
 
     public componentDidMount(): void {
+        ImageActions.setOriginLabelByIndex(0);
         this.updateListSize();
         window.addEventListener(EventType.RESIZE, this.updateListSize);
     }
@@ -77,7 +78,11 @@ class ImagesList extends React.Component<IProps, IState> {
     };
 
     private onClickHandler = (index: number) => {
-        ImageActions.getImageByIndex(index)
+        if (this.props.activeImageIndex === index) {
+            return;
+        }
+        const prevImageIndex = this.props.activeImageIndex;
+        ImageActions.getImageByIndex(index, prevImageIndex);
     };
 
     private renderImagePreview = (index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties) => {
@@ -118,7 +123,7 @@ const mapDispatchToProps = {};
 const mapStateToProps = (state: AppState) => ({
     activeImageIndex: state.labels.activeImageIndex,
     imagesData: state.labels.imagesData,
-    activeLabelType: state.labels.activeLabelType
+    activeLabelType: state.labels.activeLabelType,
 });
 
 export default connect(

@@ -8,7 +8,6 @@ import {connect} from "react-redux";
 import {remove} from "lodash";
 import './TagLabelsList.scss';
 import classNames from "classnames";
-import {ImageButton} from "../../../Common/ImageButton/ImageButton";
 import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
 interface IProps {
@@ -60,13 +59,13 @@ const TagLabelsList: React.FC<IProps> = (
         );
     };
 
-    const addNewOnClick = () => {
-        updateActivePopupType(PopupWindowType.UPDATE_LABEL)
-    }
+    // const addNewOnClick = () => {
+    //     updateActivePopupType(PopupWindowType.UPDATE_LABEL)
+    // }
 
     const getChildren = () => {
         return [
-            ...labelNames.map((labelName: LabelName) => {
+            labelNames.map((labelName: LabelName) => {
                 return <div
                     className={getClassName(labelName.id)}
                     onClickCapture={() => onTagClick(labelName.id)}
@@ -75,12 +74,12 @@ const TagLabelsList: React.FC<IProps> = (
                     {labelName.name}
                 </div>
             }),
-            <ImageButton
-                image={"ico/plus.png"}
-                imageAlt={"plus"}
-                buttonSize={{width: 32, height: 32}}
-                onClick={addNewOnClick}
-            />
+            // <ImageButton
+            //     image={"ico/plus.png"}
+            //     imageAlt={"plus"}
+            //     buttonSize={{width: 32, height: 32}}
+            //     onClick={addNewOnClick}
+            // />
         ]
     };
 
@@ -93,7 +92,7 @@ const TagLabelsList: React.FC<IProps> = (
             {labelNames.length === 0 ?
                 <div
                     className="EmptyLabelList"
-                    onClick={addNewOnClick}
+                    // onClick={addNewOnClick}
                     key="empty-label-list"
                 >
                     <img
@@ -123,7 +122,7 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    labelNames : state.labels.labels
+    labelNames : state.labels.labels,
 });
 
 export default connect(

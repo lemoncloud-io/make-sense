@@ -4,8 +4,8 @@ import {Settings} from "./Settings";
 export class RenderEngineConfig {
     public readonly lineThickness: number = 2;
     public readonly lineActiveColor: string = Settings.PRIMARY_COLOR;
-    public readonly lineInactiveColor: string = "#fff";
-    public readonly crossHairLineColor: string = "#fff";
+    public readonly lineInactiveColor: string = Settings.INACTIVE_LINE_COLOR;
+    public readonly crossHairLineColor: string = Settings.CROSS_HAIR_COLOR;
     public readonly crossHairPadding: number = 25;
     public readonly anchorSize: ISize = {
         width: Settings.RESIZE_HANDLE_DIMENSION_PX,

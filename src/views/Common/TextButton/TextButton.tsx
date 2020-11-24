@@ -17,8 +17,8 @@ export const TextButton = (props:IProps) => {
 
     const getClassName = () => {
         return classNames(
-            "TextButton",
             externalClassName,
+            "TextButton",
             {
                 "active": isActive,
                 "disabled": isDisabled

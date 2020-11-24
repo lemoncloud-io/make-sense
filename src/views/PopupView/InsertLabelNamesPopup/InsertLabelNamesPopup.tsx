@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useRef, useState } from 'react';
 import './InsertLabelNamesPopup.scss'
 import {GenericYesNoPopup} from "../GenericYesNoPopup/GenericYesNoPopup";
 import {PopupWindowType} from "../../../data/enums/PopupWindowType";
@@ -15,9 +15,16 @@ import {LabelUtil} from "../../../utils/LabelUtil";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 import {LabelActions} from "../../../logic/actions/LabelActions";
 import {ProjectType} from "../../../data/enums/ProjectType";
+import {LemonActions} from '../../../logic/actions/LemonActions';
+
+type LabelValue = {
+    name: string;
+    isEditable?: boolean;
+}
 
 interface IProps {
     projectType: ProjectType;
+    projectId: string;
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     updateLabelNames: (labels: LabelName[]) => any;
     isUpdate: boolean;
@@ -25,21 +32,27 @@ interface IProps {
 
 const InsertLabelNamesPopup: React.FC<IProps> = (
     {
+        projectId,
         projectType,
         updateActivePopupType,
         updateLabelNames,
         isUpdate
     }) => {
-    const initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
+
+    const scrollRef = useRef(null);
+
+    const initialLabels: LabelValue[] = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
     const [labelNames, setLabelNames] = useState(initialLabels);
 
     const addHandle = () => {
-        const newLabelNames = {...labelNames, [uuidv1()]: ""};
+        const newLabel: LabelValue = { name: '', isEditable: true };
+        const newLabelNames = {...labelNames, [uuidv1()]: newLabel };
         setLabelNames(newLabelNames);
+        setTimeout(scrollRef.current.scrollToBottom, 150);
     };
 
     const deleteHandle = (key: string) => {
-        const newLabelNames = {...labelNames};
+        const newLabelNames = { ...labelNames };
         delete newLabelNames[key];
         setLabelNames(newLabelNames);
     };
@@ -48,27 +61,30 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         return <div className="LabelEntry" key={key}>
                 <TextInput
                     key={key}
-                    value={labelNames[key]}
+                    value={labelNames[key].name}
                     isPassword={false}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(key, event.target.value)}
-                    label={"Insert label"}
+                    label={labelNames[key].isEditable ? "Insert Label" : "Default Label"}
+                    disabled={!labelNames[key].isEditable}
                 />
-                <ImageButton
-                    image={"ico/trash.png"}
-                    imageAlt={"remove_label"}
-                    buttonSize={{width: 30, height: 30}}
-                    onClick={() => deleteHandle(key)}
-                />
-            </div>
+                {
+                    labelNames[key].isEditable && <ImageButton
+                        image={"ico/trash.png"}
+                        imageAlt={"remove_label"}
+                        buttonSize={{width: 30, height: 30}}
+                        onClick={() => deleteHandle(key)}
+                    />
+                }
+        </div>
     });
 
     const onChange = (key: string, value: string) => {
-        const newLabelNames = {...labelNames, [key]: value};
+        const newLabelNames = {...labelNames, [key]: { name: value, isEditable: true } };
         setLabelNames(newLabelNames);
     };
 
     const onCreateAccept = () => {
-        const labelNamesList: string[] = extractLabelNamesList();
+        const labelNamesList: LabelValue[] = extractLabelNamesList();
         if (labelNamesList.length > 0) {
             updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
         }
@@ -80,13 +96,16 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
     };
 
     const onUpdateAccept = () => {
-        const labelNamesList: string[] = extractLabelNamesList();
+        const labelNamesList: LabelValue[] = extractLabelNamesList();
         const updatedLabelNamesList: LabelName[] = LabelUtil.convertMapToLabelNamesList(labelNames);
         const missingIds: string[] = LabelUtil.labelNamesIdsDiff(LabelsSelector.getLabelNames(), updatedLabelNamesList);
         LabelActions.removeLabelNames(missingIds);
+
         if (labelNamesList.length > 0) {
-            updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
-            updateActivePopupType(null);
+            LemonActions.saveUpdatedLabels(LabelUtil.convertMapToLabelNamesList(labelNames)).then(updated => {
+                updateLabelNames(updated);
+                updateActivePopupType(null);
+            });
         }
     };
 
@@ -98,9 +117,8 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateActivePopupType(null);
     };
 
-
-    const extractLabelNamesList = (): string[] => {
-        return Object.values(labelNames).filter((value => !!value)) as string[];
+    const extractLabelNamesList = (): LabelValue[] => {
+        return Object.values(labelNames).filter(((value: LabelValue) => !!value.name));
     };
 
     const renderContent = () => {
@@ -125,7 +143,8 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                     }
                 </div>
                 <div className="LabelsContainer">
-                    {Object.keys(labelNames).length !== 0 ? <Scrollbars>
+                    {Object.keys(labelNames).length > 0 ?
+                        <Scrollbars ref={scrollRef}>
                         <div
                             className="InsertLabelNamesPopupContent"
                         >
@@ -165,7 +184,8 @@ const mapDispatchToProps = {
 };
 
 const mapStateToProps = (state: AppState) => ({
-    projectType: state.general.projectData.type
+    projectType: state.general.projectData.type,
+    projectId: state.lemon.projectId,
 });
 
 export default connect(

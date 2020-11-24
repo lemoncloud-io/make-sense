@@ -1,15 +1,13 @@
 import React from 'react';
 import './TopNavigationBar.scss';
 import StateBar from "../StateBar/StateBar";
-import {UnderlineTextButton} from "../../Common/UnderlineTextButton/UnderlineTextButton";
 import {PopupWindowType} from "../../../data/enums/PopupWindowType";
 import {AppState} from "../../../store";
 import {connect} from "react-redux";
 import {updateActivePopupType, updateProjectData} from "../../../store/general/actionCreators";
 import TextInput from "../../Common/TextInput/TextInput";
-import {ImageButton} from "../../Common/ImageButton/ImageButton";
-import {Settings} from "../../../settings/Settings";
 import {ProjectData} from "../../../store/general/types";
+import { TextButton } from '../../Common/TextButton/TextButton';
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -40,14 +38,8 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                 <div>
                     <div
                         className="Header"
-                        onClick={() => updateActivePopupType(PopupWindowType.EXIT_PROJECT)}
                     >
-                        <img
-                            draggable={false}
-                            alt={"make-sense"}
-                            src={"/make-sense-ico-transparent.png"}
-                        />
-                        Make Sense
+                    LEMONADE
                     </div>
                 </div>
                 <div className="NavigationBarGroupWrapper">
@@ -58,34 +50,16 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                         value={projectData.name}
                         onChange={onChange}
                         onFocus={onFocus}
+                        disabled={true}
                     />
                 </div>
                 <div className="NavigationBarGroupWrapper">
-                    <UnderlineTextButton
-                        label={"LABELS"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.UPDATE_LABEL)}
-                    />
-                    <UnderlineTextButton
-                        label={"IMAGES"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.IMPORT_IMAGES)}
-                    />
-                    <UnderlineTextButton
-                        label={"EXPORT ANNOTATIONS"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.EXPORT_ANNOTATIONS)}
-                    />
-                    <UnderlineTextButton
-                        label={"IMPORT ANNOTATIONS"}
-                        under={true}
-                        onClick={() => updateActivePopupType(PopupWindowType.IMPORT_ANNOTATIONS)}
-                    />
-                    <ImageButton
-                        image={"img/github-logo.png"}
-                        imageAlt={"github-logo.png"}
-                        buttonSize={{width: 30, height: 30}}
-                        href={Settings.GITHUB_URL}
+                    <TextButton
+                        style={{ borderRadius: '10px', backgroundColor:'#eee', fontSize:'12px', padding:'15px' }}
+                        isActive={true}
+                        label={"완료"}
+                        onClick={() => updateActivePopupType(PopupWindowType.FINISH_PROJECT)}
+                        externalClassName={"accept"}
                     />
                 </div>
             </div>
