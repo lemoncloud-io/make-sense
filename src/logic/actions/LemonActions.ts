@@ -9,7 +9,7 @@ import {
 } from '../../store/labels/actionCreators';
 import {updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import {setProjectInfo, setTaskCurrentPage, setTaskTotalPage } from '../../store/lemon/actionCreators';
+import {setProjectInfo, setTaskCurrentPage, setTaskState, setTaskTotalPage} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
@@ -20,12 +20,7 @@ import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
-
-const blobToFile = (theBlob: Blob, fileName: string): File => {
-    return new File([theBlob], fileName, {
-        type: "image/jpeg",
-    });
-}
+import {TaskState} from "../../store/lemon/types";
 
 // TODO: modify types
 export interface TextTagInfo {
@@ -59,6 +54,26 @@ interface MakeSenseAnnotation {
 
 const WHITE_IMAGE_URL = 'img/white-bg.jpg';
 
+const blobToFile = (theBlob: Blob, fileName: string): File => {
+    return new File([theBlob], fileName, {
+        type: "image/jpeg",
+    });
+}
+
+const setTaskUrls = (tasks: Task[]) => {
+    return tasks.map(task => {
+        const { id, context } = task;
+        const { type } = context;
+        if (type === 'image' || !type) { // TODO: refactor this line
+            return { id, url: context.image.url };
+        }
+        if (type === 'text') {
+            return { id, url: WHITE_IMAGE_URL, textData: context.text };
+        }
+        return { id, url: WHITE_IMAGE_URL };
+    });
+};
+
 export class LemonActions {
 
     private static lemonCore: AuthService = new AuthService(Settings.LEMON_OPTIONS);
@@ -89,7 +104,7 @@ export class LemonActions {
             store.dispatch(updateLabelNames(labels));
         } catch (e) {
             alert(`${e}`);
-            // window.history.back();
+            window.history.back();
         }
     }
 
@@ -149,17 +164,7 @@ export class LemonActions {
     }
 
     private static async getImagesByTaskList(tasks: Task[]) {
-        const urls = tasks.map(task => {
-            const { id, context } = task;
-            const { type } = context;
-            if (type === 'image' || !type) { // TODO: refactor this line
-                return { id, url: context.image.url };
-            }
-            if (type === 'text') {
-                return { id, url: WHITE_IMAGE_URL, textData: context.text };
-            }
-            return { id, url: WHITE_IMAGE_URL };
-        });
+        const urls = setTaskUrls(tasks);
         const files = await LemonActions.convertUrlsToFiles(urls);
         return LemonActions.getImageDataFromLemonFiles(files);
     }
@@ -196,16 +201,31 @@ export class LemonActions {
     }
 
     public static async pageChanged(page: number) {
-        // refresh token
-        const credentials = await LemonActions.getCredentials();
-        if (!credentials) {
-            // TODO: add something
-        }
-
         const currentIndex = LabelsSelector.getActiveImageIndex();
         const { submittedAt } = await LemonActions.saveUpdatedImagesData(currentIndex);
         await LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt);
+        await this.resetTasks(page);
+        return;
+    }
 
+    public static async updateTaskState(state: TaskState) {
+        store.dispatch(setTaskState(state));
+        await this.resetTasks();
+        return;
+    }
+
+    // TODO: todo feature to modify label on editor
+    public static saveUpdatedLabels(updatedLabels: LabelName[]): Promise<LabelName[]> {
+        const projectId = LemonSelector.getProjectId();
+        return new Promise(resolve => {
+            setTimeout(() => {
+                console.log('TODO: request update labels', projectId, updatedLabels);
+                resolve(updatedLabels);
+            }, 300);
+        })
+    }
+
+    public static async resetTasks(page: number = 0) {
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
         const projectId = LemonSelector.getProjectId();
@@ -228,17 +248,6 @@ export class LemonActions {
         store.dispatch(setTaskCurrentPage(page));
         ImageActions.setOriginLabelByIndex(0);
         return;
-    }
-
-    // TODO: todo feature to modify label on editor
-    public static saveUpdatedLabels(updatedLabels: LabelName[]): Promise<LabelName[]> {
-        const projectId = LemonSelector.getProjectId();
-        return new Promise(resolve => {
-            setTimeout(() => {
-                console.log('TODO: request update labels', projectId, updatedLabels);
-                resolve(updatedLabels);
-            }, 300);
-        })
     }
 
     public static getTaskByImageData(image: ImageData) {
@@ -271,8 +280,12 @@ export class LemonActions {
     }
 
     public static fetchTasks(projectId: string, limit: number = 5, page: number = 0, view: string = 'workspace') {
-        const param = { limit, projectId, page, view };
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
+        let param = { limit, projectId, page, view };
+        const state = LemonSelector.getTaskState();
+        if (state === 'all') {
+            return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, param);
+        }
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks`, { ...param, state });
     }
 
     public static assignTasks(projectId: string, limit: number = 5) {
@@ -281,12 +294,15 @@ export class LemonActions {
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {
-        // const customOptions = { responseType: 'blob' };
+        // TODO: refactor lemon-core
+        // const customOptions = { header: {...}, responseType: 'blob' };
         // LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
+        // return LemonActions.lemonCore.request('GET', imageUrl, '')
+        //     .then(response => ({ id, file: new File([response], name) }))
+        //     .catch(() => ({ id, file: new File([], name) }));
 
         return Promise.all(imageUrls.map(async ({ id, url, textData }) => {
             const name = url.split('/') ? url.split('/').pop() : 'null';
-
             const config: AxiosRequestConfig = {
                 headers: {
                     'Accept': 'image/*',
@@ -294,21 +310,14 @@ export class LemonActions {
                 },
                 responseType: 'blob',
             };
-            console.log('AxiosRequest', url, config);
             return axios.get(url, config)
                 .then(response => {
-                    console.log(response);
                     // return ({ id, file: new File([response.data], name), textData });
                     const file = blobToFile(response.data, name);
                     return ({ id, file, textData })
                 })
                 .catch(() => ({ id, file: null, textData }));
-
-            // TODO: use below
-            // return LemonActions.lemonCore.request('GET', imageUrl, '')
-            //     .then(response => ({ id, file: new File([response], name) }))
-            //     .catch(() => ({ id, file: new File([], name) }));
-        }))
+        }));
     }
 
     private static getImageDataFromLemonFiles(files: LemonFileImage[]): ImageData[] {
