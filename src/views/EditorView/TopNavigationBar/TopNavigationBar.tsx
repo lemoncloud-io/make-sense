@@ -45,7 +45,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                 <div className="NavigationBarGroupWrapper">
                     <div className="ProjectName">Project Name:</div>
                     <TextInput
-                        key={"ProjectName"}
+                        key={projectData.type}
                         isPassword={false}
                         value={projectData.name}
                         onChange={onChange}

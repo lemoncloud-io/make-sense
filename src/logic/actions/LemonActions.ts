@@ -21,6 +21,12 @@ import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
 
+const blobToFile = (theBlob: Blob, fileName: string): File => {
+    return new File([theBlob], fileName, {
+        type: "image/jpeg",
+    });
+}
+
 // TODO: modify types
 export interface TextTagInfo {
     title?: string;
@@ -83,7 +89,7 @@ export class LemonActions {
             store.dispatch(updateLabelNames(labels));
         } catch (e) {
             alert(`${e}`);
-            window.history.back();
+            // window.history.back();
         }
     }
 
@@ -114,8 +120,8 @@ export class LemonActions {
             // load images
             const page = 0;
             const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
-            console.log('assignedTo: ', assignedTo);
-            console.log('tasks: ', tasks);
+            console.log('1. assignedTo: ', assignedTo);
+            console.log('2. tasks: ', tasks);
             const view = 'workspace'; // TODO: modify this line
             const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
@@ -281,9 +287,21 @@ export class LemonActions {
         return Promise.all(imageUrls.map(async ({ id, url, textData }) => {
             const name = url.split('/') ? url.split('/').pop() : 'null';
 
-            const config: AxiosRequestConfig = { responseType: 'blob' };
+            const config: AxiosRequestConfig = {
+                headers: {
+                    'Accept': 'image/*',
+                    'Content-Type': 'image/jpeg',
+                },
+                responseType: 'blob',
+            };
+            console.log('AxiosRequest', url, config);
             return axios.get(url, config)
-                .then(response => ({ id, file: new File([response.data], name), textData }))
+                .then(response => {
+                    console.log(response);
+                    // return ({ id, file: new File([response.data], name), textData });
+                    const file = blobToFile(response.data, name);
+                    return ({ id, file, textData })
+                })
                 .catch(() => ({ id, file: null, textData }));
 
             // TODO: use below
