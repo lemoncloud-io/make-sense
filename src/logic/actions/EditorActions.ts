@@ -34,6 +34,9 @@ export class EditorActions {
             case LabelType.RECT:
                 EditorModel.supportRenderingEngine = new RectRenderEngine(EditorModel.canvas);
                 break;
+            case LabelType.ELLIPSE:
+                EditorModel.supportRenderingEngine = new EllipseRenderEngine(EditorModel.canvas);
+                break;
             case LabelType.POINT:
                 EditorModel.supportRenderingEngine = new PointRenderEngine(EditorModel.canvas);
                 break;

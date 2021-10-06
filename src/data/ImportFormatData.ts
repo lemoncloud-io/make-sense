@@ -8,6 +8,7 @@ export const ImportFormatData: ImportFormatDataMap = {
     "RECT": [],
     "POINT": [],
     "LINE": [],
+    "ELLIPSE": [],
     "POLYGON": [
         {
             type: LabelFormatType.COCO_JSON,

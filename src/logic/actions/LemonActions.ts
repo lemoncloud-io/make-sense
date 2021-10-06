@@ -1,6 +1,14 @@
 import {store} from "../../index";
 import {LabelsSelector} from '../../store/selectors/LabelsSelector';
-import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from '../../store/labels/types';
+import {
+    ImageData,
+    LabelEllipse,
+    LabelLine,
+    LabelName,
+    LabelPoint,
+    LabelPolygon,
+    LabelRect
+} from '../../store/labels/types';
 import {AuthService} from '@lemoncloud/lemon-front-lib';
 import {
     updateActiveImageIndex,
@@ -49,6 +57,7 @@ interface MakeSenseAnnotation {
     labelLines: LabelLine[];
     labelPoints: LabelPoint[];
     labelRects: LabelRect[];
+    labelEllipses: LabelEllipse[];
     labelPolygons: LabelPolygon[];
     labelNameIds: string[];
 }
@@ -84,29 +93,17 @@ export class LemonActions {
         const points = annotations.filter(annotation => !!annotation.point);
         const vertices = annotations.filter(annotation => !!annotation.vertices);
         const rects = annotations.filter(annotation => !!annotation.rect);
-        const tags = annotations.filter(annotation => !!annotation.label && !annotation.rect && !annotation.point && !annotation.vertices && !annotation.rect);
+        const ellipses = annotations.filter(annotation => !!annotation.ellipse);
+        const tags = annotations.filter(annotation => !!annotation.label && !annotation.rect && !annotation.point && !annotation.vertices && !annotation.rect && !annotation.ellipse);
 
         // set label info from server
-        const labelLines = lines.map(({label, line}) => ({id: uuidv1(), labelId: label.id, line}));
-        const labelPoints = points.map(({label, point}) => ({
-            id: uuidv1(),
-            labelId: label.id,
-            point,
-            isCreatedByAI: false,
-            status: LabelStatus.ACCEPTED,
-            suggestedLabel: null
-        }));
-        const labelRects = rects.map(({label, rect}) => ({
-            id: uuidv1(),
-            labelId: label.id,
-            rect,
-            isCreatedByAI: false,
-            status: LabelStatus.ACCEPTED,
-            suggestedLabel: null
-        }));
-        const labelPolygons = vertices.map(({label, vertices}) => ({id: uuidv1(), labelId: label.id, vertices}));
-        const labelNameIds = tags.map(({label}) => label.id);
-        return {labelLines, labelPoints, labelRects, labelPolygons, labelNameIds};
+        const labelLines = lines.map(({ label, line }) => ({ id: uuidv1(), labelId: label.id, line }));
+        const labelPoints = points.map(({ label, point }) => ({ id: uuidv1(), labelId: label.id, point, isCreatedByAI: false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
+        const labelRects = rects.map(({ label, rect }) => ({ id: uuidv1(), labelId: label.id, rect, isCreatedByAI:false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
+        const labelEllipses = ellipses.map(({ label, ellipse }) => ({ id: uuidv1(), labelId: label.id, ellipse, isCreatedByAI:false, status: LabelStatus.ACCEPTED, suggestedLabel: null }));
+        const labelPolygons = vertices.map(({ label, vertices }) => ({ id: uuidv1(), labelId: label.id, vertices }));
+        const labelNameIds = tags.map(({ label }) => label.id);
+        return { labelLines, labelPoints, labelRects, labelPolygons, labelNameIds, labelEllipses };
     }
 
     public static async setupProject(projectId: string) {
@@ -203,15 +200,16 @@ export class LemonActions {
             return Promise.resolve({submittedAt: null}); // TODO: fix it. just workaround
         }
 
-        const {id, labelLines, labelPoints, labelPolygons, labelRects, labelNameIds} = targetLabels;
+        const { id, labelLines, labelPoints, labelPolygons, labelRects, labelNameIds, labelEllipses } = targetLabels;
         // TODO: refactor below
         const filteredLabelLines = labelLines.filter(line => !!line.labelId);
         const filteredLabelPoints = labelPoints.filter(point => !!point.labelId);
         const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
         const filteredLabelRects = labelRects.filter(rect => !!rect.labelId);
-        const filteredLabelIds = labelNameIds.filter(labelId => !!labelId).map(labelId => ({labelId})); // 이미지 태깅일 때
-        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects, ...filteredLabelIds];
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, {annotations});
+        const filteredLabelEllipses = labelEllipses.filter(ellipse => !!ellipse.labelId);
+        const filteredLabelIds = labelNameIds.filter(labelId => !!labelId).map(labelId => ({ labelId })); // 이미지 태깅일 때
+        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects, ...filteredLabelIds, ...filteredLabelEllipses];
+        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations });
     }
 
     public static async pageChanged(page: number) {

@@ -31,6 +31,12 @@ export const ExportFormatData: ExportFormatDataMap = {
             label: "Single CSV file."
         }
     ],
+    "ELLIPSE": [
+        {
+            type: LabelFormatType.CSV,
+            label: "Single CSV file."
+        }
+    ],
     "POLYGON": [
         {
             type: LabelFormatType.VGG_JSON,
