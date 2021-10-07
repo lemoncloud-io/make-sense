@@ -2,6 +2,7 @@
 import {IPoint} from "../interfaces/IPoint";
 import {IRect} from "../interfaces/IRect";
 import {UnitUtil} from "./UnitUtil";
+import {IEllipse} from "../interfaces/IEllipse";
 
 export class DrawUtil {
 
@@ -43,6 +44,27 @@ export class DrawUtil {
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.rect(rect.x, rect.y, rect.width, rect.height);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    public static drawEllipse(canvas:HTMLCanvasElement, ellipse:IEllipse, color:string = "#fff", thickness:number = 1): void {
+        let ctx:CanvasRenderingContext2D = canvas.getContext('2d');
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.rect(ellipse.x, ellipse.y, ellipse.width, ellipse.height);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    public static drawEllipseWithFill(canvas:HTMLCanvasElement, ellipse:IEllipse, color:string = "#fff"): void {
+        let ctx:CanvasRenderingContext2D = canvas.getContext('2d');
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.rect(ellipse.x, ellipse.y, ellipse.width, ellipse.height);
         ctx.fill();
         ctx.restore();
     }

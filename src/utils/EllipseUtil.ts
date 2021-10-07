@@ -140,7 +140,7 @@ export class EllipseUtil {
         }
     }
 
-    public static mapRectToAnchors(ellipse: IEllipse): EllipseAnchor[] {
+    public static mapEllipseToAnchors(ellipse: IEllipse): EllipseAnchor[] {
         return [
             {type: Direction.TOP_LEFT, position: {x: ellipse.x, y: ellipse.y}},
             {type: Direction.TOP, position: {x: ellipse.x + 0.5 * ellipse.width, y: ellipse.y}},

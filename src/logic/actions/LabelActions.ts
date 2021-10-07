@@ -41,7 +41,7 @@ export class LabelActions {
         const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
         const newImageData: ImageData = {
             ...imageData,
-            labelRects: filter(imageData.labelEllipses, (currentLabel: LabelEllipse) => {
+            labelEllipses: filter(imageData.labelEllipses, (currentLabel: LabelEllipse) => {
                 return currentLabel.id !== labelRectId;
             })
         };

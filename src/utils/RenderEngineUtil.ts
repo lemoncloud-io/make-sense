@@ -9,6 +9,8 @@ import {IRect} from "../interfaces/IRect";
 import {ILine} from "../interfaces/ILine";
 import {LineUtil} from "./LineUtil";
 import {ISize} from "../interfaces/ISize";
+import {IEllipse} from "../interfaces/IEllipse";
+import {EllipseUtil} from "./EllipseUtil";
 
 export class RenderEngineUtil {
     public static calculateImageScale(data: EditorData): number {
@@ -70,6 +72,21 @@ export class RenderEngineUtil {
         return RectUtil.scaleRect(RectUtil.translate(rect, translation), scale);
     }
 
+    public static transferEllipseFromViewPortContentToImage(ellipse: IEllipse, data: EditorData): IEllipse {
+        const scale = RenderEngineUtil.calculateImageScale(data);
+        return EllipseUtil.translate(EllipseUtil.scaleEllipse(ellipse, 1/scale), data.viewPortContentImageRect);
+    }
+
+    public static transferEllipseFromImageToViewPortContent(ellipse: IEllipse, data: EditorData): IEllipse {
+        const scale = RenderEngineUtil.calculateImageScale(data);
+        const translation: IPoint = {
+            x: - data.viewPortContentImageRect.x,
+            y: - data.viewPortContentImageRect.y
+        };
+
+        return EllipseUtil.scaleEllipse(EllipseUtil.translate(ellipse, translation), scale);
+    }
+
     public static wrapDefaultCursorStyleInCancel(data: EditorData) {
         if (RectUtil.isPointInside(data.viewPortContentImageRect, data.mousePositionOnViewPortContent)) {
             store.dispatch(updateCustomCursorStyle(CustomCursorStyle.DEFAULT));
@@ -97,6 +114,25 @@ export class RenderEngineUtil {
         const bottomRight: IPoint = {
             x: rect.x + rect.width,
             y: rect.y + rect.height
+        };
+        const topLeftBetweenPixels = RenderEngineUtil.setPointBetweenPixels(topLeft);
+        const bottomRightBetweenPixels = RenderEngineUtil.setPointBetweenPixels(bottomRight);
+        return {
+            x: topLeftBetweenPixels.x,
+            y: topLeftBetweenPixels.y,
+            width: bottomRightBetweenPixels.x - topLeftBetweenPixels.x,
+            height: bottomRightBetweenPixels.y - topLeftBetweenPixels.y
+        }
+    }
+
+    public static setEllipseBetweenPixels(ellipse: IEllipse): IEllipse {
+        const topLeft: IPoint = {
+            x: ellipse.x,
+            y: ellipse.y
+        };
+        const bottomRight: IPoint = {
+            x: ellipse.x + ellipse.width,
+            y: ellipse.y + ellipse.height
         };
         const topLeftBetweenPixels = RenderEngineUtil.setPointBetweenPixels(topLeft);
         const bottomRightBetweenPixels = RenderEngineUtil.setPointBetweenPixels(bottomRight);

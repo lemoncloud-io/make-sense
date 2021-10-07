@@ -22,6 +22,7 @@ import {ViewPortHelper} from "../helpers/ViewPortHelper";
 import {CustomCursorStyle} from "../../data/enums/CustomCursorStyle";
 import {LineRenderEngine} from "../render/LineRenderEngine";
 import {Settings} from '../../settings/Settings';
+import {EllipseRenderEngine} from "../render/EllipseRenderEngine";
 
 export class EditorActions {
 

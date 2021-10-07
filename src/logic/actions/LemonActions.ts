@@ -94,7 +94,14 @@ export class LemonActions {
         const vertices = annotations.filter(annotation => !!annotation.vertices);
         const rects = annotations.filter(annotation => !!annotation.rect);
         const ellipses = annotations.filter(annotation => !!annotation.ellipse);
-        const tags = annotations.filter(annotation => !!annotation.label && !annotation.rect && !annotation.point && !annotation.vertices && !annotation.rect && !annotation.ellipse);
+        const tags = annotations.filter(annotation => {
+            return !!annotation.label
+                && !annotation.rect
+                && !annotation.point
+                && !annotation.vertices
+                && !annotation.rect
+                && !annotation.ellipse;
+        });
 
         // set label info from server
         const labelLines = lines.map(({ label, line }) => ({ id: uuidv1(), labelId: label.id, line }));

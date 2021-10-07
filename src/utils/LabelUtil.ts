@@ -1,9 +1,10 @@
-import {LabelName, LabelPolygon, LabelRect} from "../store/labels/types";
+import {LabelEllipse, LabelName, LabelPolygon, LabelRect} from "../store/labels/types";
 import uuidv1 from 'uuid/v1';
 import {find} from "lodash";
 import {IRect} from "../interfaces/IRect";
 import {LabelStatus} from "../data/enums/LabelStatus";
 import {IPoint} from "../interfaces/IPoint";
+import {IEllipse} from "../interfaces/IEllipse";
 
 export class LabelUtil {
     public static createLabelName(name: string): LabelName {
@@ -18,6 +19,17 @@ export class LabelUtil {
             id: uuidv1(),
             labelId: labelId,
             rect,
+            isCreatedByAI: false,
+            status: LabelStatus.ACCEPTED,
+            suggestedLabel: null
+        }
+    }
+
+    public static createLabelEllipse(labelId: string, ellipse: IEllipse): LabelEllipse {
+        return {
+            id: uuidv1(),
+            labelId: labelId,
+            ellipse,
             isCreatedByAI: false,
             status: LabelStatus.ACCEPTED,
             suggestedLabel: null
