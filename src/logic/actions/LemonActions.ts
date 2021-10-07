@@ -135,10 +135,13 @@ export class LemonActions {
             // load images
             const page = 0;
             const { list: assignedProjects } = await LemonActions.getMyAssignedProject();
-            const isNotAssigned = !(assignedProjects && assignedProjects.filter(project => project.id === projectId).length > 0);
-            if (isNotAssigned) {
-                const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
-                console.log('assigned to ', assignedTo, tasks);
+            const isAssigned = assignedProjects && assignedProjects.filter(project => project.id === projectId).length > 0;
+            if (isAssigned) {
+                const [assignedProject] = assignedProjects.filter(project => project.id === projectId);
+                if (!!assignedProject.userProgress && assignedProject.userProgress.complete < assignedProject.userProgress.total) {
+                    const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
+                    console.log('assigned to ', assignedTo, tasks);
+                }
             }
             const view = 'workspace'; // TODO: modify this line
             const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
