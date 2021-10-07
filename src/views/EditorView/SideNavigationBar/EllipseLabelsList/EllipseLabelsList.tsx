@@ -95,7 +95,7 @@ const EllipseLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
         >
             {imageData.labelEllipses.filter((labelEllipse: LabelEllipse) => labelEllipse.status === LabelStatus.ACCEPTED).length === 0 ?
                 <EmptyLabelList
-                    labelBefore={"draw your first bounding box"}
+                    labelBefore={"draw your first ellipse box"}
                     labelAfter={"no labels created for this image yet"}
                 /> :
                 <Scrollbars>
