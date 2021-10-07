@@ -134,9 +134,12 @@ export class LemonActions {
         try {
             // load images
             const page = 0;
-            const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
-            console.log('1. assignedTo: ', assignedTo);
-            console.log('2. tasks: ', tasks);
+            const { list: assignedProjects } = await LemonActions.getMyAssignedProject();
+            const isNotAssigned = !(assignedProjects && assignedProjects.filter(project => project.id === projectId).length > 0);
+            if (isNotAssigned) {
+                const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
+                console.log('assigned to ', assignedTo, tasks);
+            }
             const view = 'workspace'; // TODO: modify this line
             const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
 
@@ -264,6 +267,10 @@ export class LemonActions {
 
     public static getProjectData(id: string) {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
+    }
+
+    public static getMyAssignedProject() {
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects`, { state: 'my_assigned' });
     }
 
     public static getLabelData(projectId: string) {
