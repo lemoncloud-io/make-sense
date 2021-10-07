@@ -138,7 +138,7 @@ export class LemonActions {
             const isAssigned = assignedProjects && assignedProjects.filter(project => project.id === projectId).length > 0;
             if (isAssigned) {
                 const [assignedProject] = assignedProjects.filter(project => project.id === projectId);
-                if (!!assignedProject.userProgress && assignedProject.userProgress.complete < assignedProject.userProgress.total) {
+                if (!!assignedProject.userProgress && assignedProject.userProgress.complete >= assignedProject.userProgress.total) {
                     const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
                     console.log('assigned to ', assignedTo, tasks);
                 }
