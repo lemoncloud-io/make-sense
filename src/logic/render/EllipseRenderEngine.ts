@@ -173,7 +173,7 @@ export class EllipseRenderEngine extends BaseRenderEngine {
     }
 
     private drawActiveEllipse(labelEllipse: LabelEllipse, data: EditorData) {
-        let ellipse: IRect = this.calculateEllipseRelativeToActiveImage(labelEllipse.ellipse, data);
+        let ellipse: IEllipse = this.calculateEllipseRelativeToActiveImage(labelEllipse.ellipse, data);
         if (!!this.startResizeEllipseAnchor) {
             const startAnchorPosition: IPoint = PointUtil.add(this.startResizeEllipseAnchor.position, data.viewPortContentImageRect);
             const endAnchorPositionSnapped: IPoint = RectUtil.snapPointToRect(data.mousePositionOnViewPortContent, data.viewPortContentImageRect);
@@ -192,7 +192,7 @@ export class EllipseRenderEngine extends BaseRenderEngine {
             const handleCenters: IPoint[] = EllipseUtil.mapEllipseToAnchors(ellipseOnImage).map((ellipseAnchor: EllipseAnchor) => ellipseAnchor.position);
             handleCenters.forEach((center: IPoint) => {
                 const handleEllipse: IEllipse = EllipseUtil.getEllipseWithCenterAndSize(center, this.config.anchorSize);
-                const handleEllipseBetweenPixels: IRect = RenderEngineUtil.setRectBetweenPixels(handleEllipse);
+                const handleEllipseBetweenPixels: IEllipse = RenderEngineUtil.setEllipseBetweenPixels(handleEllipse);
                 DrawUtil.drawEllipseWithFill(this.canvas, handleEllipseBetweenPixels, this.config.activeAnchorColor);
             })
         }
