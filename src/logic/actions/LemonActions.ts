@@ -133,19 +133,8 @@ export class LemonActions {
     public static async initTaskData(projectId: string, limit: number) {
         try {
             // load images
-            const page = 0;
-            const { list: assignedProjects } = await LemonActions.getMyAssignedProject();
-            const isAssigned = assignedProjects && assignedProjects.filter(project => project.id === projectId).length > 0;
-            if (isAssigned) {
-                const [assignedProject] = assignedProjects.filter(project => project.id === projectId);
-                if (!!assignedProject.userProgress && assignedProject.userProgress.complete >= assignedProject.userProgress.total) {
-                    const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
-                    console.log('assigned to ', assignedTo, tasks);
-                }
-            }
-            const view = 'workspace'; // TODO: modify this line
-            const { list, total } = await LemonActions.fetchTasks(projectId, limit, page, view);
-
+            const { list, total } = await LemonActions.getTaskList(projectId, limit);
+            console.log(list, total);
             // set images
             const images = await LemonActions.getImagesByTaskList(list);
             store.dispatch(updateImageData(images));
@@ -272,10 +261,6 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
     }
 
-    public static getMyAssignedProject() {
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects`, { state: 'my_assigned' });
-    }
-
     public static getLabelData(projectId: string) {
         const param = { projectId };
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/labels/`, param);
@@ -338,6 +323,25 @@ export class LemonActions {
 
     private static resetLemonOptions() {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
+    }
+
+    private static async getTaskList(projectId: string, limit: number): Promise<{ list: Task[], total: number }> {
+        const page = 0;
+        const view = 'workspace';
+        const assignedTasks = await LemonActions.fetchTasks(projectId, limit, page, view);
+        const result = { list: [], total: 0 };
+        result.list = assignedTasks.list;
+        result.total = assignedTasks.total;
+
+        if (!assignedTasks.list || assignedTasks.list.length === 0) {
+            const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
+            console.log('Assigned to ', assignedTo, tasks);
+            const newTasks = await LemonActions.fetchTasks(projectId, limit, page, view);
+            result.list = newTasks.list;
+            result.total = newTasks.total;
+        }
+
+        return result;
     }
 
 }
