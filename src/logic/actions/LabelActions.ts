@@ -1,5 +1,13 @@
 import {LabelsSelector} from "../../store/selectors/LabelsSelector";
-import {ImageData, LabelLine, LabelName, LabelPoint, LabelPolygon, LabelRect} from "../../store/labels/types";
+import {
+    ImageData,
+    LabelEllipse,
+    LabelLine,
+    LabelName,
+    LabelPoint,
+    LabelPolygon,
+    LabelRect
+} from "../../store/labels/types";
 import {filter} from "lodash";
 import {store} from "../../index";
 import {updateImageData, updateImageDataById} from "../../store/labels/actionCreators";
@@ -20,15 +28,29 @@ export class LabelActions {
             case LabelType.RECT:
                 LabelActions.deleteRectLabelById(imageId, labelId);
                 break;
+            case LabelType.ELLIPSE:
+                LabelActions.deleteEllipseLabelById(imageId, labelId);
+                break;
             case LabelType.POLYGON:
                 LabelActions.deletePolygonLabelById(imageId, labelId);
                 break;
         }
     }
 
+    public static deleteEllipseLabelById(imageId: string, labelRectId: string) {
+        const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
+        const newImageData: ImageData = {
+            ...imageData,
+            labelEllipses: filter(imageData.labelEllipses, (currentLabel: LabelEllipse) => {
+                return currentLabel.id !== labelRectId;
+            })
+        };
+        store.dispatch(updateImageDataById(imageData.id, newImageData));
+    }
+
     public static deleteRectLabelById(imageId: string, labelRectId: string) {
         const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
-        const newImageData = {
+        const newImageData: ImageData = {
             ...imageData,
             labelRects: filter(imageData.labelRects, (currentLabel: LabelRect) => {
                 return currentLabel.id !== labelRectId;
@@ -39,7 +61,7 @@ export class LabelActions {
 
     public static deletePointLabelById(imageId: string, labelPointId: string) {
         const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
-        const newImageData = {
+        const newImageData: ImageData = {
             ...imageData,
             labelPoints: filter(imageData.labelPoints, (currentLabel: LabelPoint) => {
                 return currentLabel.id !== labelPointId;
@@ -50,7 +72,7 @@ export class LabelActions {
 
     public static deleteLineLabelById(imageId: string, labelLineId: string) {
         const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
-        const newImageData = {
+        const newImageData: ImageData = {
             ...imageData,
             labelLines: filter(imageData.labelLines, (currentLabel: LabelLine) => {
                 return currentLabel.id !== labelLineId;
@@ -61,7 +83,7 @@ export class LabelActions {
 
     public static deletePolygonLabelById(imageId: string, labelPolygonId: string) {
         const imageData: ImageData = LabelsSelector.getImageDataById(imageId);
-        const newImageData = {
+        const newImageData: ImageData = {
             ...imageData,
             labelPolygons: filter(imageData.labelPolygons, (currentLabel: LabelPolygon) => {
                 return currentLabel.id !== labelPolygonId;
@@ -89,6 +111,16 @@ export class LabelActions {
                     }
                 } else {
                     return labelRect
+                }
+            }),
+            labelEllipses: imageData.labelEllipses.map((labelEllipse: LabelEllipse) => {
+                if (labelNamesIds.includes(labelEllipse.id)) {
+                    return {
+                        ...labelEllipse,
+                        id: null
+                    }
+                } else {
+                    return labelEllipse
                 }
             }),
             labelPoints: imageData.labelPoints.map((labelPoint: LabelPoint) => {

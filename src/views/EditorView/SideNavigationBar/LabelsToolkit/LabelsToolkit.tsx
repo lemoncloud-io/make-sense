@@ -19,6 +19,7 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {EventType} from "../../../../data/enums/EventType";
 import LineLabelsList from "../LineLabelsList/LineLabelsList";
 import TagLabelsList from "../TagLabelsList/TagLabelsList";
+import EllipseLabelsList from "../EllipseLabelsList/EllipseLabelsList";
 
 interface IProps {
     activeImageIndex:number,
@@ -51,6 +52,7 @@ class LabelsToolkit extends React.Component<IProps, IState> {
             ] :
             [
                 LabelType.RECT,
+                LabelType.ELLIPSE,
                 LabelType.POINT,
                 LabelType.LINE,
                 LabelType.POLYGON
@@ -135,6 +137,13 @@ class LabelsToolkit extends React.Component<IProps, IState> {
                     style={{height: isActive ? activeTabContentHeight : 0}}
                 >
                     {labelType === LabelType.RECT && <RectLabelsList
+                        size={{
+                            width: size.width - 20,
+                            height: activeTabContentHeight - 20
+                        }}
+                        imageData={imagesData[activeImageIndex]}
+                    />}
+                    {labelType === LabelType.ELLIPSE && <EllipseLabelsList
                         size={{
                             width: size.width - 20,
                             height: activeTabContentHeight - 20

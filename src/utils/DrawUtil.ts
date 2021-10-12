@@ -2,6 +2,7 @@
 import {IPoint} from "../interfaces/IPoint";
 import {IRect} from "../interfaces/IRect";
 import {UnitUtil} from "./UnitUtil";
+import {EllipseRenderPoints, IEllipse} from "../interfaces/IEllipse";
 
 export class DrawUtil {
 
@@ -43,6 +44,40 @@ export class DrawUtil {
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.rect(rect.x, rect.y, rect.width, rect.height);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // refer: https://stackoverflow.com/a/2173084
+    public static drawEllipse(canvas:HTMLCanvasElement, ellipse: IEllipse, color: string = "#fff", thickness: number = 1): void {
+        const { x, y } = ellipse;
+        const { ym, ox, oy, xe, xm, ye } = DrawUtil.getEllipseRenderPoints(ellipse);
+        let ctx: CanvasRenderingContext2D = canvas.getContext('2d');
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(x, ym);
+        ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+        ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+        ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+        ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    public static drawEllipseWithFill(canvas:HTMLCanvasElement, ellipse:IEllipse, color:string = "#fff"): void {
+        const { x, y } = ellipse;
+        const { ym, ox, oy, xe, xm, ye } = DrawUtil.getEllipseRenderPoints(ellipse);
+        let ctx:CanvasRenderingContext2D = canvas.getContext('2d');
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, ym);
+        ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+        ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+        ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+        ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
         ctx.fill();
         ctx.restore();
     }
@@ -136,5 +171,17 @@ export class DrawUtil {
         } else {
             return "rgb(" + r + ", " + g + ", " + b + ")";
         }
+    }
+
+    public static getEllipseRenderPoints(ellipse: IEllipse): EllipseRenderPoints {
+        const { x, y, height, width } = ellipse;
+        const kappa = .5522848;
+        const ox = (width / 2) * kappa;
+        const oy = (height / 2) * kappa;
+        const xe = x + width;
+        const ye = y + height;
+        const xm = x + width / 2;
+        const ym = y + height / 2;
+        return { ox, oy, xe, ye, xm, ym };
     }
 }

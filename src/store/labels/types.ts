@@ -5,6 +5,19 @@ import {IPoint} from "../../interfaces/IPoint";
 import {LabelStatus} from "../../data/enums/LabelStatus";
 import {ILine} from "../../interfaces/ILine";
 import {TextTagInfo} from '../../logic/actions/LemonActions';
+import {IEllipse} from "../../interfaces/IEllipse";
+
+export type LabelEllipse = {
+    // GENERAL
+    id: string;
+    labelId: string;
+    ellipse: IEllipse;
+
+    // AI
+    isCreatedByAI: boolean;
+    status: LabelStatus;
+    suggestedLabel: string;
+}
 
 export type LabelRect = {
     // GENERAL
@@ -53,6 +66,7 @@ export type ImageData = {
     id: string;
     fileData: File;
     loadStatus: boolean;
+    labelEllipses: LabelEllipse[];
     labelRects: LabelRect[];
     labelPoints: LabelPoint[];
     labelLines: LabelLine[];

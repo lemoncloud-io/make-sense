@@ -48,7 +48,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         const newLabel: LabelValue = { name: '', isEditable: true };
         const newLabelNames = {...labelNames, [uuidv1()]: newLabel };
         setLabelNames(newLabelNames);
-        setTimeout(scrollRef.current.scrollToBottom, 150);
+        // setTimeout(scrollRef.current.scrollToBottom, 150);
     };
 
     const deleteHandle = (key: string) => {

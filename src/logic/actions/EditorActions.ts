@@ -22,6 +22,7 @@ import {ViewPortHelper} from "../helpers/ViewPortHelper";
 import {CustomCursorStyle} from "../../data/enums/CustomCursorStyle";
 import {LineRenderEngine} from "../render/LineRenderEngine";
 import {Settings} from '../../settings/Settings';
+import {EllipseRenderEngine} from "../render/EllipseRenderEngine";
 
 export class EditorActions {
 
@@ -33,6 +34,9 @@ export class EditorActions {
         switch (activeLabelType) {
             case LabelType.RECT:
                 EditorModel.supportRenderingEngine = new RectRenderEngine(EditorModel.canvas);
+                break;
+            case LabelType.ELLIPSE:
+                EditorModel.supportRenderingEngine = new EllipseRenderEngine(EditorModel.canvas);
                 break;
             case LabelType.POINT:
                 EditorModel.supportRenderingEngine = new PointRenderEngine(EditorModel.canvas);
