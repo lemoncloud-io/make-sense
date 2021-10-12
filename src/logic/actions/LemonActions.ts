@@ -155,7 +155,6 @@ export class LemonActions {
             const {list, total} = await LemonActions.getTaskList(projectId, limit);
             console.log(list, total);
             if (total === 0) {
-                console.log('NO_TASKS_POPUP');
                 store.dispatch(updateActivePopupType(PopupWindowType.NO_TASKS_POPUP));
             }
             // set images
@@ -353,10 +352,10 @@ export class LemonActions {
         LemonActions.lemonCore.setLemonOptions(Settings.LEMON_OPTIONS);
     }
 
-    private static async assignAndFetchTask(projectId: string, limit: number): Promise<{ list: Task[], total: number }> {
+    private static async assignAndFetchTask(projectId: string, limit: number, page: number = 0): Promise<{ list: Task[], total: number }> {
         const { assignedTo, tasks } = await LemonActions.assignTasks(projectId, limit);
         console.log('Assigned to ', assignedTo, tasks);
-        return await LemonActions.fetchTasks(projectId, limit);
+        return await LemonActions.fetchTasks(projectId, limit, page);
     }
 
     private static async getTaskList(projectId: string, limit: number, page: number = 0): Promise<{ list: Task[], total: number }> {
@@ -364,7 +363,7 @@ export class LemonActions {
         const shouldAssign = assignedTaskTotal <= 0;
         if (shouldAssign) {
             console.log('should assign');
-            return await LemonActions.assignAndFetchTask(projectId, limit);
+            return await LemonActions.assignAndFetchTask(projectId, limit, page);
         }
         return await LemonActions.fetchTasks(projectId, limit, page);
     }
