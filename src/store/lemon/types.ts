@@ -1,6 +1,8 @@
 import { Action } from '../Actions';
 import { ImageData } from '../labels/types';
 
+export type TaskState = 'open' | 'submitted' | 'rejected' | 'closed' | 'all';
+
 export type LemonState = {
     projectId: string;
     category: string;
@@ -9,6 +11,7 @@ export type LemonState = {
     totalPage: number;
     originLabels: ImageData;
     taskStartTime: Date;
+    taskState: TaskState; // /tasks 요청 시 state 쿼리
 }
 
 interface SetProjectInfo {
@@ -54,10 +57,19 @@ interface SetTaskStartTime {
     }
 }
 
+interface SetTaskState {
+    type: typeof Action.SET_TASK_STATE;
+    payload: {
+        taskState: TaskState;
+    }
+}
+
+
 export type LemonActionTypes = SetProjectInfo
     | SetTaskCurrentPage
     | SetOriginLabels
     | SetTaskTotalPage
     | SetTaskStartTime
+    | SetTaskState
     | SetTaskLimit;
 

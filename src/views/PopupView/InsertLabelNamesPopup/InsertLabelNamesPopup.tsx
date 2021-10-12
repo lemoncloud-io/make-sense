@@ -48,7 +48,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         const newLabel: LabelValue = { name: '', isEditable: true };
         const newLabelNames = {...labelNames, [uuidv1()]: newLabel };
         setLabelNames(newLabelNames);
-        setTimeout(scrollRef.current.scrollToBottom, 150);
+        // setTimeout(scrollRef.current.scrollToBottom, 150);
     };
 
     const deleteHandle = (key: string) => {
@@ -57,10 +57,10 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         setLabelNames(newLabelNames);
     };
 
-    const labelInputs = Object.keys(labelNames).map((key: string) => {
+    const labelInputs = Object.keys(labelNames).map((key: string, index: number) => {
         return <div className="LabelEntry" key={key}>
                 <TextInput
-                    key={key}
+                    key={`${index}`}
                     value={labelNames[key].name}
                     isPassword={false}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(key, event.target.value)}

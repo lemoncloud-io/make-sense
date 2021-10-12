@@ -25,6 +25,13 @@ export const LabelToolkitData: ILabelToolkit[] = [
         projectType: ProjectType.OBJECT_DETECTION,
     },
     {
+        labelType: LabelType.ELLIPSE,
+        headerText: "Ellipse",
+        imageSrc: "ico/ellipse.png",
+        imageAlt: "ellipse",
+        projectType: ProjectType.OBJECT_DETECTION,
+    },
+    {
         labelType: LabelType.POINT,
         headerText: "Point",
         imageSrc: "ico/point.png",

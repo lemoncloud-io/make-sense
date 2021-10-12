@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {LabelType} from "../../../../data/enums/LabelType";
 import {ISize} from "../../../../interfaces/ISize";
 import {AppState} from "../../../../store";
-import {ImageData, LabelPoint, LabelRect} from "../../../../store/labels/types";
+import {ImageData, LabelEllipse, LabelPoint, LabelRect} from "../../../../store/labels/types";
 import {VirtualList} from "../../../Common/VirtualList/VirtualList";
 import ImagePreview from "../ImagePreview/ImagePreview";
 import './ImagesList.scss';
@@ -73,6 +73,10 @@ class ImagesList extends React.Component<IProps, IState> {
             case LabelType.RECT:
                 return imageData.labelRects
                     .filter((labelRect: LabelRect) => labelRect.status === LabelStatus.ACCEPTED)
+                    .length > 0
+            case LabelType.ELLIPSE:
+                return imageData.labelEllipses
+                    .filter((labelEllipse: LabelEllipse) => labelEllipse.status === LabelStatus.ACCEPTED)
                     .length > 0
         }
     };

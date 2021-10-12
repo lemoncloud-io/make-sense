@@ -7,6 +7,9 @@ import {updateActivePopupType, updateProjectData,} from '../../store/general/act
 import {LemonActions} from '../../logic/actions/LemonActions';
 import {ProjectCategory, ProjectType} from '../../data/enums/ProjectType';
 import {ProjectData} from '../../store/general/types';
+import {timer} from "rxjs";
+import {retry, share, switchMap, tap} from "rxjs/operators";
+import {fromPromise} from "rxjs/internal-compatibility";
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -59,9 +62,21 @@ const PreRenderView: React.FC<IProps> = (
             });
     }
 
+    const pollingCredentials = () => {
+        const POLLING_TIME = 1000 * 60 * 5; // 5 minutes;
+        const refreshCredentials$ = timer(1, POLLING_TIME).pipe(
+            switchMap(() => fromPromise(LemonActions.getCredentials())),
+            retry(),
+            share(),
+            tap(() => console.log(`polling credentials every ${Math.floor(POLLING_TIME / 60 / 1000)} minutes...`)),
+        );
+        refreshCredentials$.subscribe(() => {});
+    }
+
     useEffect(() => {
         if (projectId) {
             initProject(projectId);
+            pollingCredentials();
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

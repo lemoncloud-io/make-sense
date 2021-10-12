@@ -1,5 +1,6 @@
 import { store } from '../..';
 import { ImageData } from '../labels/types';
+import {TaskState} from "../lemon/types";
 
 export class LemonSelector {
 
@@ -29,5 +30,9 @@ export class LemonSelector {
 
     public static getTaskStartTime(): Date {
         return store.getState().lemon.taskStartTime;
+    }
+
+    public static getTaskState(): TaskState {
+        return store.getState().lemon.taskState;
     }
 }

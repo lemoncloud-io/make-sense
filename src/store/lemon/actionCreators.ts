@@ -1,5 +1,5 @@
 import { Action } from '../Actions';
-import { LemonActionTypes } from './types';
+import {LemonActionTypes, TaskState} from './types';
 import { ImageData } from '../labels/types';
 
 export function setProjectInfo(projectId: string, category: string = ''): LemonActionTypes {
@@ -56,5 +56,15 @@ export function setTaskStartTime(taskStartTime: Date | null): LemonActionTypes {
         }
     }
 }
+
+export function setTaskState(taskState: TaskState = 'open'): LemonActionTypes {
+    return {
+        type: Action.SET_TASK_STATE,
+        payload: {
+            taskState
+        }
+    }
+}
+
 
 

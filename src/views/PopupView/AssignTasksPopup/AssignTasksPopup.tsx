@@ -41,6 +41,16 @@ const options: SelectLimitOption[] = [
         value: 20,
         flag: false
     },
+    {
+        title: "100개",
+        value: 100,
+        flag: false
+    },
+    {
+        title: "200개",
+        value: 200,
+        flag: false
+    },
 ];
 
 interface IProps {

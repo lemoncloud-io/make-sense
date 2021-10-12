@@ -58,7 +58,6 @@ const App: React.FC<IProps> = (
 
     const handleOnIdle = () => {
         setIsIdle(true);
-        console.log('idle!: ', isIdle);
         const currentIndex: number | null = LabelsSelector.getActiveImageIndex();
         if (currentIndex === null) {
             popupIdle();
@@ -68,7 +67,7 @@ const App: React.FC<IProps> = (
             .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
             .then(() => popupIdle())
             .catch(e => {
-                console.log(e);
+                console.log(e, isIdle);
                 alert(`Submit Error: ${e}`);
                 popupIdle();
             })

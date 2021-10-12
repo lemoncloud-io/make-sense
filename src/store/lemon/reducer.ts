@@ -9,6 +9,7 @@ const initialState: LemonState = {
     page: null,
     originLabels: null,
     taskStartTime: null,
+    taskState: 'all'
 };
 
 export function lemonReducer(
@@ -51,6 +52,12 @@ export function lemonReducer(
             return {
                 ...state,
                 taskStartTime: action.payload.taskStartTime
+            }
+        }
+        case Action.SET_TASK_STATE: {
+            return {
+                ...state,
+                taskState: action.payload.taskState
             }
         }
         default:
