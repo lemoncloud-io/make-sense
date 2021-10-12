@@ -24,13 +24,13 @@ fi
 if [ "$IS_GITHUB" = true ] ; then
     echo 'deploy on github'
     if [ "$DEPLOY" = "stage" ] ; then
-        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor-stage --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" || { echo 'ERROR: s3 sync failed' ; exit 1; }
-        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor-stage --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
-        aws s3 cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/editor-stage/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read || { echo 'ERROR: s3 cp index failed' ; exit 1; }
+        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor-stage --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" --region ap-northeast-2 || { echo 'ERROR: s3 sync failed' ; exit 1; }
+        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor-stage --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" --region ap-northeast-2 || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
+        aws s3 cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/editor-stage/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read --region ap-northeast-2 || { echo 'ERROR: s3 cp index failed' ; exit 1; }
     else
-        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" || { echo 'ERROR: s3 sync failed' ; exit 1; }
-        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
-        aws s3 cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/editor/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read || { echo 'ERROR: s3 cp index failed' ; exit 1; }
+        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "index.html" --exclude "*.css" --exclude "*.js" --region ap-northeast-2 || { echo 'ERROR: s3 sync failed' ; exit 1; }
+        aws s3 sync dist/${APP_NAME} s3://${BUCKET_NAME}/editor --metadata-directive REPLACE --acl public-read --exclude "*" --exclude "assets/*" --include "*.css" --include "*.js" --region ap-northeast-2 || { echo 'ERROR: s3 js/css sync failed' ; exit 1; }
+        aws s3 cp dist/${APP_NAME}/index.html s3://${BUCKET_NAME}/editor/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read --region ap-northeast-2 || { echo 'ERROR: s3 cp index failed' ; exit 1; }
     fi
 else
     echo 'deploy on local'
