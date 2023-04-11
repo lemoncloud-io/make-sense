@@ -22,7 +22,6 @@ import {filter, mergeMap} from 'rxjs/operators';
 import {LemonActions} from '../../../logic/actions/LemonActions';
 import {updateImageDataById} from "../../../store/labels/actionCreators";
 import {setOriginLabels} from "../../../store/lemon/actionCreators";
-import TaskQueryNavigationBar from "../SideNavigationBar/TaskQueryNavigationBar/TaskQueryNavigationBar";
 
 interface IProps {
     windowSize: ISize;
@@ -104,7 +103,6 @@ const EditorContainer: React.FC<IProps> = (
     const leftSideBarRender = () => {
         return (
             <>
-                <TaskQueryNavigationBar key="task-query-navigation-bar" />
                 <ImagesList/>
                 <PaginationBar/>
             </>

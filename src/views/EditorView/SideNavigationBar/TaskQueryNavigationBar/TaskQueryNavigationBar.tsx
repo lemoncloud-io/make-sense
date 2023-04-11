@@ -36,11 +36,6 @@ const TaskQueryNavigationBar: React.FC<IProps> = (
                     onClick={() => setTaskState('all')}
                     isActive={activeTaskState === 'all'}
                 />
-                <HorizontalEditorButton
-                    label="새로운 작업만"
-                    onClick={() => setTaskState('open')}
-                    isActive={activeTaskState === 'open'}
-                />
             </div>
         </div>
     )

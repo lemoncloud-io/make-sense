@@ -10,6 +10,7 @@ import {ProjectData} from '../../store/general/types';
 import {timer} from "rxjs";
 import {retry, share, switchMap, tap} from "rxjs/operators";
 import {fromPromise} from "rxjs/internal-compatibility";
+import {ProjectView} from "@lemoncloud/ade-backend-api";
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -32,6 +33,7 @@ const PreRenderView: React.FC<IProps> = (
     }
 
     const initProject = projectId => {
+        console.log(projectId)
         LemonActions.isAuthenticated()
             .then((isAuth)=> {
                 const isDev = process.env.NODE_ENV;
@@ -42,23 +44,14 @@ const PreRenderView: React.FC<IProps> = (
             })
             .then(() => LemonActions.getCredentials())
             .then(() => LemonActions.setupProject(projectId))
-            .then(() => {
-                if (!taskId) {
-                    // show assign tasks limit popup
-                    updateActivePopupType(PopupWindowType.ASSIGN_TASKS_POPUP)
-                } else {
-                    // get only one task
-                    LemonActions.initTaskByTaskId(taskId).then(res => {
-                        updateActivePopupType(null);
-                        const { name, category } = res;
-                        let type = ProjectType.OBJECT_DETECTION;
-                        // TODO: refactor below
-                        if (category === ProjectCategory.IMAGE_TAG || category === ProjectCategory.TEXT_TAG) {
-                            type = ProjectType.IMAGE_RECOGNITION;
-                        }
-                        updateProjectData({ name, type });
-                    });
+            .then((project: ProjectView) => LemonActions.setupImagesByProject(project))
+            .then(({ name, category }) => {
+                updateActivePopupType(null);
+                let type = ProjectType.IMAGE_RECOGNITION;
+                if (category === ProjectCategory.IMAGE_TAG || category === ProjectCategory.TEXT_TAG) {
+                    type = ProjectType.OBJECT_DETECTION;
                 }
+                updateProjectData({ name, type });
             });
     }
 

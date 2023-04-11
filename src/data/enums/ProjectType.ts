@@ -5,7 +5,7 @@ export enum ProjectType {
 
 // for lemoncloud
 export enum ProjectCategory {
-    IMAGE_LABEL = 'image_label',
+    RECOGNITION = 'recognition',
     IMAGE_TAG = 'image_tag',
     TEXT_TAG = 'text',
 }

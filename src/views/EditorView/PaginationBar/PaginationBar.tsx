@@ -8,10 +8,11 @@ import {LemonActions} from "../../../logic/actions/LemonActions";
 import {PopupWindowType} from '../../../data/enums/PopupWindowType';
 import { updateActivePopupType } from '../../../store/general/actionCreators';
 import {from} from 'rxjs';
-import {delay, filter, mergeMap, skip} from 'rxjs/operators';
+import {delay, filter, map, mergeMap, skip, tap} from 'rxjs/operators';
 import {updateImageDataById} from '../../../store/labels/actionCreators';
 import {ImageData} from '../../../store/labels/types';
 import {setOriginLabels} from '../../../store/lemon/actionCreators';
+import {ImageView} from "@lemoncloud/ade-backend-api";
 
 interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -35,16 +36,17 @@ const PaginationBar: React.FC<IProps> = (
     useEffect(() => {
         const parallelRequest$ = from(imagesData).pipe(
             skip(page === 0 ? 0 : 1), // 처음 로딩 때만 전부 가져옴
-            mergeMap(data => LemonActions.getTaskByImageData$(data)),
-            delay(200),
-            filter(({ task, origin }) => !!task)
+            mergeMap(imageData => LemonActions.getDetailImageData$(imageData)
+                .pipe(map(detailImage => ({ detailImage, imageData })))
+            ),
+            delay(100),
         );
-        parallelRequest$.subscribe(({ task, origin }) => {
-            const { annotations } = task;
-            const labels = LemonActions.getLabelsFromAnnotations(annotations);
-            updateImageDataById(origin.id, { ...origin, ...labels });
-            if (imagesData.length > 0 && imagesData[0].id === origin.id) {
-                setOriginLabels({ ...origin, ...labels}); // storing origin labels..
+        parallelRequest$.subscribe(({ detailImage, imageData }) => {
+            console.log('detailImage', detailImage, imageData);
+            const labels = LemonActions.getLabelsFromImageView(detailImage);
+            updateImageDataById(imageData.id, { ...imageData, ...labels });
+            if (imagesData.length > 0 && imagesData[0].id === imageData.id) {
+                setOriginLabels({ ...imageData, ...labels}); // storing origin labels..
             }
         })
     }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
