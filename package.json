@@ -14,6 +14,7 @@
     "@types/react-dom": "16.8.4",
     "@types/react-router-dom": "^5.1.5",
     "axios": "^0.20.0",
+    "caniuse-lite": "^1.0.30001477",
     "classnames": "^2.2.6",
     "env-cmd": "^10.1.0",
     "file-saver": "^2.0.2",

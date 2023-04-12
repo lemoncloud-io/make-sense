@@ -33,7 +33,6 @@ const PreRenderView: React.FC<IProps> = (
     }
 
     const initProject = projectId => {
-        console.log(projectId)
         LemonActions.isAuthenticated()
             .then((isAuth)=> {
                 const isDev = process.env.NODE_ENV;

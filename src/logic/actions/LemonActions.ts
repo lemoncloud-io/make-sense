@@ -175,7 +175,6 @@ export class LemonActions {
     // @ts-ignore
     public static async setupProject(projectId: string): Promise<ProjectView> {
         try {
-            // debugger;
             const projectView = await LemonActions.getProjectData(projectId);
             const category = projectView.useName ? ProjectCategory.RECOGNITION : ProjectCategory.IMAGE_TAG;
             store.dispatch(setProjectInfo(projectId, category, projectView));
@@ -197,8 +196,7 @@ export class LemonActions {
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
             const limit = 10;
-            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, {}) as GetProjectImagesResult;
-            console.log(project);
+            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
 
             // set images
             const urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
@@ -370,7 +368,7 @@ export class LemonActions {
             'GET',
             Settings.LEMONADE_API,
             `/projects/${projectId}/images`,
-            { page, limit }
+            { detail: 1, page, limit }
         ) as GetProjectImagesResult;
 
         // set total page
@@ -395,6 +393,7 @@ export class LemonActions {
         if (images.length > 0) {
             const firstImage = images[0];
             const detailImage: ImageView = await LemonActions.getDetailImageData(firstImage);
+            console.log('detailImage', detailImage)
             const labels = LemonActions.getLabelsFromImageView(detailImage);
             store.dispatch(updateImageDataById(firstImage.id, {...firstImage, ...labels}));
         }
