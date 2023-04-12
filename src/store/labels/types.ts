@@ -6,6 +6,7 @@ import {LabelStatus} from "../../data/enums/LabelStatus";
 import {ILine} from "../../interfaces/ILine";
 import {TextTagInfo} from '../../logic/actions/LemonActions';
 import {IEllipse} from "../../interfaces/IEllipse";
+import {ImageView} from "@lemoncloud/ade-backend-api";
 
 export type LabelEllipse = {
     // GENERAL
@@ -81,6 +82,7 @@ export type ImageData = {
 
     // Lemon Text data
     textData?: TextTagInfo;
+    imageView?: ImageView;
 }
 
 export type LabelsState = {

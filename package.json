@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@lemoncloud/lemon-front-lib": "^1.1.7",
+    "@lemoncloud/lemon-front-lib": "^1.3.8",
     "@material-ui/core": "^4.1.1",
     "@tensorflow-models/coco-ssd": "^2.0.0",
     "@tensorflow-models/posenet": "^2.1.3",
@@ -14,6 +14,7 @@
     "@types/react-dom": "16.8.4",
     "@types/react-router-dom": "^5.1.5",
     "axios": "^0.20.0",
+    "caniuse-lite": "^1.0.30001477",
     "classnames": "^2.2.6",
     "env-cmd": "^10.1.0",
     "file-saver": "^2.0.2",
@@ -69,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "@lemoncloud/ade-backend-api": "^0.23.327",
     "@types/axios": "^0.14.0",
     "@types/classnames": "^2.2.8",
     "@types/file-saver": "^2.0.1",

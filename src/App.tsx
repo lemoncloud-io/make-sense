@@ -64,7 +64,6 @@ const App: React.FC<IProps> = (
             return;
         }
         LemonActions.saveUpdatedImagesData(currentIndex)
-            .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
             .then(() => popupIdle())
             .catch(e => {
                 console.log(e, isIdle);

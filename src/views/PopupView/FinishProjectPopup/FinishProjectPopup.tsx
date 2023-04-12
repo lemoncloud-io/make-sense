@@ -61,7 +61,6 @@ const FinishProjectPopup: React.FC<IProps> = (props) => {
     const saveLabels = () => {
         const currentIndex = LabelsSelector.getActiveImageIndex();
         LemonActions.saveUpdatedImagesData(currentIndex)
-            .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt))
             .then(() => resetStoreAndClosePopup())
             .then(() => window.history.back())
             .catch(e => {

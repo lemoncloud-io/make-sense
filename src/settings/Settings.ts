@@ -2,7 +2,7 @@ import {PopupWindowType} from "../data/enums/PopupWindowType";
 import {LemonOptions} from '@lemoncloud/lemon-front-lib';
 
 export class Settings {
-    public static readonly PROJECT_NAME: string = "lemonade";
+    public static readonly PROJECT_NAME: string = "lemonade-front-admin";
     public static readonly LEMONADE_HOME: string = process.env.REACT_APP_LEMONADE_HOME;
     public static readonly LEMONADE_API: string = process.env.REACT_APP_LEMONADE_API;
     public static readonly LEMONADE_OAUTH_ENDPOINT: string = process.env.REACT_APP_LEMONADE_OAUTH_ENDPOINT;

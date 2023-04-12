@@ -1,8 +1,13 @@
 import { store } from '../..';
 import { ImageData } from '../labels/types';
 import {TaskState} from "../lemon/types";
+import {ProjectView} from "@lemoncloud/ade-backend-api";
 
 export class LemonSelector {
+
+    public static getProjectView(): ProjectView {
+        return store.getState().lemon.project;
+    }
 
     public static getProjectId(): string {
         return store.getState().lemon.projectId;

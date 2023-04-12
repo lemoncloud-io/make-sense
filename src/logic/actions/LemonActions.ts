@@ -12,24 +12,35 @@ import {
 import {AuthService} from '@lemoncloud/lemon-front-lib';
 import {
     updateActiveImageIndex,
+    updateImageData,
+    updateImageDataById,
     updateLabelNames,
-    updateImageData, updateImageDataById,
 } from '../../store/labels/actionCreators';
 import {updateActivePopupType, updateProjectData} from '../../store/general/actionCreators';
 import {ImageDataUtil} from '../../utils/ImageDataUtil';
-import {setProjectInfo, setTaskCurrentPage, setTaskState, setTaskTotalPage} from '../../store/lemon/actionCreators';
+import {setProjectInfo, setTaskCurrentPage, setTaskState, setTaskTotalPage, setTaskLimit} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {map } from 'rxjs/operators';
+import {delay, map, mergeMap} from 'rxjs/operators';
 import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
 import {GeneralSelector} from '../../store/selectors/GeneralSelector';
 import {TaskState} from "../../store/lemon/types";
 import {PopupWindowType} from "../../data/enums/PopupWindowType";
+import {GetProjectImagesResult, ImageBody, ImageView, ProjectView,
+    LabelPoint as LemonLabelPoint,
+    LabelName as LemonLabelName,
+    LabelRect as LemonLabelRect,
+    LabelLine as LemonLabelLine,
+} from "@lemoncloud/ade-backend-api";
+import {ProjectCategory} from "../../data/enums/ProjectType";
+import {from, Observable} from "rxjs";
+import {ILine} from "../../interfaces/ILine";
+import {IPoint} from "../../interfaces/IPoint";
 
 // TODO: modify types
 export interface TextTagInfo {
@@ -39,7 +50,7 @@ export interface TextTagInfo {
 
 type Task = any;
 
-type LemonImageUrl = {
+interface LemonImageUrl extends ImageView {
     id: string;
     url: string;
     width?: number;
@@ -47,10 +58,11 @@ type LemonImageUrl = {
     textData?: TextTagInfo;
 }
 
-interface LemonFileImage {
+export interface LemonFileImage {
     id: string;
     file?: File;
     textData?: TextTagInfo;
+    imageView?: ImageView;
 }
 
 interface MakeSenseAnnotation {
@@ -113,35 +125,105 @@ export class LemonActions {
         return { labelLines, labelPoints, labelRects, labelPolygons, labelNameIds, labelEllipses };
     }
 
-    public static async setupProject(projectId: string) {
-        try {
-            const {name, category} = await LemonActions.getProjectData(projectId);
-            store.dispatch(setProjectInfo(projectId, category));
-            store.dispatch(updateProjectData({name, type: null}));
+    public static getLabelsFromImageView(imageView: ImageView): MakeSenseAnnotation {
+        const labelNameIds = !imageView.names ? [] : imageView.names.map(name => name.labelId);
+        const labelLines = !imageView.lines ? [] : imageView.lines.map(line => {
+            return {
+                id: uuidv1(),
+                labelId: line.labelId,
+                line: {
+                    start: { x: line.left, y: line.top },
+                    end: { x: line.right, y: line.bottom }
+                }
+            }
+        });
+        const labelPoints = !imageView.points ? [] : imageView.points.map(lemonPoint => {
+            return {
+                id: uuidv1(),
+                labelId: lemonPoint.labelId,
+                point: { x: lemonPoint.left, y: lemonPoint.top },
+                isCreatedByAI: false,
+                status: LabelStatus.ACCEPTED,
+                suggestedLabel: null,
+            }
+        });
+        const labelRects = !imageView.rects ? [] : imageView.rects.map(lemonRect => {
+            return {
+                id: uuidv1(),
+                labelId: lemonRect.labelId,
+                rect: {
+                    x: lemonRect.left,
+                    y: lemonRect.top,
+                    height: lemonRect.height,
+                    width: lemonRect.width
+                },
+                isCreatedByAI: false,
+                status: LabelStatus.ACCEPTED,
+                suggestedLabel: null,
+            }
+        });
+        return {
+            labelPolygons: [],
+            labelEllipses: [],
+            labelNameIds,
+            labelLines,
+            labelPoints,
+            labelRects,
+        };
+    }
 
-            const {list: labels} = await LemonActions.getLabelData(projectId);
+    // @ts-ignore
+    public static async setupProject(projectId: string): Promise<ProjectView> {
+        try {
+            const projectView = await LemonActions.getProjectData(projectId);
+            const category = projectView.useName ? ProjectCategory.RECOGNITION : ProjectCategory.IMAGE_TAG;
+            store.dispatch(setProjectInfo(projectId, category, projectView));
+            store.dispatch(updateProjectData({name: projectView.name, type: null}));
+
+            const labels = projectView.label$ as LabelName[];
             store.dispatch(updateLabelNames(labels));
+
+            return projectView;
         } catch (e) {
             alert(`${e}`);
             window.history.back();
         }
     }
 
-    public static async initTaskByTaskId(taskId: string) {
+    public static async setupImagesByProject(project: ProjectView) {
         try {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
-            const task = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${taskId}`);
-            const {project: {id: projectId}} = task;
-            const images = await LemonActions.getImagesByTaskList([task]);
+            const limit = 10;
+            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
+
+            // set images
+            const urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
+                return {
+                    id: imageView.id,
+                    url: `${project.baseUrl}${imageView.key}`,
+                    ...imageView,
+                }
+            });
+            const files = await LemonActions.convertUrlsToFiles(urls);
+            const images = LemonActions.getImageDataFromLemonFiles(files);
             store.dispatch(updateImageData(images));
+
+            // set total page
+            const totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
+            store.dispatch(setTaskTotalPage(totalPage));
+
+            // set active image index
+            store.dispatch(updateActiveImageIndex(0)); // select initial image!
+            store.dispatch(setTaskCurrentPage(0));
+            store.dispatch(setTaskLimit(limit));
             LemonActions.resetLemonOptions();
 
             return {
-                projectId: projectId,
+                projectId: LemonSelector.getProjectId(),
                 name: GeneralSelector.getProjectName(),
-                category: LemonSelector.getProjectCategory(),
+                category: LemonSelector.getProjectCategory()
             };
         } catch (e) {
             alert(`${e}`);
@@ -186,42 +268,79 @@ export class LemonActions {
         return LemonActions.getImageDataFromLemonFiles(files);
     }
 
-    public static saveWorkingTimeByImageIndex(index: number, submittedAt: number | null) {
-        const startTime = LemonSelector.getTaskStartTime();
-        if (!submittedAt || !startTime) {
-            return Promise.resolve();
-        }
-
-        // log working time
-        const time = submittedAt - startTime.getTime();
-        const targetLabels = LabelsSelector.getImageDataByIndex(index);
-        const {id} = targetLabels;
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/log`, null, {time});
-    }
-
-    public static saveUpdatedImagesData(index: number) {
+    public static async saveUpdatedImagesData(index: number) {
         const originLabels = LemonSelector.getOriginLabels();
         const targetLabels = LabelsSelector.getImageDataByIndex(index);
         if (isEqual(originLabels, targetLabels)) {
-            return Promise.resolve({submittedAt: null}); // TODO: fix it. just workaround
+            return Promise.resolve();
         }
 
-        const { id, labelLines, labelPoints, labelPolygons, labelRects, labelNameIds, labelEllipses } = targetLabels;
+        const {
+            id,
+            fileData,
+            labelLines,
+            labelPoints,
+            labelRects,
+            labelNameIds,
+            labelPolygons,
+            labelEllipses,
+        } = targetLabels;
+        const { width, height } = await this.getImageDimensions(fileData);
+
         // TODO: refactor below
-        const filteredLabelLines = labelLines.filter(line => !!line.labelId);
+        // const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
+        // const filteredLabelEllipses = labelEllipses.filter(ellipse => !!ellipse.labelId);
+        console.log(targetLabels);
+
+        const filteredLabelIds = labelNameIds.filter(labelId => !!labelId);
         const filteredLabelPoints = labelPoints.filter(point => !!point.labelId);
-        const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
         const filteredLabelRects = labelRects.filter(rect => !!rect.labelId);
-        const filteredLabelEllipses = labelEllipses.filter(ellipse => !!ellipse.labelId);
-        const filteredLabelIds = labelNameIds.filter(labelId => !!labelId).map(labelId => ({ labelId })); // 이미지 태깅일 때
-        const annotations = [...filteredLabelLines, ...filteredLabelPoints, ...filteredLabelPolygons, ...filteredLabelRects, ...filteredLabelIds, ...filteredLabelEllipses];
-        return LemonActions.lemonCore.request('POST', Settings.LEMONADE_API, `/tasks/${id}/submit`, null, { annotations });
+        const filteredLabelLines = labelLines.filter(line => !!line.labelId);
+
+        const names: LemonLabelName[] = filteredLabelIds.map(labelId => ({ labelId })); // 이미지 레코그니션
+        const points: LemonLabelPoint[] = filteredLabelPoints.map(({ labelId, point }) => ({ labelId, top: point.y, left: point.x }));
+        const rects: LemonLabelRect[] = filteredLabelRects.map(({ labelId, rect }) => ({ labelId, top: rect.y, left: rect.x, height: rect.height, width: rect.width }));
+        const lines: LemonLabelLine[] = filteredLabelLines.map(({ labelId, line }) => {
+            const { start, end } = line;
+            return {
+                labelId,
+                left: start.x,
+                top: start.y,
+                right: end.x,
+                bottom: end.y,
+            }
+        });
+
+        const imageBody: ImageBody = {
+            width,
+            height,
+            names,
+            points,
+            rects,
+            lines,
+        };
+        return LemonActions.lemonCore.request(
+            'PUT',
+            Settings.LEMONADE_API,
+            `/images/${id}`,
+            null,
+            { ...imageBody }
+        );
+    }
+
+    public static async getImageDimensions(file: File): Promise<{ width: number, height: number }> {
+        let img = new Image();
+        img.src = URL.createObjectURL(file);
+        await img.decode();
+        return {
+            width: img.width,
+            height: img.height,
+        }
     }
 
     public static async pageChanged(page: number) {
         const currentIndex = LabelsSelector.getActiveImageIndex();
-        const {submittedAt} = await LemonActions.saveUpdatedImagesData(currentIndex);
-        await LemonActions.saveWorkingTimeByImageIndex(currentIndex, submittedAt);
+        await LemonActions.saveUpdatedImagesData(currentIndex);
         return await this.resetTasks(page);
     }
 
@@ -242,28 +361,40 @@ export class LemonActions {
     }
 
     public static async resetTasks(page: number = 0): Promise<number> {
-        // TODO: user getTaskList()
         const projectId = LemonSelector.getProjectId();
+        const project: ProjectView = LemonSelector.getProjectView();
         const limit = LemonSelector.getTaskLimit();
-        // const view = 'workspace'; // TODO: modify this line
-        // const {list} = await LemonActions.fetchTasks(projectId, limit, page, view);
-        const { list, total } = await LemonActions.getTaskList(projectId, limit, page);
+        const { list, total } = await LemonActions.lemonCore.request(
+            'GET',
+            Settings.LEMONADE_API,
+            `/projects/${projectId}/images`,
+            { detail: 1, page, limit }
+        ) as GetProjectImagesResult;
 
         // set total page
         const totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
         store.dispatch(setTaskTotalPage(totalPage));
         // set active image index
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
+
         // set images
-        const images = await LemonActions.getImagesByTaskList(list);
+        const urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
+            return {
+                id: imageView.id,
+                url: `${project.baseUrl}${imageView.key}`,
+                ...imageView,
+            }
+        });
+        const files = await LemonActions.convertUrlsToFiles(urls);
+        const images = LemonActions.getImageDataFromLemonFiles(files);
         store.dispatch(updateImageData(images));
 
         // get first image info
         if (images.length > 0) {
             const firstImage = images[0];
-            const task = await LemonActions.getTaskByImageData(firstImage);
-            const {annotations} = task;
-            const labels = LemonActions.getLabelsFromAnnotations(annotations);
+            const detailImage: ImageView = await LemonActions.getDetailImageData(firstImage);
+            console.log('detailImage', detailImage)
+            const labels = LemonActions.getLabelsFromImageView(detailImage);
             store.dispatch(updateImageDataById(firstImage.id, {...firstImage, ...labels}));
         }
 
@@ -277,14 +408,17 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`);
     }
 
-    public static getTaskByImageData$(image: ImageData) {
+    public static getDetailImageData(image: ImageData): Promise<ImageView> {
         const {id} = image;
-        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`)).pipe(
-            map(task => ({task, origin: image}))
-        );
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`);
     }
 
-    public static getProjectData(id: string) {
+    public static getDetailImageData$(image: ImageData): Observable<ImageView> {
+        const {id} = image;
+        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`));
+    }
+
+    public static getProjectData(id: string): Promise<ProjectView> {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
     }
 
@@ -316,14 +450,8 @@ export class LemonActions {
     }
 
     private static async convertUrlsToFiles(imageUrls: LemonImageUrl[]): Promise<LemonFileImage[]> {
-        // TODO: refactor lemon-core
-        // const customOptions = { header: {...}, responseType: 'blob' };
-        // LemonActions.lemonCore.setLemonOptions({ ...Settings.LEMON_OPTIONS, extraOptions: { ...customOptions } });
-        // return LemonActions.lemonCore.request('GET', imageUrl, '')
-        //     .then(response => ({ id, file: new File([response], name) }))
-        //     .catch(() => ({ id, file: new File([], name) }));
-
-        return Promise.all(imageUrls.map(async ({id, url, textData}) => {
+        return Promise.all(imageUrls.map(async (imageView) => {
+            const { url, id } = imageView;
             const name = url.split('/') ? url.split('/').pop() : 'null';
             const config: AxiosRequestConfig = {
                 headers: {
@@ -334,18 +462,17 @@ export class LemonActions {
             };
             return axios.get(url, config)
                 .then(response => {
-                    // return ({ id, file: new File([response.data], name), textData });
                     const file = blobToFile(response.data, name);
-                    return ({id, file, textData})
+                    return ({ id, file, imageView });
                 })
-                .catch(() => ({id, file: null, textData}));
+                .catch(() => ({id, file: null, imageView: null }));
         }));
     }
 
     private static getImageDataFromLemonFiles(files: LemonFileImage[]): ImageData[] {
         return files
             .filter(({file}) => !!file)
-            .map(({file, id, textData}) => ImageDataUtil.createImageDataFromFileData(file, id, textData));
+            .map(({ file, id, imageView }) => ImageDataUtil.createImageDataFromFileData(file, id, imageView));
     }
 
     private static resetLemonOptions() {

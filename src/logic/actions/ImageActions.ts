@@ -31,7 +31,6 @@ export class ImageActions {
         } else {
             // TODO: refactor below
             LemonActions.saveUpdatedImagesData(prevIndex)
-                .then(({ submittedAt }) => LemonActions.saveWorkingTimeByImageIndex(prevIndex, submittedAt))
                 .catch(e => {
                     console.log(e);
                     alert(`Submit Error: ${e}`)

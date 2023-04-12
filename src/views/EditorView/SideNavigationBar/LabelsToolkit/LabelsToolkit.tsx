@@ -20,6 +20,7 @@ import {EventType} from "../../../../data/enums/EventType";
 import LineLabelsList from "../LineLabelsList/LineLabelsList";
 import TagLabelsList from "../TagLabelsList/TagLabelsList";
 import EllipseLabelsList from "../EllipseLabelsList/EllipseLabelsList";
+import {ProjectView} from "@lemoncloud/ade-backend-api";
 
 interface IProps {
     activeImageIndex:number,
@@ -29,6 +30,7 @@ interface IProps {
     updateImageDataById: (id: string, newImageData: ImageData) => any;
     updateActiveLabelType: (activeLabelType: LabelType) => any;
     updateActiveLabelId: (highlightedLabelId: string) => any;
+    project: ProjectView;
 }
 
 interface IState {
@@ -46,17 +48,37 @@ class LabelsToolkit extends React.Component<IProps, IState> {
             size: null,
         };
 
-        this.tabs = props.projectType === ProjectType.IMAGE_RECOGNITION ?
-            [
-                LabelType.IMAGE_RECOGNITION
-            ] :
-            [
-                LabelType.RECT,
-                LabelType.ELLIPSE,
-                LabelType.POINT,
-                LabelType.LINE,
-                LabelType.POLYGON
-            ];
+        // this.tabs = props.projectType === ProjectType.IMAGE_RECOGNITION ?
+        //     [
+        //         LabelType.IMAGE_RECOGNITION
+        //     ] :
+        //     [
+        //         LabelType.RECT,
+        //         LabelType.ELLIPSE,
+        //         LabelType.POINT,
+        //         LabelType.LINE,
+        //         LabelType.POLYGON
+        //     ];
+
+        // NOTE: support useName, useLine.. @23.04.12
+        this.tabs = [];
+        const project: ProjectView = props.project;
+        // TODO: refactor below
+        if (project.useName) {
+            this.tabs = [...this.tabs, LabelType.IMAGE_RECOGNITION];
+        }
+        if (project.useRect) {
+            this.tabs = [...this.tabs, LabelType.RECT];
+        }
+        if (project.usePoint) {
+            this.tabs = [...this.tabs, LabelType.POINT];
+        }
+        if (project.useLine) {
+            this.tabs = [...this.tabs, LabelType.LINE];
+        }
+        if (project.usePolygon) {
+            this.tabs = [...this.tabs, LabelType.POLYGON];
+        }
 
         const activeTab: LabelType = props.activeLabelType ? props.activeLabelType : this.tabs[0];
         props.updateActiveLabelType(activeTab);
@@ -209,6 +231,7 @@ const mapStateToProps = (state: AppState) => ({
     activeLabelType: state.labels.activeLabelType,
     imagesData: state.labels.imagesData,
     projectType: state.general.projectData.type,
+    project: state.lemon.project,
 });
 
 export default connect(

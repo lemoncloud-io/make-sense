@@ -1,13 +1,15 @@
 import { Action } from '../Actions';
 import {LemonActionTypes, TaskState} from './types';
 import { ImageData } from '../labels/types';
+import {ProjectView} from "@lemoncloud/ade-backend-api";
 
-export function setProjectInfo(projectId: string, category: string = ''): LemonActionTypes {
+export function setProjectInfo(projectId: string, category: string = '', project: ProjectView = null): LemonActionTypes {
     return {
         type: Action.SET_PROJECT_INFO,
         payload: {
             projectId,
             category,
+            project
         }
     }
 }

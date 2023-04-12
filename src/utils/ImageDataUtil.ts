@@ -1,9 +1,12 @@
-import {ImageData} from "../store/labels/types";
+import {ImageData, LabelName, LabelRect} from "../store/labels/types";
 import uuidv1 from "uuid/v1";
-import {TextTagInfo} from '../logic/actions/LemonActions';
+import {LemonFileImage, TextTagInfo} from '../logic/actions/LemonActions';
+import {IRect} from "../interfaces/IRect";
+import {LabelStatus} from "../data/enums/LabelStatus";
+import {ImageView} from "@lemoncloud/ade-backend-api";
 
 export class ImageDataUtil {
-    public static createImageDataFromFileData(fileData: File, id: string = uuidv1(), textData: TextTagInfo = null): ImageData {
+    public static createImageDataFromFileData(fileData: File, id: string = uuidv1(), imageView: ImageView = null): ImageData {
         return {
             id: id,
             fileData: fileData,
@@ -16,7 +19,7 @@ export class ImageDataUtil {
             labelNameIds: [],
             isVisitedByObjectDetector: false,
             isVisitedByPoseDetector: false,
-            textData: textData
+            imageView,
         }
     }
 
@@ -29,7 +32,8 @@ export class ImageDataUtil {
             labelLines: [],
             labelPolygons: [],
             labelNameIds: [],
-            textData: null
+            textData: null,
+            imageView: null,
         }
     }
 }
