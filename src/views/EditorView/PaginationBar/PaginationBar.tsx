@@ -42,7 +42,6 @@ const PaginationBar: React.FC<IProps> = (
             delay(100),
         );
         parallelRequest$.subscribe(({ detailImage, imageData }) => {
-            console.log('detailImage', detailImage, imageData);
             const labels = LemonActions.getLabelsFromImageView(detailImage);
             updateImageDataById(imageData.id, { ...imageData, ...labels });
             if (imagesData.length > 0 && imagesData[0].id === imageData.id) {

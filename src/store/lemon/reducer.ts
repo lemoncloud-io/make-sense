@@ -9,7 +9,8 @@ const initialState: LemonState = {
     page: null,
     originLabels: null,
     taskStartTime: null,
-    taskState: 'all'
+    taskState: 'all',
+    project: null,
 };
 
 export function lemonReducer(
@@ -22,6 +23,7 @@ export function lemonReducer(
                 ...state,
                 projectId: action.payload.projectId,
                 category: action.payload.category,
+                project: action.payload.project,
             }
         }
         case Action.SET_TASK_CURRENT_PAGE: {

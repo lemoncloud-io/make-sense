@@ -1,5 +1,6 @@
 import { Action } from '../Actions';
 import { ImageData } from '../labels/types';
+import {ProjectView} from "@lemoncloud/ade-backend-api";
 
 export type TaskState = 'open' | 'submitted' | 'rejected' | 'closed' | 'all';
 
@@ -12,6 +13,7 @@ export type LemonState = {
     originLabels: ImageData;
     taskStartTime: Date;
     taskState: TaskState; // /tasks 요청 시 state 쿼리
+    project: ProjectView;
 }
 
 interface SetProjectInfo {
@@ -19,6 +21,7 @@ interface SetProjectInfo {
     payload: {
         projectId: string,
         category: string,
+        project: ProjectView,
     }
 }
 

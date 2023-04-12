@@ -24,7 +24,7 @@ import {LemonSelector} from '../../store/selectors/LemonSelector';
 import {isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
-import {map} from 'rxjs/operators';
+import {delay, map, mergeMap} from 'rxjs/operators';
 import {ImageActions} from './ImageActions';
 import uuidv1 from 'uuid/v1';
 import {LabelStatus} from '../../data/enums/LabelStatus';
@@ -38,7 +38,7 @@ import {GetProjectImagesResult, ImageBody, ImageView, ProjectView,
     LabelLine as LemonLabelLine,
 } from "@lemoncloud/ade-backend-api";
 import {ProjectCategory} from "../../data/enums/ProjectType";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {ILine} from "../../interfaces/ILine";
 import {IPoint} from "../../interfaces/IPoint";
 
@@ -175,9 +175,10 @@ export class LemonActions {
     // @ts-ignore
     public static async setupProject(projectId: string): Promise<ProjectView> {
         try {
+            // debugger;
             const projectView = await LemonActions.getProjectData(projectId);
             const category = projectView.useName ? ProjectCategory.RECOGNITION : ProjectCategory.IMAGE_TAG;
-            store.dispatch(setProjectInfo(projectId, category));
+            store.dispatch(setProjectInfo(projectId, category, projectView));
             store.dispatch(updateProjectData({name: projectView.name, type: null}));
 
             const labels = projectView.label$ as LabelName[];
@@ -196,7 +197,7 @@ export class LemonActions {
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
             const limit = 10;
-            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
+            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, {}) as GetProjectImagesResult;
             console.log(project);
 
             // set images
@@ -207,7 +208,6 @@ export class LemonActions {
                     ...imageView,
                 }
             });
-
             const files = await LemonActions.convertUrlsToFiles(urls);
             const images = LemonActions.getImageDataFromLemonFiles(files);
             store.dispatch(updateImageData(images));
@@ -363,28 +363,39 @@ export class LemonActions {
     }
 
     public static async resetTasks(page: number = 0): Promise<number> {
-        // TODO: user getTaskList()
         const projectId = LemonSelector.getProjectId();
+        const project: ProjectView = LemonSelector.getProjectView();
         const limit = LemonSelector.getTaskLimit();
-        // const view = 'workspace'; // TODO: modify this line
-        // const {list} = await LemonActions.fetchTasks(projectId, limit, page, view);
-        const { list, total } = await LemonActions.getTaskList(projectId, limit, page);
+        const { list, total } = await LemonActions.lemonCore.request(
+            'GET',
+            Settings.LEMONADE_API,
+            `/projects/${projectId}/images`,
+            { page, limit }
+        ) as GetProjectImagesResult;
 
         // set total page
         const totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
         store.dispatch(setTaskTotalPage(totalPage));
         // set active image index
         store.dispatch(updateActiveImageIndex(0)); // select initial image!
+
         // set images
-        const images = await LemonActions.getImagesByTaskList(list);
+        const urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
+            return {
+                id: imageView.id,
+                url: `${project.baseUrl}${imageView.key}`,
+                ...imageView,
+            }
+        });
+        const files = await LemonActions.convertUrlsToFiles(urls);
+        const images = LemonActions.getImageDataFromLemonFiles(files);
         store.dispatch(updateImageData(images));
 
         // get first image info
         if (images.length > 0) {
             const firstImage = images[0];
-            const task = await LemonActions.getTaskByImageData(firstImage);
-            const {annotations} = task;
-            const labels = LemonActions.getLabelsFromAnnotations(annotations);
+            const detailImage: ImageView = await LemonActions.getDetailImageData(firstImage);
+            const labels = LemonActions.getLabelsFromImageView(detailImage);
             store.dispatch(updateImageDataById(firstImage.id, {...firstImage, ...labels}));
         }
 
@@ -398,11 +409,9 @@ export class LemonActions {
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`);
     }
 
-    public static getTaskByImageData$(image: ImageData) {
+    public static getDetailImageData(image: ImageData): Promise<ImageView> {
         const {id} = image;
-        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/tasks/${id}`)).pipe(
-            map(task => ({task, origin: image}))
-        );
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`);
     }
 
     public static getDetailImageData$(image: ImageData): Observable<ImageView> {

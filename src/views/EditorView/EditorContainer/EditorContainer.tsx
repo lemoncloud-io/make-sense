@@ -18,7 +18,7 @@ import EditorTopNavigationBar from "../EditorTopNavigationBar/EditorTopNavigatio
 import {ProjectType} from "../../../data/enums/ProjectType";
 import PaginationBar from '../PaginationBar/PaginationBar';
 import {from} from 'rxjs';
-import {filter, mergeMap} from 'rxjs/operators';
+import {delay, filter, map, mergeMap, skip} from 'rxjs/operators';
 import {LemonActions} from '../../../logic/actions/LemonActions';
 import {updateImageDataById} from "../../../store/labels/actionCreators";
 import {setOriginLabels} from "../../../store/lemon/actionCreators";
@@ -53,14 +53,15 @@ const EditorContainer: React.FC<IProps> = (
         // taskId로 데이터 가져왔을 때 (수정케이스)
         if (imagesData.length === 1 && totalPage === 0) {
             const parallelRequest$ = from(imagesData).pipe(
-                mergeMap(data => LemonActions.getTaskByImageData$(data)),
-                filter(({ task, origin }) => !!task)
+                mergeMap(imageData => LemonActions.getDetailImageData$(imageData)
+                    .pipe(map(detailImage => ({ detailImage, imageData })))
+                ),
+                delay(100),
             );
-            parallelRequest$.subscribe(({ task, origin }) => {
-                const { annotations } = task;
-                const labels = LemonActions.getLabelsFromAnnotations(annotations);
-                setOriginLabels({ ...origin, ...labels });
-                updateImageDataById(origin.id, { ...origin, ...labels });
+            parallelRequest$.subscribe(({ detailImage, imageData }) => {
+                const labels = LemonActions.getLabelsFromImageView(detailImage);
+                setOriginLabels({ ...imageData, ...labels });
+                updateImageDataById(imageData.id, { ...imageData, ...labels });
             })
         }
     },[]); // eslint-disable-line react-hooks/exhaustive-deps
