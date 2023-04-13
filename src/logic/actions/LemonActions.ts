@@ -21,7 +21,7 @@ import {ImageDataUtil} from '../../utils/ImageDataUtil';
 import {setProjectInfo, setTaskCurrentPage, setTaskState, setTaskTotalPage, setTaskLimit} from '../../store/lemon/actionCreators';
 import {Settings} from '../../settings/Settings';
 import {LemonSelector} from '../../store/selectors/LemonSelector';
-import {isEqual} from 'lodash';
+import _, {cloneDeep, isEqual} from 'lodash';
 import axios, {AxiosRequestConfig} from 'axios';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {delay, map, mergeMap} from 'rxjs/operators';
@@ -38,7 +38,7 @@ import {GetProjectImagesResult, ImageBody, ImageView, ProjectView,
     LabelLine as LemonLabelLine,
 } from "@lemoncloud/ade-backend-api";
 import {ProjectCategory} from "../../data/enums/ProjectType";
-import {from, Observable} from "rxjs";
+import {from, Observable, of} from "rxjs";
 import {ILine} from "../../interfaces/ILine";
 import {IPoint} from "../../interfaces/IPoint";
 
@@ -162,6 +162,7 @@ export class LemonActions {
                 suggestedLabel: null,
             }
         });
+
         return {
             labelPolygons: [],
             labelEllipses: [],
@@ -190,7 +191,7 @@ export class LemonActions {
         }
     }
 
-    public static async setupImagesByProject(project: ProjectView) {
+    public static async setupImagesByProject(project: ProjectView, imageId: string = '') {
         try {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
@@ -199,19 +200,29 @@ export class LemonActions {
             const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
 
             // set images
-            const urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
+            let urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
                 return {
                     id: imageView.id,
                     url: `${project.baseUrl}${imageView.key}`,
                     ...imageView,
                 }
             });
+
+            // NOTE: only one image
+            if (!!imageId) {
+                urls = urls.filter(url => url.id === imageId);
+            }
+
             const files = await LemonActions.convertUrlsToFiles(urls);
             const images = LemonActions.getImageDataFromLemonFiles(files);
             store.dispatch(updateImageData(images));
 
             // set total page
-            const totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
+            let totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
+            // NOTE: only one image
+            if (!!imageId) {
+                totalPage = 1;
+            }
             store.dispatch(setTaskTotalPage(totalPage));
 
             // set active image index
@@ -235,7 +246,6 @@ export class LemonActions {
         try {
             // load images
             const {list, total} = await LemonActions.getTaskList(projectId, limit);
-            console.log(list, total);
             if (total === 0) {
                 store.dispatch(updateActivePopupType(PopupWindowType.NO_TASKS_POPUP));
             }
@@ -290,7 +300,6 @@ export class LemonActions {
         // TODO: refactor below
         // const filteredLabelPolygons = labelPolygons.filter(polygon => !!polygon.labelId);
         // const filteredLabelEllipses = labelEllipses.filter(ellipse => !!ellipse.labelId);
-        console.log(targetLabels);
 
         const filteredLabelIds = labelNameIds.filter(labelId => !!labelId);
         const filteredLabelPoints = labelPoints.filter(point => !!point.labelId);
@@ -393,7 +402,6 @@ export class LemonActions {
         if (images.length > 0) {
             const firstImage = images[0];
             const detailImage: ImageView = await LemonActions.getDetailImageData(firstImage);
-            console.log('detailImage', detailImage)
             const labels = LemonActions.getLabelsFromImageView(detailImage);
             store.dispatch(updateImageDataById(firstImage.id, {...firstImage, ...labels}));
         }
@@ -409,17 +417,22 @@ export class LemonActions {
     }
 
     public static getDetailImageData(image: ImageData): Promise<ImageView> {
+        if (!!image.imageView) {
+            const result = cloneDeep(image.imageView);
+            return new Promise(resolve => setTimeout(() => resolve(result), 100));
+        }
         const {id} = image;
         return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`);
     }
 
     public static getDetailImageData$(image: ImageData): Observable<ImageView> {
-        const {id} = image;
-        return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`));
+        return fromPromise(this.getDetailImageData(image));
+        // const {id} = image;
+        // return fromPromise(LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${id}`));
     }
 
     public static getProjectData(id: string): Promise<ProjectView> {
-        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`);
+        return LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${id}`, {});
     }
 
     public static getLabelData(projectId: string) {
