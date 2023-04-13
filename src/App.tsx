@@ -80,14 +80,14 @@ const App: React.FC<IProps> = (
     }
 
     const selectRoute = () => {
-        const { projectId, taskId } = getQueryParams();
+        const { projectId, imageId } = getQueryParams();
         if (projectId) {
             if (!projectType) {
-                return <PreRenderView projectId={projectId} taskId={taskId}/>;
+                return <PreRenderView projectId={projectId} imageId={imageId}/>;
             } else if (imagesData && imagesData.length > 0) {
                 return <EditorView/>;
             } else if (imagesData && imagesData.length === 0) {
-                return <PreRenderView projectId={null} taskId={null}/>;
+                return <PreRenderView projectId={null} imageId={null}/>;
             }
         }
 

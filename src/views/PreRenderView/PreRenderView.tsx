@@ -16,19 +16,19 @@ interface IProps {
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     updateProjectData: (projectData: ProjectData) => any;
     projectId: string;
-    taskId: string;
+    imageId: string;
 }
 
 const PreRenderView: React.FC<IProps> = (
     {
         projectId,
-        taskId,
+        imageId,
         updateActivePopupType,
         updateProjectData,
     }) => {
 
     updateActivePopupType(PopupWindowType.LOADER);
-    if (!projectId && !taskId) {
+    if (!projectId && !imageId) {
         updateActivePopupType(PopupWindowType.NO_TASKS_POPUP);
     }
 
@@ -43,7 +43,7 @@ const PreRenderView: React.FC<IProps> = (
             })
             .then(() => LemonActions.getCredentials())
             .then(() => LemonActions.setupProject(projectId))
-            .then((project: ProjectView) => LemonActions.setupImagesByProject(project))
+            .then((project: ProjectView) => LemonActions.setupImagesByProject(project, imageId))
             .then(({ name, category }) => {
                 updateActivePopupType(null);
                 let type = ProjectType.IMAGE_RECOGNITION;

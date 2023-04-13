@@ -56,7 +56,7 @@ const EditorContainer: React.FC<IProps> = (
                 mergeMap(imageData => LemonActions.getDetailImageData$(imageData)
                     .pipe(map(detailImage => ({ detailImage, imageData })))
                 ),
-                delay(100),
+                delay(10),
             );
             parallelRequest$.subscribe(({ detailImage, imageData }) => {
                 const labels = LemonActions.getLabelsFromImageView(detailImage);
