@@ -43,7 +43,12 @@ const PreRenderView: React.FC<IProps> = (
             })
             .then(() => LemonActions.getCredentials())
             .then(() => LemonActions.setupProject(projectId))
-            .then((project: ProjectView) => LemonActions.setupImagesByProject(project, imageId))
+            .then((project: ProjectView) => {
+                if (!!imageId) {
+                    return LemonActions.setupOneImage(imageId);
+                }
+                return LemonActions.setupImagesByProject(project);
+            })
             .then(({ name, category }) => {
                 updateActivePopupType(null);
                 let type = ProjectType.IMAGE_RECOGNITION;

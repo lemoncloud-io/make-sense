@@ -191,7 +191,41 @@ export class LemonActions {
         }
     }
 
-    public static async setupImagesByProject(project: ProjectView, imageId: string = '') {
+    public static async setupOneImage(imageId: string = '') {
+        try {
+            store.dispatch(setTaskTotalPage(0));
+            store.dispatch(updateActiveImageIndex(0)); // select initial image!
+
+            const project: ProjectView = LemonSelector.getProjectView();
+            const imageView = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/images/${imageId}`);
+            const url: LemonImageUrl = {
+                id: imageId,
+                url: `${project.baseUrl}${imageView.key}`,
+                ...imageView,
+            };
+
+            const files = await LemonActions.convertUrlsToFiles([url]);
+            const images = LemonActions.getImageDataFromLemonFiles(files);
+            store.dispatch(updateImageData(images));
+            store.dispatch(setTaskTotalPage(1));
+            // set active image index
+            store.dispatch(updateActiveImageIndex(0)); // select initial image!
+            store.dispatch(setTaskCurrentPage(0));
+            store.dispatch(setTaskLimit(10));
+            LemonActions.resetLemonOptions();
+
+            return {
+                projectId: LemonSelector.getProjectId(),
+                name: GeneralSelector.getProjectName(),
+                category: LemonSelector.getProjectCategory()
+            };
+        } catch (e) {
+            alert(`${e}`);
+            return {projectId: null, name: null, category: null};
+        }
+    }
+
+    public static async setupImagesByProject(project: ProjectView) {
         try {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
@@ -208,21 +242,12 @@ export class LemonActions {
                 }
             });
 
-            // NOTE: only one image
-            if (!!imageId) {
-                urls = urls.filter(url => url.id === imageId);
-            }
-
             const files = await LemonActions.convertUrlsToFiles(urls);
             const images = LemonActions.getImageDataFromLemonFiles(files);
             store.dispatch(updateImageData(images));
 
             // set total page
             let totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
-            // NOTE: only one image
-            if (!!imageId) {
-                totalPage = 1;
-            }
             store.dispatch(setTaskTotalPage(totalPage));
 
             // set active image index
