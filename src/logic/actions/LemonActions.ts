@@ -230,8 +230,7 @@ export class LemonActions {
             store.dispatch(setTaskTotalPage(0));
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
 
-            const limit = 10;
-            const { list, total, page } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
+            const { list, total, page , limit } = await LemonActions.lemonCore.request('GET', Settings.LEMONADE_API, `/projects/${project.id}/images`, { detail: 1 }) as GetProjectImagesResult;
 
             // set images
             let urls: LemonImageUrl[] = list.map((imageView: ImageView) => {
@@ -247,13 +246,13 @@ export class LemonActions {
             store.dispatch(updateImageData(images));
 
             // set total page
-            let totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit, 1));
+            let totalPage = Math.ceil(Math.max(total || 0, 1) / Math.max(limit || 10, 1));
             store.dispatch(setTaskTotalPage(totalPage));
 
             // set active image index
             store.dispatch(updateActiveImageIndex(0)); // select initial image!
             store.dispatch(setTaskCurrentPage(0));
-            store.dispatch(setTaskLimit(limit));
+            store.dispatch(setTaskLimit(limit || 10));
             LemonActions.resetLemonOptions();
 
             return {
